@@ -446,6 +446,7 @@
 </footer>
 
 <script src="script.js"></script>
+<script src="inquiry-data.js"></script>
 <script>
 // ── 데이터 ──────────────────────────────────
 const CAT_NAMES = { product:'상품문의', delivery:'배송문의', exchange:'교환/환불', etc:'기타' };
@@ -485,8 +486,7 @@ const SAMPLE_INQUIRIES = [
 function getInquiries() {
   const d = localStorage.getItem('lunacool_inquiries');
   if (d) return JSON.parse(d);
-  localStorage.setItem('lunacool_inquiries', JSON.stringify(SAMPLE_INQUIRIES));
-  return SAMPLE_INQUIRIES;
+  return typeof DEFAULT_INQUIRIES !== 'undefined' ? DEFAULT_INQUIRIES : [];
 }
 
 // ── 렌더링 ───────────────────────────────────

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>브랜드 소개 - 루나쿨 바이오쿨</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <style>
+    .page-hero {
+      background: linear-gradient(135deg, #1A2B3C 0%, #2A4A6C 100%);
+      padding: 80px 24px;
+      text-align: center;
+      color: white;
+    }
+    .page-hero h1 { font-size: 40px; font-weight: 800; margin-bottom: 14px; }
+    .page-hero h1 span { color: var(--blue); }
+    .page-hero p { font-size: 17px; opacity: 0.8; line-height: 1.7; }
+
+    .brand-story {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 80px 24px;
+      text-align: center;
+    }
+    .brand-story h2 { font-size: 30px; font-weight: 800; margin-bottom: 24px; }
+    .brand-story p { font-size: 16px; color: #444; line-height: 1.9; margin-bottom: 20px; }
+
+    .brand-logo-wrap {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+      margin: 40px 0;
+      align-items: center;
+    }
+    .brand-logo-wrap img {
+      height: 60px;
+      object-fit: contain;
+    }
+
+    .packaging-section {
+      background: var(--light-gray);
+      padding: 80px 24px;
+      text-align: center;
+    }
+    .packaging-img {
+      max-width: 500px;
+      width: 100%;
+      border-radius: 20px;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.12);
+      margin-top: 32px;
+    }
+
+    .tech-section {
+      padding: 80px 24px;
+      background: white;
+    }
+    .tech-grid {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 28px;
+    }
+    .tech-card {
+      border: 2px solid #EEF2F8;
+      border-radius: 20px;
+      padding: 36px 28px;
+      transition: all 0.3s;
+    }
+    .tech-card:hover {
+      border-color: var(--blue);
+      box-shadow: 0 8px 28px rgba(102,163,255,0.15);
+    }
+    .tech-num {
+      font-size: 48px;
+      font-weight: 800;
+      color: var(--blue);
+      margin-bottom: 8px;
+    }
+    .tech-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
+    .tech-card p { font-size: 14px; color: #555; line-height: 1.7; }
+
+    /* CERT SECTION */
+    #cert { scroll-margin-top: 80px; }
+    .cert-detail-grid {
+      max-width: 960px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+    }
+    .cert-detail-card {
+      background: white;
+      border-radius: 20px;
+      padding: 32px 24px;
+      text-align: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+      transition: all 0.3s;
+    }
+    .cert-detail-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.1);
+    }
+    .cert-icon-big { font-size: 52px; margin-bottom: 16px; }
+    .cert-detail-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 10px; }
+    .cert-detail-card p { font-size: 14px; color: #555; line-height: 1.6; margin-bottom: 14px; }
+    .cert-num {
+      display: inline-block;
+      background: #EEF5FF;
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 14px;
+      border-radius: 12px;
+    }
+
+    .values-section {
+      background: linear-gradient(135deg, #E8F4FF 0%, #D4F0E8 100%);
+      padding: 80px 24px;
+      text-align: center;
+    }
+    .values-grid {
+      max-width: 900px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+    }
+    .value-item { padding: 20px; }
+    .value-icon { font-size: 48px; margin-bottom: 16px; }
+    .value-item h3 { font-size: 18px; font-weight: 800; margin-bottom: 10px; }
+    .value-item p { font-size: 14px; color: #555; line-height: 1.6; }
+
+    @media (max-width: 600px) {
+      .values-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <img src="루나쿨_로고/루나쿨_로고.png" alt="루나쿨">
+    </a>
+    <nav>
+      <a href="index.html">홈</a>
+      <a href="products.html">전체 상품</a>
+      <a href="reviews.html">구매후기</a>
+      <a href="about.html">브랜드 소개</a>
+    </nav>
+    <a href="https://smartstore.naver.com" target="_blank" class="header-cta">스마트스토어 구매</a>
+    <div class="menu-toggle" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+  <div class="mobile-nav" id="mobileNav">
+    <a href="index.html">홈</a>
+    <a href="products.html">전체 상품</a>
+    <a href="reviews.html">구매후기</a>
+    <a href="about.html">브랜드 소개</a>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="page-hero">
+  <h1><span>루나쿨</span> 바이오쿨</h1>
+  <p>달(Luna)처럼 시원한 밤을 선물합니다<br>바이오쿨 기술이 만들어낸 최상의 냉감 침구 브랜드</p>
+</div>
+
+<!-- BRAND STORY -->
+<section class="brand-story">
+  <h2 class="reveal">브랜드 스토리</h2>
+  <p class="reveal">
+    루나쿨(Luna Cool)은 '달빛처럼 시원한 밤'이라는 의미를 담은 여름 냉감 침구 브랜드입니다.<br>
+    바이오쿨(Bio Cool) 기술을 통해 자연 친화적이면서도 강력한 냉감 효과를 구현했습니다.
+  </p>
+  <p class="reveal">
+    뜨거운 여름 밤, 에어컨에만 의존하지 않고도 쾌적하게 수면을 취할 수 있도록—<br>
+    루나쿨은 독일 OEKO-TEX 인증 친환경 소재와 첨단 냉감 기술을 결합한<br>
+    프리미엄 냉감 침구를 합리적인 가격으로 제공합니다.
+  </p>
+  <div class="brand-logo-wrap reveal">
+    <img src="루나쿨_로고/루나쿨_로고.png" alt="루나쿨 로고">
+    <img src="루나쿨_로고/루나쿨_로고3.png" alt="루나쿨 로고3">
+  </div>
+</section>
+
+<!-- PACKAGING -->
+<section class="packaging-section">
+  <div class="section-title reveal">
+    <h2>신뢰할 수 있는 포장</h2>
+    <p>꼼꼼한 포장으로 상품을 안전하게 배송합니다</p>
+  </div>
+  <img src="루나쿨포장.jpg" alt="루나쿨 포장" class="packaging-img reveal">
+</section>
+
+<!-- TECH -->
+<section class="tech-section">
+  <div class="section-title reveal">
+    <h2>바이오쿨 기술력</h2>
+    <p>숫자로 증명하는 루나쿨의 성능</p>
+  </div>
+  <div class="tech-grid">
+    <div class="tech-card reveal">
+      <div class="tech-num">550G</div>
+      <h3>프리미엄 QMAX 냉감지수</h3>
+      <p>냉감 패드 기준 QMAX 550G 수준의 뛰어난 냉감 성능. 공인 인증 기관 검사를 통과한 수치입니다.</p>
+    </div>
+    <div class="tech-card reveal">
+      <div class="tech-num">420G</div>
+      <h3>스탠다드 QMAX 냉감지수</h3>
+      <p>소파패드, 방석, 베개커버 등 QMAX 420G 수준의 냉감 성능으로 온몸을 시원하게 유지합니다.</p>
+    </div>
+    <div class="tech-card reveal">
+      <div class="tech-num">100%</div>
+      <h3>친환경 안전 소재</h3>
+      <p>OEKO-TEX Standard 100 인증 통과. 유해물질이 전혀 없어 영·유아, 어르신, 민감성 피부에도 안전합니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CERTIFICATIONS -->
+<section class="certs-section" id="cert">
+  <div class="section-title reveal">
+    <h2>인증 현황</h2>
+    <p>공인 기관이 검증한 루나쿨의 안전성</p>
+  </div>
+  <div class="cert-detail-grid">
+
+    <div class="cert-detail-card reveal">
+      <div class="cert-icon-big">🌍</div>
+      <h3>OEKO-TEX Standard 100</h3>
+      <p>독일 기반 국제 친환경 섬유 인증.<br>인체에 유해한 성분이 없음을 보증하는 세계 최고 권위의 섬유 인증입니다.</p>
+      <span class="cert-num">SHYO 058758</span>
+    </div>
+
+    <div class="cert-detail-card reveal">
+      <div class="cert-icon-big">❄️</div>
+      <h3>QMAX 냉감 인증 (420G)</h3>
+      <p>공인 시험 기관의 냉감지수 측정 검사.<br>소파패드·방석·베개커버 라인에 적용된 420G 냉감 성능을 공식 인증합니다.</p>
+      <span class="cert-num">QMAX 40230013</span>
+    </div>
+
+    <div class="cert-detail-card reveal">
+      <div class="cert-icon-big">❄️❄️</div>
+      <h3>QMAX 냉감 인증 (550G)</h3>
+      <p>공인 시험 기관의 냉감지수 측정 검사.<br>냉감 패드 라인에 적용된 550G 프리미엄 냉감 성능을 공식 인증합니다.</p>
+      <span class="cert-num">QMAX 40230018</span>
+    </div>
+
+    <div class="cert-detail-card reveal">
+      <div class="cert-icon-big">☢️</div>
+      <h3>방사능 안전 검사</h3>
+      <p>국가 공인 방사능 검사 통과.<br>방사능이 전혀 검출되지 않아 가족 모두가 안심하고 사용할 수 있습니다.</p>
+      <span class="cert-num">방사능 불검출</span>
+    </div>
+
+    <div class="cert-detail-card reveal">
+      <div class="cert-icon-big">🛡️</div>
+      <h3>품질 인증 (SAAA)</h3>
+      <p>한국 공인 품질 시험 통과.<br>제품 품질 및 안전성에 대한 국내 공인 기관 검증을 완료했습니다.</p>
+      <span class="cert-num">SAAA26-00000260K</span>
+    </div>
+
+    <div class="cert-detail-card reveal">
+      <div class="cert-icon-big">✅</div>
+      <h3>품질 인증 (SAOB)</h3>
+      <p>한국 공인 품질 시험 통과.<br>제품의 지속적인 품질 관리를 위한 추가 공인 인증을 보유하고 있습니다.</p>
+      <span class="cert-num">SAOB26-00000095K</span>
+    </div>
+
+  </div>
+</section>
+
+<!-- VALUES -->
+<section class="values-section">
+  <div class="section-title reveal">
+    <h2>루나쿨의 약속</h2>
+    <p>고객과의 신뢰를 최우선으로 생각합니다</p>
+  </div>
+  <div class="values-grid">
+    <div class="value-item reveal">
+      <div class="value-icon">🌿</div>
+      <h3>친환경</h3>
+      <p>OEKO-TEX 인증 소재만 사용.<br>지구와 사람 모두에게 안전한 제품을 만듭니다.</p>
+    </div>
+    <div class="value-item reveal">
+      <div class="value-icon">🔬</div>
+      <h3>과학적 검증</h3>
+      <p>모든 제품은 공인 기관 인증 완료.<br>숫자로 증명하는 냉감 성능을 제공합니다.</p>
+    </div>
+    <div class="value-item reveal">
+      <div class="value-icon">💛</div>
+      <h3>합리적 가격</h3>
+      <p>프리미엄 품질을 합리적인 가격으로.<br>좋은 수면은 누구나 누릴 수 있어야 합니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-banner">
+  <h2>루나쿨과 함께 시원한 여름을</h2>
+  <p>지금 네이버 스마트스토어에서 만나보세요</p>
+  <a href="https://smartstore.naver.com" target="_blank" class="btn-white">스마트스토어 바로가기 →</a>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <div class="footer-logo">
+          <img src="루나쿨_로고/루나쿨_로고.png" alt="루나쿨">
+        </div>
+        <p class="footer-desc">루나쿨 바이오쿨은 최고의 냉감 기술과<br>친환경 소재로 만든 여름 침구 브랜드입니다.</p>
+        <div class="footer-contact">
+          <div><strong>고객센터</strong> 070-7717-5231</div>
+          <div><strong>운영시간</strong> 평일 09:00 ~ 18:00</div>
+        </div>
+      </div>
+      <div class="footer-links">
+        <h4>상품</h4>
+        <ul>
+          <li><a href="products.html">냉감 패드</a></li>
+          <li><a href="products.html">냉감 차렵이불</a></li>
+          <li><a href="products.html">냉감 소파패드</a></li>
+          <li><a href="products.html">냉감 방석</a></li>
+          <li><a href="products.html">냉감 베개커버</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>브랜드</h4>
+        <ul>
+          <li><a href="about.html">브랜드 소개</a></li>
+          <li><a href="reviews.html">구매 후기</a></li>
+          <li><a href="#cert">인증 현황</a></li>
+          <li><a href="https://smartstore.naver.com" target="_blank">스마트스토어</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 루나쿨(LUNA COOL). All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

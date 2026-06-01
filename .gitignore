@@ -1,0 +1,8 @@
+# 불필요한 파일 제외
+루나쿨 상품 이미지/더줄임/
+*.bmp
+Thumbs.db
+.DS_Store
+desktop.ini
+*.pptx
+인증서/

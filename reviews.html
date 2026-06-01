@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>구매후기 — 루나쿨 바이오쿨</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ── 페이지 히어로 ── */
+    .page-hero {
+      padding: 120px 56px 72px;
+      background: linear-gradient(160deg, #0D2035 0%, #1A3A5C 100%);
+      text-align: center; color: white;
+    }
+    .page-hero .pk { font-size: 11px; font-weight: 700; letter-spacing: 3px;
+      color: var(--ice); text-transform: uppercase; margin-bottom: 14px; }
+    .page-hero h1 { font-size: clamp(32px, 4vw, 52px); font-weight: 800; margin-bottom: 14px; }
+    .page-hero p  { font-size: 16px; color: rgba(255,255,255,0.5); }
+
+    /* ── 평점 요약 ── */
+    .rating-wrap {
+      max-width: 860px; margin: -1px auto 0;
+      padding: 0 56px;
+    }
+    .rating-card {
+      background: white; border: 1px solid var(--border); border-radius: 4px;
+      padding: 40px 48px;
+      display: grid; grid-template-columns: auto 1fr; gap: 56px; align-items: center;
+      transform: translateY(-32px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+    }
+    .rating-left { text-align: center; }
+    .r-big { font-size: 72px; font-weight: 800; color: var(--blue); line-height: 1; }
+    .r-stars { color: #F0A500; font-size: 24px; margin: 8px 0; letter-spacing: 2px; }
+    .r-count { font-size: 13px; color: var(--mid); }
+    .rating-bars { display: flex; flex-direction: column; gap: 9px; }
+    .bar-row { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+    .bar-row .n { width: 8px; color: var(--mid); text-align: right; }
+    .bar-row .s { color: #F0A500; font-size: 12px; }
+    .bar-bg { flex: 1; height: 8px; background: var(--light); border-radius: 4px; overflow: hidden; }
+    .bar-fill { height: 100%; background: var(--blue); border-radius: 4px; transition: width 1s ease; }
+    .bar-row .c { width: 28px; color: var(--mid); font-size: 12px; }
+
+    /* ── 상품 이미지 + 후기 섹션 ── */
+    .product-review-section {
+      max-width: 1280px; margin: 0 auto;
+      padding: 24px 56px 80px;
+    }
+
+    .prod-block { margin-bottom: 80px; }
+
+    .prod-header {
+      display: flex; align-items: center; gap: 20px;
+      padding: 28px 0 24px;
+      border-bottom: 2px solid var(--dark);
+      margin-bottom: 32px;
+    }
+    .prod-thumb {
+      width: 72px; height: 72px; border-radius: 4px; overflow: hidden;
+      border: 1px solid var(--border); flex-shrink: 0;
+    }
+    .prod-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .prod-header h2 { font-size: 22px; font-weight: 800; color: var(--dark); }
+    .prod-header .prod-cnt {
+      margin-left: auto; font-size: 13px; color: var(--mid); white-space: nowrap;
+    }
+
+    /* ── 후기 카드 그리드 ── */
+    .reviews-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+    }
+    .rev-card {
+      background: white; border: 1px solid var(--border); border-radius: 4px;
+      overflow: hidden; transition: box-shadow 0.25s, transform 0.25s;
+    }
+    .rev-card:hover { box-shadow: 0 10px 32px rgba(0,0,0,0.08); transform: translateY(-3px); }
+
+    /* 사진 후기 이미지 */
+    .rev-photos {
+      display: grid; gap: 2px;
+    }
+    .rev-photos.count-1 { grid-template-columns: 1fr; }
+    .rev-photos.count-2 { grid-template-columns: 1fr 1fr; }
+    .rev-photos.count-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+    .rev-photo-item {
+      aspect-ratio: 1; overflow: hidden; cursor: pointer; position: relative;
+    }
+    .rev-photo-item img {
+      width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s;
+    }
+    .rev-photo-item:hover img { transform: scale(1.06); }
+
+    .rev-body { padding: 20px 22px 18px; }
+    .rv-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .rv-av {
+      width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--blue), var(--mint));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 800; color: white;
+    }
+    .rv-name { font-size: 14px; font-weight: 700; color: var(--dark); }
+    .rv-loc  { font-size: 11px; color: var(--mid); margin-top: 1px; }
+    .rv-stars { color: #F0A500; font-size: 13px; margin-bottom: 8px; }
+    .rv-text { font-size: 14px; color: #444; line-height: 1.72; }
+    .rv-date { font-size: 11px; color: #AAAAAA; margin-top: 10px; }
+
+    /* 사진 없는 텍스트 후기 */
+    .rev-card.text-only .rev-body { padding: 24px 22px 20px; }
+    .text-quote { font-size: 32px; color: var(--ice); line-height: 0.5; margin-bottom: 12px; }
+
+    /* ── 더보기 버튼 ── */
+    .load-more-wrap { text-align: center; margin-top: 40px; }
+    .btn-load-more {
+      display: inline-flex; align-items: center; gap: 8px;
+      border: 1.5px solid var(--dark); color: var(--dark);
+      padding: 13px 36px; border-radius: 3px;
+      font-size: 14px; font-weight: 700; transition: all 0.2s; cursor: pointer;
+      background: none;
+    }
+    .btn-load-more:hover { background: var(--dark); color: white; }
+
+    /* ── 라이트박스 ── */
+    .lightbox {
+      display: none; position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,0.92); align-items: center; justify-content: center;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox img { max-width: 90vw; max-height: 90vh; object-fit: contain; border-radius: 2px; }
+    .lb-close {
+      position: absolute; top: 24px; right: 32px;
+      font-size: 28px; color: white; cursor: pointer; opacity: 0.7; transition: opacity 0.2s;
+    }
+    .lb-close:hover { opacity: 1; }
+
+    /* ── 필터 탭 ── */
+    .filter-wrap {
+      max-width: 1280px; margin: 0 auto;
+      padding: 8px 56px 0; display: flex; gap: 10px; flex-wrap: wrap;
+    }
+    .ftab {
+      padding: 8px 20px; border-radius: 3px;
+      border: 1.5px solid var(--border); background: white;
+      font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+      color: var(--dark);
+    }
+    .ftab.active, .ftab:hover { background: var(--blue); color: white; border-color: var(--blue); }
+
+    /* ── CTA ── */
+    .review-cta {
+      background: var(--light); padding: 72px 56px; text-align: center;
+      border-top: 1px solid var(--border);
+    }
+    .review-cta h3 { font-size: 24px; font-weight: 800; margin-bottom: 10px; }
+    .review-cta p  { font-size: 15px; color: var(--mid); margin-bottom: 28px; }
+
+    @media (max-width: 1024px) {
+      .reviews-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .rating-card { grid-template-columns: 1fr; gap: 28px; padding: 28px; }
+      .product-review-section, .filter-wrap { padding-inline: 20px; }
+      .page-hero { padding: 100px 24px 60px; }
+      .rating-wrap { padding-inline: 20px; }
+      .reviews-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header id="hdr" class="solid">
+  <a href="index.html" class="logo">
+    <img src="루나쿨_로고/루나쿨_로고.png" alt="루나쿨" class="logo-light" style="display:none">
+    <img src="루나쿨_로고/루나쿨_로고.png" alt="루나쿨" class="logo-dark">
+  </a>
+  <nav>
+    <a href="index.html">홈</a>
+    <a href="products.html">전체 상품</a>
+    <a href="reviews.html">구매후기</a>
+    <a href="about.html">브랜드 소개</a>
+    <a href="https://smartstore.naver.com" target="_blank" class="hdr-cta">스마트스토어 구매</a>
+  </nav>
+  <div class="burger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</header>
+<div class="m-nav" id="mNav">
+  <a href="index.html">홈</a>
+  <a href="products.html">전체 상품</a>
+  <a href="reviews.html">구매후기</a>
+  <a href="about.html">브랜드 소개</a>
+  <a href="https://smartstore.naver.com" target="_blank" class="hdr-cta">스마트스토어 구매</a>
+</div>
+
+<div class="page-hero">
+  <div class="pk">Customer Reviews</div>
+  <h1>구매 후기</h1>
+  <p>루나쿨을 경험한 고객님들의 솔직한 리뷰 모음</p>
+</div>
+
+<!-- 평점 요약 -->
+<div class="rating-wrap">
+  <div class="rating-card appear">
+    <div class="rating-left">
+      <div class="r-big" id="avgScore">4.9</div>
+      <div class="r-stars">★★★★★</div>
+      <div class="r-count">총 <span id="totalCount">0</span>개 리뷰</div>
+    </div>
+    <div class="rating-bars" id="ratingBars"></div>
+  </div>
+</div>
+
+<!-- 필터 -->
+<div class="filter-wrap" id="filterWrap">
+  <button class="ftab active" onclick="filterByProduct('all', this)">전체</button>
+  <button class="ftab" onclick="filterByProduct('pad', this)">냉감 패드</button>
+  <button class="ftab" onclick="filterByProduct('blanket', this)">차렵이불</button>
+  <button class="ftab" onclick="filterByProduct('sofa', this)">소파패드</button>
+  <button class="ftab" onclick="filterByProduct('cushion', this)">방석</button>
+  <button class="ftab" onclick="filterByProduct('pillow', this)">베개커버</button>
+</div>
+
+<!-- 후기 목록 -->
+<div class="product-review-section" id="reviewsContainer"></div>
+
+<div class="review-cta">
+  <h3>루나쿨을 경험하셨나요?</h3>
+  <p>네이버 스마트스토어에서 구매 후 후기를 남겨주세요.</p>
+  <a href="https://smartstore.naver.com" target="_blank" class="btn-solid"
+     style="display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:white;padding:14px 36px;border-radius:3px;font-size:14px;font-weight:700;transition:background 0.2s;"
+     onmouseover="this.style.background='var(--blue-dk)'" onmouseout="this.style.background='var(--blue)'">
+    스마트스토어 후기 작성하기 →
+  </a>
+</div>
+
+<!-- 라이트박스 -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <span class="lb-close">✕</span>
+  <img id="lbImg" src="" alt="">
+</div>
+
+<footer>
+  <div class="ft-grid">
+    <div class="ft-brand">
+      <img src="루나쿨_로고/루나쿨_로고.png" alt="루나쿨">
+      <p class="ft-desc">루나쿨 바이오쿨 — 달빛처럼 시원한 여름 침구 브랜드.</p>
+      <div class="ft-tel"><strong>고객센터</strong> 070-7717-5231 | 평일 09:00~18:00</div>
+    </div>
+    <div class="ft-col">
+      <h5>Products</h5>
+      <ul>
+        <li><a href="products.html">냉감 패드</a></li>
+        <li><a href="products.html">냉감 차렵이불</a></li>
+        <li><a href="products.html">냉감 소파패드</a></li>
+        <li><a href="products.html">냉감 방석</a></li>
+        <li><a href="products.html">냉감 베개커버</a></li>
+      </ul>
+    </div>
+    <div class="ft-col">
+      <h5>Brand</h5>
+      <ul>
+        <li><a href="about.html">브랜드 소개</a></li>
+        <li><a href="reviews.html">구매 후기</a></li>
+        <li><a href="https://smartstore.naver.com" target="_blank">스마트스토어</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="ft-bottom"><p>© 2025 루나쿨(LUNA COOL). All rights reserved.</p></div>
+</footer>
+
+<script src="script.js"></script>
+<script src="reviews-data.js"></script>
+<script src="review-generator.js"></script>
+<script>
+// ── 후기 렌더링 ──
+const PRODUCT_META = {
+  pad:     { name: '냉감 패드',    thumb: '루나쿨 상품 이미지/냉감 패드 퀸 6.jpg' },
+  blanket: { name: '냉감 차렵이불', thumb: '루나쿨 상품 이미지/냉감 차렵이불 퀸 5.jpg' },
+  sofa:    { name: '냉감 소파패드', thumb: '루나쿨 상품 이미지/냉감 소파패드 6.jpg' },
+  cushion: { name: '냉감 방석',    thumb: '루나쿨 상품 이미지/냉감 방석 2.jpg' },
+  pillow:  { name: '냉감 베개커버', thumb: '루나쿨 상품 이미지/냉감 베개커버.jpg' },
+};
+
+let currentFilter = 'all';
+
+function getReviews() {
+  const stored = localStorage.getItem('lunacool_reviews');
+  if (stored) return JSON.parse(stored);
+  // 기본 후기 데이터 (DEFAULT_REVIEWS는 reviews-data.js에서 로드)
+  return typeof DEFAULT_REVIEWS !== 'undefined' ? DEFAULT_REVIEWS : [];
+}
+
+function renderRatingSummary(reviews) {
+  const total = reviews.length;
+  document.getElementById('totalCount').textContent = total;
+  const counts = [0,0,0,0,0]; // index 0=1star ... 4=5star
+  reviews.forEach(r => counts[r.rating - 1]++);
+  const avg = total ? (reviews.reduce((s,r) => s+r.rating, 0) / total).toFixed(1) : '0.0';
+  document.getElementById('avgScore').textContent = avg;
+  const barsEl = document.getElementById('ratingBars');
+  barsEl.innerHTML = [5,4,3,2,1].map(n => {
+    const pct = total ? Math.round(counts[n-1]/total*100) : 0;
+    return `<div class="bar-row">
+      <span class="n">${n}</span>
+      <span class="s">★</span>
+      <div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div>
+      <span class="c">${counts[n-1]}</span>
+    </div>`;
+  }).join('');
+}
+
+const PAGE_SIZE = 12; // 한 번에 보여줄 후기 수 (카테고리별)
+const pageState = {}; // { product: currentPage }
+
+function renderReviews(filter) {
+  const all = getReviews();
+  const filtered = filter === 'all' ? all : all.filter(r => r.product === filter);
+  const container = document.getElementById('reviewsContainer');
+
+  if (!filtered.length) {
+    container.innerHTML = '<div style="text-align:center;padding:80px 0;color:var(--mid);font-size:16px;">등록된 후기가 없습니다.</div>';
+    return;
+  }
+
+  // 상품별 그룹화
+  const groups = {};
+  const PROD_ORDER = ['pad','blanket','sofa','cushion','pillow'];
+  filtered.forEach(r => {
+    if (!groups[r.product]) groups[r.product] = [];
+    groups[r.product].push(r);
+  });
+
+  // 상품 순서 고정
+  const orderedGroups = PROD_ORDER.filter(p => groups[p]).map(p => [p, groups[p]]);
+
+  container.innerHTML = orderedGroups.map(([prod, revs]) => {
+    const meta = PRODUCT_META[prod] || { name: prod, thumb: '' };
+    if (!pageState[prod]) pageState[prod] = 1;
+    const page = pageState[prod];
+    const shown = revs.slice(0, page * PAGE_SIZE);
+    const hasMore = shown.length < revs.length;
+
+    const avgRating = (revs.reduce((s,r)=>s+r.rating,0)/revs.length).toFixed(1);
+    const photoCount = revs.filter(r=>r.photos&&r.photos.length>0).length;
+
+    return `
+      <div class="prod-block appear" data-product="${prod}">
+        <div class="prod-header">
+          <div class="prod-thumb"><img src="${meta.thumb}" alt="${meta.name}" loading="lazy"></div>
+          <div>
+            <h2>${meta.name}</h2>
+            <div style="display:flex;gap:12px;margin-top:6px;font-size:13px;color:var(--mid);">
+              <span style="color:#F0A500;font-weight:700;">★ ${avgRating}</span>
+              <span>${revs.length}개 후기</span>
+              <span>📷 사진 ${photoCount}개</span>
+            </div>
+          </div>
+          <span class="prod-cnt">${shown.length} / ${revs.length}</span>
+        </div>
+        <div class="reviews-grid" id="grid-${prod}">
+          ${shown.map(r => renderCard(r)).join('')}
+        </div>
+        ${hasMore ? `
+        <div class="load-more-wrap">
+          <button class="btn-load-more" onclick="loadMore('${prod}', ${revs.length})">
+            후기 더 보기 (${revs.length - shown.length}개 남음)
+          </button>
+        </div>` : `<div style="text-align:center;padding:20px 0;font-size:13px;color:var(--mid);">✓ 모든 후기를 확인했습니다</div>`}
+      </div>`;
+  }).join('');
+
+  // 스크롤 애니메이션
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.05 });
+  container.querySelectorAll('.appear').forEach(el => io.observe(el));
+}
+
+function loadMore(prod, total) {
+  pageState[prod] = (pageState[prod] || 1) + 1;
+  const all = getReviews();
+  const revs = all.filter(r => r.product === prod);
+  const page = pageState[prod];
+  const shown = revs.slice(0, page * PAGE_SIZE);
+  const hasMore = shown.length < total;
+  const grid = document.getElementById(`grid-${prod}`);
+  const newCards = revs.slice((page-1)*PAGE_SIZE, page*PAGE_SIZE).map(r => renderCard(r)).join('');
+  grid.insertAdjacentHTML('beforeend', newCards);
+  // 더보기 버튼 업데이트
+  const btn = grid.nextElementSibling;
+  if (btn) {
+    if (hasMore) {
+      btn.innerHTML = `<button class="btn-load-more" onclick="loadMore('${prod}', ${total})">후기 더 보기 (${total - shown.length}개 남음)</button>`;
+    } else {
+      btn.innerHTML = `<div style="text-align:center;padding:20px 0;font-size:13px;color:var(--mid);">✓ 모든 후기를 확인했습니다</div>`;
+    }
+  }
+  // 카운터 업데이트
+  const cnt = document.querySelector(`.prod-block[data-product="${prod}"] .prod-cnt`);
+  if (cnt) cnt.textContent = `${shown.length} / ${total}`;
+}
+
+function renderCard(r) {
+  const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+  const hasPhotos = r.photos && r.photos.length > 0;
+  const photoHTML = hasPhotos ? `
+    <div class="rev-photos count-${Math.min(r.photos.length, 3)}">
+      ${r.photos.slice(0,3).map(src => `
+        <div class="rev-photo-item" onclick="openLightbox('${src}')">
+          <img src="${src}" alt="후기 이미지" loading="lazy">
+        </div>`).join('')}
+    </div>` : '';
+
+  const verifiedBadge = r.verified !== false ? `<span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;color:#3DAA6E;font-weight:700;margin-left:6px;">✔ 구매인증</span>` : '';
+
+  return `
+    <div class="rev-card ${hasPhotos ? '' : 'text-only'}">
+      ${photoHTML}
+      <div class="rev-body">
+        ${!hasPhotos ? '<div class="text-quote">"</div>' : ''}
+        <div class="rv-top">
+          <div class="rv-av">${r.name[0]}</div>
+          <div>
+            <div class="rv-name">${r.name}님 ${verifiedBadge}</div>
+            <div class="rv-loc">${r.location || ''}</div>
+          </div>
+        </div>
+        <div class="rv-stars" style="color:#F0A500">${stars}</div>
+        <div class="rv-text">${r.text}</div>
+        <div class="rv-date">${r.date}</div>
+      </div>
+    </div>`;
+}
+
+function filterByProduct(cat, btn) {
+  currentFilter = cat;
+  document.querySelectorAll('.ftab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderReviews(cat);
+}
+
+function openLightbox(src) {
+  document.getElementById('lbImg').src = src;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+// 초기 렌더
+const allReviews = getReviews();
+renderRatingSummary(allReviews);
+renderReviews('all');
+</script>
+</body>
+</html>

@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>관리자 — 루나쿨 후기 관리</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --blue: #4A8FBF; --blue-dk: #2E6A96;
+      --dark: #1A1A1A; --mid: #666;
+      --light: #F4F8FB; --border: #E0E8F0;
+      --white: #fff; --red: #E05555; --green: #3DAA6E;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Noto Sans KR', sans-serif; background: #F0F4F8; color: var(--dark); }
+
+    /* ── 로그인 ── */
+    #loginScreen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    }
+    .login-box {
+      background: white; border-radius: 8px; padding: 48px 40px;
+      width: 380px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); text-align: center;
+    }
+    .login-box .logo { font-size: 22px; font-weight: 800; color: var(--blue); margin-bottom: 6px; }
+    .login-box .sub  { font-size: 13px; color: var(--mid); margin-bottom: 32px; }
+    .login-box input {
+      width: 100%; padding: 13px 16px; border: 1.5px solid var(--border);
+      border-radius: 6px; font-size: 15px; font-family: inherit;
+      margin-bottom: 14px; outline: none; transition: border-color 0.2s;
+    }
+    .login-box input:focus { border-color: var(--blue); }
+    .login-box button {
+      width: 100%; padding: 14px; background: var(--blue); color: white;
+      border: none; border-radius: 6px; font-size: 15px; font-weight: 700;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .login-box button:hover { background: var(--blue-dk); }
+    .login-err { color: var(--red); font-size: 13px; margin-top: 10px; display: none; }
+
+    /* ── 관리자 레이아웃 ── */
+    #adminApp { display: none; }
+    .adm-header {
+      background: var(--dark); color: white; padding: 0 32px;
+      height: 56px; display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .adm-header .brand { font-size: 16px; font-weight: 800; color: white; }
+    .adm-header .brand span { color: var(--blue); }
+    .adm-header-right { display: flex; align-items: center; gap: 16px; }
+    .adm-header a {
+      font-size: 13px; color: rgba(255,255,255,0.6);
+      text-decoration: none; transition: color 0.2s;
+    }
+    .adm-header a:hover { color: white; }
+    .btn-logout {
+      background: none; border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.6);
+      padding: 6px 16px; border-radius: 4px; font-size: 12px; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-logout:hover { border-color: white; color: white; }
+
+    .adm-body { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+
+    /* ── 통계 카드 ── */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+    .stat-card {
+      background: white; border-radius: 8px; padding: 24px 20px;
+      border: 1px solid var(--border);
+    }
+    .stat-card .sv { font-size: 32px; font-weight: 800; color: var(--blue); }
+    .stat-card .sl { font-size: 13px; color: var(--mid); margin-top: 4px; }
+
+    /* ── 섹션 헤더 ── */
+    .sec-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .sec-header h2 { font-size: 18px; font-weight: 800; }
+    .btn-add {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--blue); color: white;
+      padding: 10px 22px; border-radius: 6px; border: none;
+      font-size: 13px; font-weight: 700; cursor: pointer; transition: background 0.2s;
+    }
+    .btn-add:hover { background: var(--blue-dk); }
+
+    /* ── 후기 테이블 ── */
+    .rev-table-wrap { background: white; border-radius: 8px; border: 1px solid var(--border); overflow: hidden; }
+    .rev-table { width: 100%; border-collapse: collapse; }
+    .rev-table th {
+      background: var(--light); padding: 13px 16px;
+      font-size: 12px; font-weight: 700; color: var(--mid);
+      text-align: left; border-bottom: 1px solid var(--border);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .rev-table td {
+      padding: 14px 16px; border-bottom: 1px solid var(--border);
+      font-size: 14px; vertical-align: middle;
+    }
+    .rev-table tr:last-child td { border-bottom: none; }
+    .rev-table tr:hover td { background: var(--light); }
+
+    .td-photos { display: flex; gap: 6px; flex-wrap: wrap; }
+    .td-photo {
+      width: 52px; height: 52px; border-radius: 4px; overflow: hidden;
+      border: 1px solid var(--border); cursor: pointer; flex-shrink: 0;
+    }
+    .td-photo img { width: 100%; height: 100%; object-fit: cover; }
+    .td-stars { color: #F0A500; font-size: 14px; }
+    .td-text { max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--mid); }
+
+    .prod-tag {
+      display: inline-block; padding: 3px 10px; border-radius: 3px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.3px;
+    }
+    .prod-tag.pad     { background: #EEF5FF; color: #3A7ABF; }
+    .prod-tag.blanket { background: #F0FFF4; color: #2E8A5F; }
+    .prod-tag.sofa    { background: #FFF8EE; color: #C07830; }
+    .prod-tag.cushion { background: #FDF0FF; color: #8A40B0; }
+    .prod-tag.pillow  { background: #FFF0F0; color: #B04040; }
+
+    .td-actions { display: flex; gap: 8px; }
+    .btn-edit, .btn-del {
+      padding: 6px 14px; border-radius: 4px; border: none;
+      font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-edit { background: var(--light); color: var(--blue); }
+    .btn-edit:hover { background: #D6E8F8; }
+    .btn-del  { background: #FEF0F0; color: var(--red); }
+    .btn-del:hover  { background: #FFD8D8; }
+
+    .empty-msg { text-align: center; padding: 48px; color: var(--mid); font-size: 15px; }
+
+    /* ── 모달 ── */
+    .modal-bg {
+      display: none; position: fixed; inset: 0; z-index: 500;
+      background: rgba(0,0,0,0.55); align-items: center; justify-content: center;
+    }
+    .modal-bg.open { display: flex; }
+    .modal {
+      background: white; border-radius: 12px; width: 640px; max-width: 95vw;
+      max-height: 92vh; overflow-y: auto;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.18);
+    }
+    .modal-head {
+      padding: 24px 28px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; background: white; z-index: 1;
+    }
+    .modal-head h3 { font-size: 18px; font-weight: 800; }
+    .modal-close {
+      background: none; border: none; font-size: 22px; cursor: pointer; color: var(--mid);
+      transition: color 0.2s; line-height: 1;
+    }
+    .modal-close:hover { color: var(--dark); }
+    .modal-body { padding: 28px; }
+
+    .form-group { margin-bottom: 22px; }
+    .form-group label {
+      display: block; font-size: 13px; font-weight: 700;
+      color: var(--dark); margin-bottom: 8px;
+    }
+    .form-group label .req { color: var(--red); margin-left: 2px; }
+    .form-control {
+      width: 100%; padding: 11px 14px;
+      border: 1.5px solid var(--border); border-radius: 6px;
+      font-size: 14px; font-family: inherit; outline: none; transition: border-color 0.2s;
+    }
+    .form-control:focus { border-color: var(--blue); }
+    textarea.form-control { min-height: 100px; resize: vertical; }
+    select.form-control { cursor: pointer; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    /* 별점 선택 */
+    .star-select { display: flex; gap: 6px; }
+    .star-btn {
+      width: 36px; height: 36px; border: 1.5px solid var(--border);
+      border-radius: 6px; background: white; font-size: 18px; cursor: pointer;
+      transition: all 0.15s; display: flex; align-items: center; justify-content: center;
+    }
+    .star-btn.on { background: #FFF8E0; border-color: #F0A500; }
+
+    /* 이미지 업로드 */
+    .upload-area {
+      border: 2px dashed var(--border); border-radius: 8px; padding: 28px;
+      text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s;
+      position: relative;
+    }
+    .upload-area:hover { border-color: var(--blue); background: var(--light); }
+    .upload-area input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .upload-icon { font-size: 32px; margin-bottom: 10px; }
+    .upload-area p { font-size: 13px; color: var(--mid); }
+    .upload-area strong { color: var(--blue); }
+
+    .preview-imgs {
+      display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px;
+    }
+    .preview-img {
+      position: relative; width: 80px; height: 80px;
+      border-radius: 6px; overflow: hidden; border: 1px solid var(--border);
+    }
+    .preview-img img { width: 100%; height: 100%; object-fit: cover; }
+    .preview-img .rm-img {
+      position: absolute; top: 3px; right: 3px;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: rgba(0,0,0,0.65); color: white; border: none;
+      font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+
+    .modal-foot {
+      padding: 20px 28px; border-top: 1px solid var(--border);
+      display: flex; justify-content: flex-end; gap: 10px;
+      position: sticky; bottom: 0; background: white;
+    }
+    .btn-cancel {
+      padding: 11px 24px; border: 1.5px solid var(--border); background: white;
+      border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-cancel:hover { background: var(--light); }
+    .btn-save {
+      padding: 11px 28px; background: var(--blue); color: white;
+      border: none; border-radius: 6px; font-size: 14px; font-weight: 700;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .btn-save:hover { background: var(--blue-dk); }
+
+    /* ── 토스트 ── */
+    .toast {
+      position: fixed; bottom: 32px; right: 32px; z-index: 1000;
+      background: var(--dark); color: white;
+      padding: 14px 24px; border-radius: 8px; font-size: 14px; font-weight: 600;
+      transform: translateY(80px); opacity: 0;
+      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { background: var(--green); }
+    .toast.error   { background: var(--red); }
+
+    /* ── 필터 ── */
+    .filter-bar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+    .filter-bar select, .filter-bar input {
+      padding: 9px 14px; border: 1.5px solid var(--border); border-radius: 6px;
+      font-size: 13px; font-family: inherit; outline: none; background: white;
+    }
+    .filter-bar input { flex: 1; min-width: 200px; }
+
+    @media (max-width: 768px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .form-row  { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── 로그인 화면 ── -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="logo">🌙 루나쿨</div>
+    <div class="sub">관리자 페이지 로그인</div>
+    <input type="text"     id="loginId"  placeholder="아이디" autocomplete="username">
+    <input type="password" id="loginPw"  placeholder="비밀번호" autocomplete="current-password"
+           onkeydown="if(event.key==='Enter') doLogin()">
+    <button onclick="doLogin()">로그인</button>
+    <div class="login-err" id="loginErr">아이디 또는 비밀번호가 올바르지 않습니다.</div>
+  </div>
+</div>
+
+<!-- ── 관리자 앱 ── -->
+<div id="adminApp">
+  <div class="adm-header">
+    <div class="brand">🌙 루나쿨 <span>관리자</span></div>
+    <div class="adm-header-right">
+      <a href="reviews.html" target="_blank">후기 페이지 보기 →</a>
+      <a href="index.html" target="_blank">홈페이지 →</a>
+      <button class="btn-logout" onclick="doLogout()">로그아웃</button>
+    </div>
+  </div>
+
+  <div class="adm-body">
+
+    <!-- 통계 -->
+    <div class="stats-row" id="statsRow"></div>
+
+    <!-- 후기 관리 -->
+    <div class="sec-header">
+      <h2>후기 관리</h2>
+      <button class="btn-add" onclick="openModal()">+ 후기 추가</button>
+    </div>
+
+    <!-- 필터 -->
+    <div class="filter-bar">
+      <select id="filterProd" onchange="renderTable()">
+        <option value="all">전체 상품</option>
+        <option value="pad">냉감 패드</option>
+        <option value="blanket">차렵이불</option>
+        <option value="sofa">소파패드</option>
+        <option value="cushion">방석</option>
+        <option value="pillow">베개커버</option>
+      </select>
+      <input type="text" id="searchInput" placeholder="이름 또는 후기 내용 검색..." oninput="renderTable()">
+    </div>
+
+    <div class="rev-table-wrap">
+      <table class="rev-table">
+        <thead>
+          <tr>
+            <th>상품</th>
+            <th>작성자</th>
+            <th>별점</th>
+            <th>후기 내용</th>
+            <th>사진</th>
+            <th>날짜</th>
+            <th>관리</th>
+          </tr>
+        </thead>
+        <tbody id="revTableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- ── 영상 관리 ── -->
+    <div style="margin-top:48px;">
+      <div class="sec-header">
+        <h2>🎬 홍보 영상 관리</h2>
+      </div>
+      <div style="background:white;border:1px solid var(--border);border-radius:8px;padding:32px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start;">
+          <div>
+            <div class="form-group">
+              <label>YouTube URL 또는 MP4 파일명</label>
+              <input class="form-control" type="text" id="videoUrl"
+                placeholder="예: https://youtu.be/XXXXX 또는 video.mp4"
+                value="">
+              <div style="font-size:12px;color:var(--mid);margin-top:6px;">
+                YouTube URL 입력 시 자동으로 임베드됩니다.<br>
+                MP4는 파일을 프로젝트 폴더에 복사 후 파일명 입력
+              </div>
+            </div>
+            <button class="btn-save" onclick="saveVideoUrl()" style="width:100%;">영상 URL 저장</button>
+            <button onclick="clearVideoUrl()"
+              style="width:100%;margin-top:8px;padding:10px;background:none;border:1.5px solid var(--border);border-radius:6px;font-size:13px;cursor:pointer;transition:all 0.2s;"
+              onmouseover="this.style.background=getComputedStyle(document.documentElement).getPropertyValue('--light')"
+              onmouseout="this.style.background='none'">영상 삭제</button>
+          </div>
+          <div id="videoPreviewBox" style="background:var(--light);border-radius:8px;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+            <div style="text-align:center;color:var(--mid);">
+              <div style="font-size:32px;margin-bottom:8px;">🎬</div>
+              <div style="font-size:13px;">영상 미리보기</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 초기화 버튼 -->
+    <div style="margin-top:16px;text-align:right;">
+      <button onclick="resetToDefault()"
+        style="background:none;border:none;font-size:12px;color:var(--mid);cursor:pointer;text-decoration:underline;">
+        기본 데이터로 초기화
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── 후기 추가/수정 모달 ── -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modalTitle">후기 추가</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>상품 카테고리 <span class="req">*</span></label>
+          <select class="form-control" id="fProduct">
+            <option value="pad">냉감 패드</option>
+            <option value="blanket">냉감 차렵이불</option>
+            <option value="sofa">냉감 소파패드</option>
+            <option value="cushion">냉감 방석</option>
+            <option value="pillow">냉감 베개커버</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>별점 <span class="req">*</span></label>
+          <div class="star-select" id="starSelect">
+            <button class="star-btn on" onclick="setStar(1)">★</button>
+            <button class="star-btn on" onclick="setStar(2)">★</button>
+            <button class="star-btn on" onclick="setStar(3)">★</button>
+            <button class="star-btn on" onclick="setStar(4)">★</button>
+            <button class="star-btn on" onclick="setStar(5)">★</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>작성자 이름 <span class="req">*</span></label>
+          <input class="form-control" type="text" id="fName" placeholder="예: 김**">
+        </div>
+        <div class="form-group">
+          <label>지역</label>
+          <input class="form-control" type="text" id="fLocation" placeholder="예: 서울 강남구">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>후기 내용 <span class="req">*</span></label>
+        <textarea class="form-control" id="fText" placeholder="고객 후기를 입력하세요..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>작성일</label>
+        <input class="form-control" type="text" id="fDate" placeholder="예: 2025.06.01">
+      </div>
+
+      <div class="form-group">
+        <label>후기 사진 <small style="color:var(--mid);font-weight:400;">(최대 3장, JPG/PNG)</small></label>
+        <div class="upload-area">
+          <input type="file" id="fPhotos" accept="image/*" multiple onchange="handlePhotoUpload(event)">
+          <div class="upload-icon">📷</div>
+          <p><strong>클릭하여 사진 선택</strong> 또는 여기에 드래그</p>
+          <p style="margin-top:6px;font-size:12px;">고객이 직접 찍은 사진을 등록하세요</p>
+        </div>
+        <div class="preview-imgs" id="previewImgs"></div>
+      </div>
+
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeModal()">취소</button>
+      <button class="btn-save"   onclick="saveReview()">저장하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 토스트 -->
+<div class="toast" id="toast"></div>
+
+<script src="reviews-data.js"></script>
+<script>
+// ── 인증 ──
+const ADMIN_ID = 'lunacool';
+const ADMIN_PW = 'luna2025!';
+
+function doLogin() {
+  const id = document.getElementById('loginId').value;
+  const pw = document.getElementById('loginPw').value;
+  if (id === ADMIN_ID && pw === ADMIN_PW) {
+    sessionStorage.setItem('lc_admin', '1');
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminApp').style.display = 'block';
+    init();
+  } else {
+    document.getElementById('loginErr').style.display = 'block';
+  }
+}
+function doLogout() {
+  sessionStorage.removeItem('lc_admin');
+  location.reload();
+}
+if (sessionStorage.getItem('lc_admin')) {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('adminApp').style.display = 'block';
+}
+
+// ── 데이터 ──
+function getReviews() {
+  const d = localStorage.getItem('lunacool_reviews');
+  return d ? JSON.parse(d) : [];
+}
+function saveReviews(arr) {
+  localStorage.setItem('lunacool_reviews', JSON.stringify(arr));
+}
+function resetToDefault() {
+  if (confirm('기본 데이터로 초기화하면 모든 수정 내용이 삭제됩니다. 계속할까요?')) {
+    localStorage.setItem('lunacool_reviews', JSON.stringify(DEFAULT_REVIEWS));
+    init();
+    showToast('기본 데이터로 초기화했습니다.', 'success');
+  }
+}
+
+const PROD_NAMES = { pad:'냉감 패드', blanket:'차렵이불', sofa:'소파패드', cushion:'방석', pillow:'베개커버' };
+
+// ── 통계 ──
+function renderStats() {
+  const revs = getReviews();
+  const total = revs.length;
+  const avg = total ? (revs.reduce((s,r)=>s+r.rating,0)/total).toFixed(1) : '0.0';
+  const withPhoto = revs.filter(r=>r.photos&&r.photos.length>0).length;
+  const counts = {};
+  revs.forEach(r => counts[r.product] = (counts[r.product]||0)+1);
+  const topProd = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
+
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-card"><div class="sv">${total}</div><div class="sl">총 후기 수</div></div>
+    <div class="stat-card"><div class="sv">${avg}★</div><div class="sl">평균 별점</div></div>
+    <div class="stat-card"><div class="sv">${withPhoto}</div><div class="sl">사진 후기</div></div>
+    <div class="stat-card"><div class="sv">${topProd ? PROD_NAMES[topProd[0]] : '-'}</div><div class="sl">후기 최다 상품</div></div>
+  `;
+}
+
+// ── 테이블 ──
+function renderTable() {
+  const filter = document.getElementById('filterProd').value;
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  let revs = getReviews();
+  if (filter !== 'all') revs = revs.filter(r => r.product === filter);
+  if (search) revs = revs.filter(r =>
+    r.name.toLowerCase().includes(search) || r.text.toLowerCase().includes(search)
+  );
+  const tbody = document.getElementById('revTableBody');
+  if (!revs.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-msg">등록된 후기가 없습니다.</div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = revs.map(r => `
+    <tr>
+      <td><span class="prod-tag ${r.product}">${PROD_NAMES[r.product]||r.product}</span></td>
+      <td><strong>${r.name}</strong><br><small style="color:var(--mid)">${r.location||''}</small></td>
+      <td><span class="td-stars">${'★'.repeat(r.rating)}</span></td>
+      <td><div class="td-text" title="${r.text}">${r.text}</div></td>
+      <td>
+        <div class="td-photos">
+          ${(r.photos||[]).slice(0,3).map(src=>`
+            <div class="td-photo"><img src="${src}" alt="후기사진"></div>
+          `).join('')}
+          ${!r.photos||r.photos.length===0 ? '<span style="color:var(--mid);font-size:12px;">없음</span>' : ''}
+        </div>
+      </td>
+      <td style="white-space:nowrap;font-size:13px;color:var(--mid)">${r.date}</td>
+      <td>
+        <div class="td-actions">
+          <button class="btn-edit" onclick="openModal(${r.id})">수정</button>
+          <button class="btn-del"  onclick="deleteReview(${r.id})">삭제</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function init() {
+  renderStats();
+  renderTable();
+}
+if (sessionStorage.getItem('lc_admin')) init();
+
+// ── 모달 ──
+let editId = null;
+let currentPhotos = []; // base64 또는 경로
+let currentRating = 5;
+
+function openModal(id) {
+  editId = id || null;
+  currentPhotos = [];
+  document.getElementById('previewImgs').innerHTML = '';
+  document.getElementById('fPhotos').value = '';
+
+  if (id) {
+    const rev = getReviews().find(r => r.id === id);
+    if (!rev) return;
+    document.getElementById('modalTitle').textContent = '후기 수정';
+    document.getElementById('fProduct').value = rev.product;
+    document.getElementById('fName').value = rev.name;
+    document.getElementById('fLocation').value = rev.location || '';
+    document.getElementById('fText').value = rev.text;
+    document.getElementById('fDate').value = rev.date;
+    currentPhotos = [...(rev.photos || [])];
+    setStar(rev.rating);
+    renderPreview();
+  } else {
+    document.getElementById('modalTitle').textContent = '후기 추가';
+    document.getElementById('fProduct').value = 'pad';
+    document.getElementById('fName').value = '';
+    document.getElementById('fLocation').value = '';
+    document.getElementById('fText').value = '';
+    const today = new Date();
+    document.getElementById('fDate').value =
+      `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`;
+    setStar(5);
+  }
+  document.getElementById('modalBg').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('modalBg').classList.remove('open');
+}
+
+function setStar(n) {
+  currentRating = n;
+  document.querySelectorAll('.star-btn').forEach((btn, i) => {
+    btn.classList.toggle('on', i < n);
+  });
+}
+
+function handlePhotoUpload(e) {
+  const files = Array.from(e.target.files).slice(0, 3 - currentPhotos.filter(p => !p.startsWith('루나쿨')).length);
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      if (currentPhotos.length < 3) {
+        currentPhotos.push(ev.target.result);
+        renderPreview();
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderPreview() {
+  document.getElementById('previewImgs').innerHTML = currentPhotos.map((src, i) => `
+    <div class="preview-img">
+      <img src="${src}" alt="">
+      <button class="rm-img" onclick="removePhoto(${i})">✕</button>
+    </div>
+  `).join('');
+}
+function removePhoto(i) {
+  currentPhotos.splice(i, 1);
+  renderPreview();
+}
+
+function saveReview() {
+  const product  = document.getElementById('fProduct').value;
+  const name     = document.getElementById('fName').value.trim();
+  const location = document.getElementById('fLocation').value.trim();
+  const text     = document.getElementById('fText').value.trim();
+  const date     = document.getElementById('fDate').value.trim();
+
+  if (!name || !text) {
+    showToast('작성자 이름과 후기 내용은 필수입니다.', 'error');
+    return;
+  }
+
+  const revs = getReviews();
+
+  if (editId) {
+    const idx = revs.findIndex(r => r.id === editId);
+    if (idx > -1) {
+      revs[idx] = { ...revs[idx], product, name, location, text, date, rating: currentRating, photos: currentPhotos };
+    }
+    showToast('후기가 수정되었습니다.', 'success');
+  } else {
+    const newId = revs.length ? Math.max(...revs.map(r=>r.id)) + 1 : 1;
+    revs.unshift({ id: newId, product, name, location, text, date, rating: currentRating, photos: currentPhotos });
+    showToast('후기가 추가되었습니다.', 'success');
+  }
+
+  saveReviews(revs);
+  closeModal();
+  init();
+}
+
+function deleteReview(id) {
+  if (!confirm('이 후기를 삭제할까요?')) return;
+  const revs = getReviews().filter(r => r.id !== id);
+  saveReviews(revs);
+  init();
+  showToast('삭제되었습니다.', 'success');
+}
+
+// ── 토스트 ──
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type}`;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── 영상 관리 ──
+function saveVideoUrl() {
+  const url = document.getElementById('videoUrl').value.trim();
+  localStorage.setItem('lunacool_video_url', url);
+  updateVideoPreview(url);
+  showToast('영상 URL이 저장되었습니다.', 'success');
+}
+function clearVideoUrl() {
+  localStorage.removeItem('lunacool_video_url');
+  document.getElementById('videoUrl').value = '';
+  document.getElementById('videoPreviewBox').innerHTML = `<div style="text-align:center;color:var(--mid);"><div style="font-size:32px;margin-bottom:8px;">🎬</div><div style="font-size:13px;">영상 미리보기</div></div>`;
+  showToast('영상이 삭제되었습니다.');
+}
+function updateVideoPreview(url) {
+  const box = document.getElementById('videoPreviewBox');
+  if (!url) return;
+  if (url.includes('youtube.com') || url.includes('youtu.be')) {
+    const ytId = url.match(/(?:v=|youtu\.be\/)([^&?]+)/)?.[1];
+    if (ytId) box.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${ytId}" frameborder="0" style="border-radius:8px;"></iframe>`;
+  } else {
+    box.innerHTML = `<video style="width:100%;border-radius:8px;" controls><source src="${url}" type="video/mp4"></video>`;
+  }
+}
+// 저장된 영상 URL 로드
+(function loadVideoUrl() {
+  const url = localStorage.getItem('lunacool_video_url') || '';
+  if (url) {
+    document.getElementById('videoUrl').value = url;
+    updateVideoPreview(url);
+  }
+})();
+
+// ESC 닫기
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
+</body>
+</html>

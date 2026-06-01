@@ -37,9 +37,12 @@ header.solid {
   border-bottom: 1px solid var(--border);
 }
 .logo img { height: 34px; object-fit: contain; }
-.logo .logo-dark { display: none; }
+/* 투명 헤더(히어로 위): 로고를 흰색으로 필터 */
+.logo-light { filter: brightness(0) invert(1); opacity: 0.95; }
+.logo-dark  { display: none; }
+/* 스크롤 후 흰 헤더: 원본 컬러 로고로 교체 */
 header.solid .logo-light { display: none; }
-header.solid .logo-dark  { display: block; }
+header.solid .logo-dark  { display: block; filter: none; opacity: 1; }
 
 nav { display: flex; align-items: center; gap: 44px; }
 nav a {
@@ -163,19 +166,25 @@ header.solid .burger span { background: var(--dark); }
 
 /* 히어로 인증 배지 */
 .hero-badges {
-  display: flex; gap: 10px; flex-wrap: wrap;
+  display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px;
 }
 .hero-badge-chip {
-  display: inline-flex; align-items: center; gap: 5px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 20px;
-  padding: 6px 14px; font-size: 12px; font-weight: 500;
-  color: rgba(255,255,255,0.7);
-  backdrop-filter: blur(4px);
+  display: inline-flex; align-items: center; gap: 7px;
+  background: rgba(255,255,255,0.18);
+  border: 1.5px solid rgba(255,255,255,0.45);
+  border-radius: 24px;
+  padding: 8px 18px; font-size: 13px; font-weight: 700;
+  color: white;
+  backdrop-filter: blur(8px);
   transition: all 0.2s;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  letter-spacing: 0.2px;
 }
-.hero-badge-chip:hover { background: rgba(255,255,255,0.14); color: white; }
+.hero-badge-chip:hover {
+  background: rgba(255,255,255,0.28);
+  border-color: white;
+  transform: translateY(-1px);
+}
 
 /* scroll hint */
 .hero-scroll {

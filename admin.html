@@ -321,6 +321,72 @@
       </table>
     </div>
 
+    <!-- ── 문의 관리 ── -->
+    <div style="margin-top:48px;">
+      <div class="sec-header">
+        <h2>💬 상품 문의 관리</h2>
+        <a href="inquiry.html" target="_blank" style="font-size:13px;color:var(--blue);font-weight:600;">문의 게시판 보기 →</a>
+      </div>
+
+      <!-- 필터 -->
+      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+        <select id="inqFilterCat" onchange="renderInqTable()" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;outline:none;background:white;">
+          <option value="all">전체</option>
+          <option value="product">상품문의</option>
+          <option value="delivery">배송문의</option>
+          <option value="exchange">교환/환불</option>
+          <option value="etc">기타</option>
+        </select>
+        <select id="inqFilterStatus" onchange="renderInqTable()" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;outline:none;background:white;">
+          <option value="all">전체 상태</option>
+          <option value="wait">답변대기</option>
+          <option value="done">답변완료</option>
+        </select>
+        <input id="inqSearch" type="text" placeholder="제목/이름 검색..." oninput="renderInqTable()"
+          style="padding:9px 14px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;outline:none;flex:1;min-width:200px;">
+      </div>
+
+      <!-- 답변 미작성 건수 알림 -->
+      <div id="inqWaitAlert" style="display:none;background:#FFF3EE;border:1px solid #FCDCC8;border-radius:6px;padding:12px 16px;margin-bottom:14px;font-size:13px;color:#C07830;"></div>
+
+      <div style="background:white;border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+        <table class="rev-table">
+          <thead>
+            <tr>
+              <th>분류</th>
+              <th>제목</th>
+              <th>작성자</th>
+              <th>날짜</th>
+              <th>상태</th>
+              <th>관리</th>
+            </tr>
+          </thead>
+          <tbody id="inqAdminBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── 답변 모달 ── -->
+    <div class="modal-bg" id="answerModal">
+      <div class="modal">
+        <div class="modal-head">
+          <h3>문의 답변 작성</h3>
+          <button class="modal-close" onclick="document.getElementById('answerModal').classList.remove('open');document.body.style.overflow=''">✕</button>
+        </div>
+        <div class="modal-body">
+          <div id="answerQuestion" style="background:var(--light);border-radius:8px;padding:18px;margin-bottom:20px;font-size:14px;color:var(--dark);line-height:1.75;"></div>
+          <div class="form-group">
+            <label>답변 내용 <span class="req">*</span></label>
+            <textarea class="form-control" id="answerText" style="min-height:140px;" placeholder="고객 문의에 대한 답변을 작성해주세요."></textarea>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn-cancel" onclick="document.getElementById('answerModal').classList.remove('open');document.body.style.overflow=''">취소</button>
+          <button class="btn-save" onclick="submitAnswer()">답변 등록</button>
+        </div>
+      </div>
+    </div>
+
     <!-- ── 영상 관리 ── -->
     <div style="margin-top:48px;">
       <div class="sec-header">
@@ -546,6 +612,7 @@ function renderTable() {
 function init() {
   renderStats();
   renderTable();
+  renderInqTable();
 }
 if (sessionStorage.getItem('lc_admin')) init();
 
@@ -669,6 +736,100 @@ function showToast(msg, type = '') {
   t.className = `toast ${type}`;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── 문의 관리 ──
+const INQ_CAT = { product:'상품문의', delivery:'배송문의', exchange:'교환/환불', etc:'기타' };
+let answeringId = null;
+
+function getInquiries() {
+  const d = localStorage.getItem('lunacool_inquiries');
+  return d ? JSON.parse(d) : [];
+}
+function saveInquiries(arr) { localStorage.setItem('lunacool_inquiries', JSON.stringify(arr)); }
+
+function renderInqTable() {
+  const cat    = document.getElementById('inqFilterCat')?.value || 'all';
+  const status = document.getElementById('inqFilterStatus')?.value || 'all';
+  const search = (document.getElementById('inqSearch')?.value || '').toLowerCase();
+
+  let data = getInquiries();
+  if (cat !== 'all')    data = data.filter(i => i.cat === cat);
+  if (status !== 'all') data = data.filter(i => i.status === status);
+  if (search) data = data.filter(i => i.title.toLowerCase().includes(search) || i.name.toLowerCase().includes(search));
+
+  // 답변대기 알림
+  const waitCount = getInquiries().filter(i => i.status === 'wait').length;
+  const alertEl = document.getElementById('inqWaitAlert');
+  if (waitCount > 0) {
+    alertEl.style.display = 'block';
+    alertEl.innerHTML = `⚠️ 답변 대기 중인 문의가 <strong>${waitCount}건</strong> 있습니다.`;
+  } else { alertEl.style.display = 'none'; }
+
+  const body = document.getElementById('inqAdminBody');
+  if (!data.length) {
+    body.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--mid);">문의가 없습니다.</td></tr>`;
+    return;
+  }
+  body.innerHTML = data.map(i => `
+    <tr>
+      <td><span class="prod-tag ${i.cat === 'product' ? 'pad' : i.cat === 'delivery' ? 'blanket' : i.cat === 'exchange' ? 'sofa' : 'cushion'}">${INQ_CAT[i.cat]||i.cat}</span></td>
+      <td>
+        <div style="font-weight:600;font-size:14px;">${i.secret ? '🔒 ' : ''}${i.title}</div>
+        ${i.product ? `<div style="font-size:12px;color:var(--mid);">${i.product}</div>` : ''}
+        <div style="font-size:12px;color:#888;margin-top:4px;line-height:1.5;">${i.content.slice(0,60)}${i.content.length>60?'…':''}</div>
+      </td>
+      <td><strong>${i.name}</strong></td>
+      <td style="font-size:13px;color:var(--mid);white-space:nowrap;">${i.date}</td>
+      <td>${i.status==='done' ? '<span style="background:#EEF9F1;color:#2E8A5F;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700;">✓ 답변완료</span>' : '<span style="background:#FFF3EE;color:#E05555;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700;">● 답변대기</span>'}</td>
+      <td>
+        <div class="td-actions">
+          <button class="btn-edit" onclick="openAnswerModal(${i.id})">${i.status==='done'?'수정':'답변'}</button>
+          <button class="btn-del"  onclick="deleteInquiry(${i.id})">삭제</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function openAnswerModal(id) {
+  answeringId = id;
+  const item = getInquiries().find(i => i.id === id);
+  if (!item) return;
+  document.getElementById('answerQuestion').innerHTML = `
+    <div style="font-size:11px;font-weight:700;color:var(--blue);letter-spacing:1px;margin-bottom:8px;">Q. ${item.name} (${item.date})</div>
+    ${item.product ? `<div style="font-size:12px;color:var(--mid);margin-bottom:6px;">📦 ${item.product}</div>` : ''}
+    <div>${item.content.replace(/\n/g,'<br>')}</div>`;
+  document.getElementById('answerText').value = item.answer || '';
+  document.getElementById('answerModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function submitAnswer() {
+  const text = document.getElementById('answerText').value.trim();
+  if (!text) { showToast('답변 내용을 입력해주세요.', 'error'); return; }
+  const all = getInquiries();
+  const idx = all.findIndex(i => i.id === answeringId);
+  if (idx > -1) {
+    const today = new Date();
+    const dateStr = `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`;
+    all[idx].answer = text;
+    all[idx].status = 'done';
+    all[idx].answerDate = dateStr;
+    saveInquiries(all);
+  }
+  document.getElementById('answerModal').classList.remove('open');
+  document.body.style.overflow = '';
+  renderInqTable();
+  renderStats();
+  showToast('답변이 등록되었습니다.', 'success');
+}
+
+function deleteInquiry(id) {
+  if (!confirm('이 문의를 삭제할까요?')) return;
+  saveInquiries(getInquiries().filter(i => i.id !== id));
+  renderInqTable();
+  renderStats();
+  showToast('삭제되었습니다.', 'success');
 }
 
 // ── 영상 관리 ──

@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>상품 문의 — 루나쿨 바이오쿨</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ── 페이지 히어로 ── */
+    .page-hero {
+      background: linear-gradient(160deg, #0D2035 0%, #1A3A5C 100%);
+      padding: 120px 56px 64px; text-align: center; color: white;
+    }
+    .page-hero .pk {
+      font-size: 11px; font-weight: 700; letter-spacing: 3px;
+      color: var(--ice); text-transform: uppercase; margin-bottom: 14px;
+    }
+    .page-hero h1 { font-size: clamp(28px, 4vw, 48px); font-weight: 800; margin-bottom: 12px; }
+    .page-hero p  { font-size: 15px; color: rgba(255,255,255,0.5); }
+
+    /* ── 메인 컨테이너 ── */
+    .inq-wrap {
+      max-width: 960px; margin: 0 auto; padding: 48px 24px 100px;
+    }
+
+    /* ── 상단 바 ── */
+    .inq-topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+    }
+    .inq-topbar .inq-count {
+      font-size: 14px; color: var(--mid);
+    }
+    .inq-topbar .inq-count strong { color: var(--dark); font-weight: 700; }
+    .btn-write {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--blue); color: white;
+      padding: 11px 24px; border-radius: 4px; border: none;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      transition: background 0.2s; font-family: inherit;
+    }
+    .btn-write:hover { background: var(--blue-dk); }
+
+    /* ── 카테고리 필터 ── */
+    .inq-cats {
+      display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;
+    }
+    .cat-btn {
+      padding: 7px 18px; border-radius: 20px;
+      border: 1.5px solid var(--border); background: white;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      transition: all 0.2s; color: var(--dark); font-family: inherit;
+    }
+    .cat-btn.active, .cat-btn:hover {
+      background: var(--blue); color: white; border-color: var(--blue);
+    }
+
+    /* ── 게시판 테이블 ── */
+    .inq-table {
+      width: 100%; border-collapse: collapse;
+      background: white; border-radius: 8px; overflow: hidden;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.06); border: 1px solid var(--border);
+    }
+    .inq-table thead th {
+      background: var(--light); padding: 14px 16px;
+      font-size: 12px; font-weight: 700; color: var(--mid);
+      text-align: left; border-bottom: 1px solid var(--border);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .inq-table tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s; cursor: pointer;
+    }
+    .inq-table tbody tr:last-child { border-bottom: none; }
+    .inq-table tbody tr:hover { background: var(--light); }
+    .inq-table td { padding: 16px; font-size: 14px; vertical-align: middle; }
+
+    .td-cat {
+      display: inline-block; padding: 3px 10px; border-radius: 12px;
+      font-size: 11px; font-weight: 700; white-space: nowrap;
+    }
+    .td-cat.product  { background: #EEF5FF; color: var(--blue); }
+    .td-cat.delivery { background: #F0FFF4; color: #2E8A5F; }
+    .td-cat.exchange { background: #FFF8EE; color: #C07830; }
+    .td-cat.etc      { background: #F5F5F5; color: #666; }
+
+    .td-title { font-weight: 600; color: var(--dark); }
+    .td-title.secret::before {
+      content: '🔒'; font-size: 12px; margin-right: 6px;
+    }
+    .td-author { font-size: 13px; color: var(--mid); white-space: nowrap; }
+    .td-date   { font-size: 12px; color: #AAAAAA; white-space: nowrap; }
+
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border-radius: 10px; font-size: 11px; font-weight: 700;
+      white-space: nowrap;
+    }
+    .status-badge.wait    { background: #FFF3EE; color: #E05555; }
+    .status-badge.done    { background: #EEF9F1; color: #2E8A5F; }
+    .status-badge.wait::before { content: '●'; font-size: 8px; }
+    .status-badge.done::before { content: '✓'; }
+
+    .empty-row td {
+      text-align: center; padding: 60px 16px;
+      color: var(--mid); font-size: 15px;
+    }
+
+    /* ── 상세 보기 패널 (아코디언) ── */
+    .inq-detail {
+      display: none; background: var(--light);
+      border-top: 1px solid var(--border);
+    }
+    .inq-detail.open { display: table-row; }
+    .inq-detail td {
+      padding: 0 !important;
+    }
+    .detail-inner { padding: 28px 32px; }
+    .detail-question {
+      font-size: 14px; color: var(--dark); line-height: 1.75;
+      padding-bottom: 24px; border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+    .detail-question .q-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 1px;
+      color: var(--blue); text-transform: uppercase; margin-bottom: 8px;
+    }
+    .detail-answer { }
+    .detail-answer .a-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 1px;
+      color: #2E8A5F; text-transform: uppercase; margin-bottom: 8px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .detail-answer .a-text {
+      font-size: 14px; color: var(--dark); line-height: 1.75;
+      background: white; border: 1px solid var(--border);
+      border-radius: 6px; padding: 16px 20px;
+    }
+    .no-answer {
+      font-size: 13px; color: var(--mid); font-style: italic;
+    }
+
+    /* 비밀글 잠금 */
+    .secret-lock {
+      text-align: center; padding: 32px;
+      font-size: 14px; color: var(--mid);
+    }
+    .secret-lock .lock-icon { font-size: 32px; margin-bottom: 12px; }
+    .secret-lock p { margin-bottom: 16px; }
+    .secret-input-row { display: flex; gap: 8px; justify-content: center; }
+    .secret-input {
+      padding: 9px 14px; border: 1.5px solid var(--border);
+      border-radius: 4px; font-size: 14px; font-family: inherit;
+      outline: none; transition: border-color 0.2s; width: 180px;
+    }
+    .secret-input:focus { border-color: var(--blue); }
+    .btn-unlock {
+      padding: 9px 18px; background: var(--blue); color: white;
+      border: none; border-radius: 4px; font-size: 14px; font-weight: 600;
+      cursor: pointer; font-family: inherit; transition: background 0.2s;
+    }
+    .btn-unlock:hover { background: var(--blue-dk); }
+
+    /* ── 페이지네이션 ── */
+    .pagination {
+      display: flex; justify-content: center; gap: 6px; margin-top: 28px;
+    }
+    .pg-btn {
+      width: 36px; height: 36px; border-radius: 4px;
+      border: 1.5px solid var(--border); background: white;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      transition: all 0.2s; display: flex; align-items: center; justify-content: center;
+      font-family: inherit; color: var(--dark);
+    }
+    .pg-btn.active { background: var(--blue); color: white; border-color: var(--blue); }
+    .pg-btn:hover:not(.active) { background: var(--light); border-color: var(--blue); }
+
+    /* ── 공지사항 배너 ── */
+    .inq-notice {
+      background: #EEF5FF; border: 1px solid #C8DFF0; border-radius: 6px;
+      padding: 14px 18px; margin-bottom: 20px;
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 13px; color: var(--blue);
+    }
+    .inq-notice .n-icon { font-size: 16px; flex-shrink: 0; }
+    .inq-notice ul { margin: 4px 0 0 0; padding-left: 0; list-style: none; }
+    .inq-notice li::before { content: '·'; margin-right: 6px; }
+
+    /* ── 작성 모달 ── */
+    .modal-bg {
+      display: none; position: fixed; inset: 0; z-index: 500;
+      background: rgba(0,0,0,0.55); align-items: center; justify-content: center;
+    }
+    .modal-bg.open { display: flex; }
+    .modal {
+      background: white; border-radius: 12px; width: 620px; max-width: 95vw;
+      max-height: 92vh; overflow-y: auto;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.18);
+    }
+    .modal-head {
+      padding: 22px 28px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; background: white; z-index: 1;
+    }
+    .modal-head h3 { font-size: 18px; font-weight: 800; }
+    .modal-close {
+      background: none; border: none; font-size: 22px; cursor: pointer;
+      color: var(--mid); transition: color 0.2s; line-height: 1;
+    }
+    .modal-close:hover { color: var(--dark); }
+    .modal-body { padding: 28px; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label {
+      display: block; font-size: 13px; font-weight: 700;
+      color: var(--dark); margin-bottom: 8px;
+    }
+    .form-group label .req { color: #E05555; margin-left: 2px; }
+    .form-group label .opt { color: var(--mid); font-weight: 400; margin-left: 4px; font-size: 12px; }
+    .form-control {
+      width: 100%; padding: 11px 14px; border: 1.5px solid var(--border);
+      border-radius: 6px; font-size: 14px; font-family: inherit;
+      outline: none; transition: border-color 0.2s; color: var(--dark);
+    }
+    .form-control:focus { border-color: var(--blue); }
+    textarea.form-control { min-height: 120px; resize: vertical; }
+    select.form-control { cursor: pointer; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .secret-toggle {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: var(--mid); cursor: pointer; user-select: none;
+    }
+    .secret-toggle input { cursor: pointer; }
+    .modal-foot {
+      padding: 18px 28px; border-top: 1px solid var(--border);
+      display: flex; justify-content: flex-end; gap: 10px;
+      position: sticky; bottom: 0; background: white;
+    }
+    .btn-cancel {
+      padding: 11px 24px; border: 1.5px solid var(--border); background: white;
+      border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer;
+      font-family: inherit; transition: all 0.2s; color: var(--dark);
+    }
+    .btn-cancel:hover { background: var(--light); }
+    .btn-submit {
+      padding: 11px 28px; background: var(--blue); color: white;
+      border: none; border-radius: 6px; font-size: 14px; font-weight: 700;
+      cursor: pointer; font-family: inherit; transition: background 0.2s;
+    }
+    .btn-submit:hover { background: var(--blue-dk); }
+
+    /* ── 토스트 ── */
+    .toast {
+      position: fixed; bottom: 32px; right: 32px; z-index: 1000;
+      background: var(--dark); color: white;
+      padding: 14px 24px; border-radius: 8px; font-size: 14px; font-weight: 600;
+      transform: translateY(80px); opacity: 0;
+      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { background: #2E8A5F; }
+
+    @media (max-width: 768px) {
+      .page-hero { padding: 100px 24px 52px; }
+      .inq-wrap { padding: 32px 16px 80px; }
+      .inq-table thead th:nth-child(3),
+      .inq-table tbody td:nth-child(3) { display: none; }
+      .form-row { grid-template-columns: 1fr; }
+      .td-date, .td-author { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header id="hdr" class="solid">
+  <a href="index.html" class="logo">
+    <img src="루나쿨_로고/루나쿨_로고.png" alt="루나쿨" class="logo-light" style="display:none">
+    <img src="루나쿨_로고/루나쿨_로고.png" alt="루나쿨" class="logo-dark">
+  </a>
+  <nav>
+    <a href="index.html">홈</a>
+    <a href="products.html">전체 상품</a>
+    <a href="reviews.html">구매후기</a>
+    <a href="inquiry.html" style="color:var(--blue);font-weight:700;">상품문의</a>
+    <a href="about.html">브랜드</a>
+    <a href="https://smartstore.naver.com" target="_blank" class="hdr-cta">스마트스토어 구매</a>
+  </nav>
+  <div class="burger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</header>
+<div class="m-nav" id="mNav">
+  <a href="index.html">홈</a>
+  <a href="products.html">전체 상품</a>
+  <a href="reviews.html">구매후기</a>
+  <a href="inquiry.html">상품문의</a>
+  <a href="about.html">브랜드</a>
+  <a href="https://smartstore.naver.com" target="_blank" class="hdr-cta">스마트스토어 구매</a>
+</div>
+
+<div class="page-hero">
+  <div class="pk">Customer Inquiry</div>
+  <h1>상품 문의</h1>
+  <p>궁금한 점은 무엇이든 문의해 주세요 — 1~2 영업일 내 답변 드립니다</p>
+</div>
+
+<div class="inq-wrap">
+
+  <!-- 안내 배너 -->
+  <div class="inq-notice appear">
+    <span class="n-icon">📌</span>
+    <div>
+      <strong>문의 안내</strong>
+      <ul>
+        <li>답변은 영업일 기준 1~2일 이내 드립니다.</li>
+        <li>주문·배송 문의는 네이버 스마트스토어 고객센터를 이용해 주세요.</li>
+        <li>비밀번호를 설정하면 비밀글로 등록됩니다.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 상단 바 -->
+  <div class="inq-topbar">
+    <div class="inq-count">전체 <strong id="totalCount">0</strong>건</div>
+    <button class="btn-write" onclick="openWriteModal()">+ 문의하기</button>
+  </div>
+
+  <!-- 카테고리 필터 -->
+  <div class="inq-cats">
+    <button class="cat-btn active" onclick="filterCat('all', this)">전체</button>
+    <button class="cat-btn" onclick="filterCat('product', this)">상품문의</button>
+    <button class="cat-btn" onclick="filterCat('delivery', this)">배송문의</button>
+    <button class="cat-btn" onclick="filterCat('exchange', this)">교환/환불</button>
+    <button class="cat-btn" onclick="filterCat('etc', this)">기타</button>
+  </div>
+
+  <!-- 게시판 -->
+  <table class="inq-table">
+    <thead>
+      <tr>
+        <th style="width:90px;">분류</th>
+        <th>제목</th>
+        <th style="width:90px;">작성자</th>
+        <th style="width:100px;">작성일</th>
+        <th style="width:90px;">상태</th>
+      </tr>
+    </thead>
+    <tbody id="inqTableBody"></tbody>
+  </table>
+
+  <!-- 페이지네이션 -->
+  <div class="pagination" id="pagination"></div>
+
+</div>
+
+<!-- ── 작성 모달 ── -->
+<div class="modal-bg" id="writeMOdal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>문의 작성</h3>
+      <button class="modal-close" onclick="closeModal('writeMOdal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>문의 분류 <span class="req">*</span></label>
+          <select class="form-control" id="fCat">
+            <option value="product">상품문의</option>
+            <option value="delivery">배송문의</option>
+            <option value="exchange">교환/환불</option>
+            <option value="etc">기타</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>관련 상품 <span class="opt">(선택)</span></label>
+          <select class="form-control" id="fProduct">
+            <option value="">선택 안함</option>
+            <option value="냉감 패드 (퀸)">냉감 패드 (퀸)</option>
+            <option value="냉감 패드 (싱글)">냉감 패드 (싱글)</option>
+            <option value="냉감 차렵이불 (퀸)">냉감 차렵이불 (퀸)</option>
+            <option value="냉감 차렵이불 (싱글)">냉감 차렵이불 (싱글)</option>
+            <option value="냉감 소파패드">냉감 소파패드</option>
+            <option value="냉감 방석">냉감 방석</option>
+            <option value="냉감 베개커버">냉감 베개커버</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>제목 <span class="req">*</span></label>
+        <input class="form-control" type="text" id="fTitle" placeholder="문의 제목을 입력해주세요">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>이름 <span class="req">*</span></label>
+          <input class="form-control" type="text" id="fName" placeholder="홍**">
+        </div>
+        <div class="form-group">
+          <label>비밀번호 <span class="opt">(비밀글 설정)</span></label>
+          <input class="form-control" type="password" id="fPw" placeholder="비밀번호 입력 시 비밀글">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>문의 내용 <span class="req">*</span></label>
+        <textarea class="form-control" id="fContent" placeholder="문의 내용을 상세히 입력해주세요.&#10;&#10;예) 냉감 패드 퀸 사이즈 재고 확인 부탁드립니다."></textarea>
+      </div>
+      <label class="secret-toggle">
+        <input type="checkbox" id="fSecret" onchange="document.getElementById('fPw').disabled = !this.checked; if(!this.checked) document.getElementById('fPw').value='';">
+        &nbsp;🔒 비밀글로 작성
+      </label>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeModal('writeMOdal')">취소</button>
+      <button class="btn-submit" onclick="submitInquiry()">문의 등록</button>
+    </div>
+  </div>
+</div>
+
+<!-- 토스트 -->
+<div class="toast" id="toast"></div>
+
+<footer>
+  <div class="ft-grid">
+    <div class="ft-brand">
+      <img src="루나쿨_로고/루나쿨_로고.png" alt="루나쿨">
+      <p class="ft-desc">루나쿨 바이오쿨 — 달빛처럼 시원한 여름 침구 브랜드.</p>
+      <div class="ft-tel"><strong>고객센터</strong> 070-7717-5231 | 평일 09:00~18:00</div>
+    </div>
+    <div class="ft-col">
+      <h5>Menu</h5>
+      <ul>
+        <li><a href="products.html">전체 상품</a></li>
+        <li><a href="reviews.html">구매 후기</a></li>
+        <li><a href="inquiry.html">상품 문의</a></li>
+        <li><a href="about.html">브랜드 소개</a></li>
+      </ul>
+    </div>
+    <div class="ft-col">
+      <h5>Links</h5>
+      <ul>
+        <li><a href="https://smartstore.naver.com" target="_blank">스마트스토어</a></li>
+        <li><a href="about.html#cert">인증 현황</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="ft-bottom"><p>© 2025 루나쿨(LUNA COOL). All rights reserved.</p></div>
+</footer>
+
+<script src="script.js"></script>
+<script>
+// ── 데이터 ──────────────────────────────────
+const CAT_NAMES = { product:'상품문의', delivery:'배송문의', exchange:'교환/환불', etc:'기타' };
+const CAT_CLASS = { product:'product', delivery:'delivery', exchange:'exchange', etc:'etc' };
+const PAGE_SIZE = 10;
+let currentCat = 'all';
+let currentPage = 1;
+let openRowId = null;
+
+// 기본 샘플 데이터
+const SAMPLE_INQUIRIES = [
+  { id:1, cat:'product', product:'냉감 패드 (퀸)', title:'냉감 패드 퀸 사이즈 재고 문의', name:'김**', pw:'', secret:false,
+    content:'안녕하세요. 냉감 패드 퀸 사이즈 재고가 있는지 확인하고 싶습니다. 이번 주 내로 받아볼 수 있을까요?',
+    date:'2025.06.01', status:'done',
+    answer:'안녕하세요, 루나쿨입니다 😊\n현재 퀸 사이즈 재고 충분히 있습니다. 주문 후 1~2 영업일 내 발송되어 3~4일 내 수령 가능합니다. 감사합니다!',
+    answerDate:'2025.06.01' },
+  { id:2, cat:'delivery', product:'', title:'배송 기간이 얼마나 걸리나요?', name:'이**', pw:'', secret:false,
+    content:'제주도 배송도 가능한지, 배송 기간이 얼마나 걸리는지 알고 싶습니다.',
+    date:'2025.05.30', status:'done',
+    answer:'안녕하세요 😊 제주도 배송 가능합니다!\n일반 배송 2~3일, 제주/도서산간 지역은 3~5일 소요됩니다. 추가 배송비 없이 무료 배송입니다. 감사합니다!',
+    answerDate:'2025.05.30' },
+  { id:3, cat:'product', product:'냉감 소파패드', title:'소파패드 세탁 방법 문의', name:'박**', pw:'1234', secret:true,
+    content:'소파패드 구매했는데 세탁은 어떻게 하면 되나요? 드라이클리닝해야 하나요?',
+    date:'2025.05.28', status:'done',
+    answer:'안녕하세요 😊 세탁기 사용 가능합니다!\n세탁망에 넣어서 약한 물 온도(30도 이하)로 세탁하시면 됩니다. 드럼 세탁기도 가능하며 건조기는 피해주세요. 그늘에서 건조하시면 냉감 성능이 오래 유지됩니다!',
+    answerDate:'2025.05.29' },
+  { id:4, cat:'exchange', product:'냉감 차렵이불 (싱글)', title:'사이즈 교환 가능한가요?', name:'최**', pw:'', secret:false,
+    content:'싱글로 주문했는데 퀸으로 교환이 가능할까요? 아직 미사용 상태입니다.',
+    date:'2025.05.25', status:'wait', answer:'', answerDate:'' },
+  { id:5, cat:'product', product:'냉감 베개커버', title:'베개커버 사이즈 종류 문의', name:'정**', pw:'', secret:false,
+    content:'표준형 베개에 맞는 사이즈인가요? 50cm x 70cm 베개에 맞는지 확인하고 싶습니다.',
+    date:'2025.05.22', status:'done',
+    answer:'안녕하세요 😊\n루나쿨 베개커버는 50x70cm 표준 사이즈 베개에 맞게 제작되었습니다. 입구 부분에 지퍼가 달려 있어 탈착이 편리합니다!',
+    answerDate:'2025.05.22' },
+];
+
+function getInquiries() {
+  const d = localStorage.getItem('lunacool_inquiries');
+  if (d) return JSON.parse(d);
+  localStorage.setItem('lunacool_inquiries', JSON.stringify(SAMPLE_INQUIRIES));
+  return SAMPLE_INQUIRIES;
+}
+
+// ── 렌더링 ───────────────────────────────────
+function renderTable() {
+  let data = getInquiries();
+  if (currentCat !== 'all') data = data.filter(i => i.cat === currentCat);
+
+  document.getElementById('totalCount').textContent = data.length;
+
+  const total = Math.ceil(data.length / PAGE_SIZE);
+  const sliced = data.slice((currentPage-1)*PAGE_SIZE, currentPage*PAGE_SIZE);
+  const body = document.getElementById('inqTableBody');
+
+  if (!sliced.length) {
+    body.innerHTML = `<tr class="empty-row"><td colspan="5">등록된 문의가 없습니다.</td></tr>`;
+    document.getElementById('pagination').innerHTML = '';
+    return;
+  }
+
+  body.innerHTML = sliced.map(item => {
+    const catCls = CAT_CLASS[item.cat] || 'etc';
+    const catName = CAT_NAMES[item.cat] || item.cat;
+    const titleDisp = item.secret ? `<span class="td-title secret">비밀글입니다</span>` : `<span class="td-title">${item.title}${item.product ? ` <small style="color:var(--mid);font-weight:400;">[${item.product}]</small>` : ''}</span>`;
+    const statusHtml = item.status === 'done'
+      ? `<span class="status-badge done">답변완료</span>`
+      : `<span class="status-badge wait">답변대기</span>`;
+    return `
+      <tr onclick="toggleDetail(${item.id})" id="row-${item.id}">
+        <td><span class="td-cat ${catCls}">${catName}</span></td>
+        <td>${titleDisp}</td>
+        <td class="td-author">${item.name}</td>
+        <td class="td-date">${item.date}</td>
+        <td>${statusHtml}</td>
+      </tr>
+      <tr class="inq-detail" id="detail-${item.id}">
+        <td colspan="5"></td>
+      </tr>`;
+  }).join('');
+
+  // 페이지네이션
+  renderPagination(total);
+}
+
+function renderPagination(total) {
+  const pg = document.getElementById('pagination');
+  if (total <= 1) { pg.innerHTML = ''; return; }
+  let html = '';
+  if (currentPage > 1) html += `<button class="pg-btn" onclick="goPage(${currentPage-1})">‹</button>`;
+  for (let i = 1; i <= total; i++) {
+    html += `<button class="pg-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+  }
+  if (currentPage < total) html += `<button class="pg-btn" onclick="goPage(${currentPage+1})">›</button>`;
+  pg.innerHTML = html;
+}
+
+function goPage(p) { currentPage = p; openRowId = null; renderTable(); window.scrollTo({top:400,behavior:'smooth'}); }
+
+function filterCat(cat, btn) {
+  currentCat = cat; currentPage = 1; openRowId = null;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable();
+}
+
+// ── 상세 보기 토글 ──────────────────────────
+function toggleDetail(id) {
+  const item = getInquiries().find(i => i.id === id);
+  if (!item) return;
+
+  const detailRow = document.getElementById(`detail-${id}`);
+  if (!detailRow) return;
+
+  // 이미 열려있으면 닫기
+  if (openRowId === id) {
+    detailRow.classList.remove('open');
+    openRowId = null;
+    return;
+  }
+
+  // 이전 것 닫기
+  if (openRowId) {
+    const prev = document.getElementById(`detail-${openRowId}`);
+    if (prev) prev.classList.remove('open');
+  }
+  openRowId = id;
+
+  // 비밀글 처리
+  if (item.secret && item.pw) {
+    detailRow.querySelector('td').innerHTML = `
+      <div class="detail-inner">
+        <div class="secret-lock">
+          <div class="lock-icon">🔒</div>
+          <p>비밀글입니다. 비밀번호를 입력해 주세요.</p>
+          <div class="secret-input-row">
+            <input class="secret-input" type="password" id="unlockPw" placeholder="비밀번호 입력"
+              onkeydown="if(event.key==='Enter') unlockDetail(${id})">
+            <button class="btn-unlock" onclick="unlockDetail(${id})">확인</button>
+          </div>
+        </div>
+      </div>`;
+  } else {
+    renderDetailContent(item, detailRow);
+  }
+  detailRow.classList.add('open');
+}
+
+function unlockDetail(id) {
+  const item = getInquiries().find(i => i.id === id);
+  const pw = document.getElementById('unlockPw')?.value;
+  if (pw === item.pw) {
+    const detailRow = document.getElementById(`detail-${id}`);
+    renderDetailContent(item, detailRow);
+  } else {
+    showToast('비밀번호가 올바르지 않습니다.');
+  }
+}
+
+function renderDetailContent(item, detailRow) {
+  const answerHtml = item.answer
+    ? `<div class="a-label">💬 관리자 답변 <small style="color:var(--mid);font-weight:400;font-size:11px;margin-left:8px;">${item.answerDate}</small></div>
+       <div class="a-text">${item.answer.replace(/\n/g,'<br>')}</div>`
+    : `<div class="no-answer">⏳ 아직 답변이 등록되지 않았습니다. 영업일 1~2일 내 답변 드리겠습니다.</div>`;
+
+  detailRow.querySelector('td').innerHTML = `
+    <div class="detail-inner">
+      <div class="detail-question">
+        <div class="q-label">Q. 문의 내용</div>
+        ${item.product ? `<div style="font-size:12px;color:var(--blue);margin-bottom:8px;">📦 ${item.product}</div>` : ''}
+        <div>${item.content.replace(/\n/g,'<br>')}</div>
+      </div>
+      <div class="detail-answer">${answerHtml}</div>
+    </div>`;
+}
+
+// ── 작성 모달 ────────────────────────────────
+function openWriteModal() {
+  document.getElementById('fTitle').value = '';
+  document.getElementById('fName').value = '';
+  document.getElementById('fPw').value = '';
+  document.getElementById('fContent').value = '';
+  document.getElementById('fSecret').checked = false;
+  document.getElementById('fPw').disabled = true;
+  document.getElementById('writeMOdal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function submitInquiry() {
+  const cat     = document.getElementById('fCat').value;
+  const product = document.getElementById('fProduct').value;
+  const title   = document.getElementById('fTitle').value.trim();
+  const name    = document.getElementById('fName').value.trim();
+  const pw      = document.getElementById('fPw').value.trim();
+  const content = document.getElementById('fContent').value.trim();
+  const secret  = document.getElementById('fSecret').checked;
+
+  if (!title || !name || !content) {
+    showToast('제목, 이름, 내용을 모두 입력해주세요.');
+    return;
+  }
+  if (secret && !pw) {
+    showToast('비밀글로 작성 시 비밀번호를 입력해주세요.');
+    return;
+  }
+
+  const all = getInquiries();
+  const newId = all.length ? Math.max(...all.map(i=>i.id)) + 1 : 1;
+  const today = new Date();
+  const dateStr = `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`;
+
+  all.unshift({ id:newId, cat, product, title, name, pw: secret?pw:'', secret,
+    content, date:dateStr, status:'wait', answer:'', answerDate:'' });
+  localStorage.setItem('lunacool_inquiries', JSON.stringify(all));
+
+  closeModal('writeMOdal');
+  currentPage = 1;
+  renderTable();
+  showToast('문의가 등록되었습니다. 1~2 영업일 내 답변 드리겠습니다 😊', 'success');
+}
+
+// ── 토스트 ──────────────────────────────────
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type}`;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ESC 닫기
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal('writeMOdal'); } });
+// 초기 렌더
+renderTable();
+</script>
+</body>
+</html>

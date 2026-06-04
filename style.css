@@ -37,12 +37,11 @@ header.solid {
   border-bottom: 1px solid var(--border);
 }
 .logo img { height: 34px; object-fit: contain; }
-/* 투명 헤더(히어로 위): 로고를 흰색으로 필터 */
-.logo-light { filter: brightness(0) invert(1); opacity: 0.95; }
+/* 투명 헤더(히어로 위): 로고 완전히 숨김 */
+.logo-light { display: none; }
 .logo-dark  { display: none; }
-/* 스크롤 후 흰 헤더: 원본 컬러 로고로 교체 */
-header.solid .logo-light { display: none; }
-header.solid .logo-dark  { display: block; filter: none; opacity: 1; }
+/* 스크롤 후 흰 헤더: 컬러 로고 표시 */
+header.solid .logo-dark { display: block; }
 
 nav { display: flex; align-items: center; gap: 44px; }
 nav a {

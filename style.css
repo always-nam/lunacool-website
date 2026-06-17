@@ -28,7 +28,7 @@ img { display: block; max-width: 100%; }
 header {
   position: fixed; top: 0; left: 0; right: 0; z-index: 200;
   height: 64px; padding: 0 56px;
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex; align-items: center; justify-content: flex-end;
   transition: background 0.35s, border-bottom 0.35s;
 }
 header.solid {
@@ -36,12 +36,8 @@ header.solid {
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--border);
 }
-.logo img { height: 34px; object-fit: contain; }
-/* 투명 헤더(히어로 위): 로고 완전히 숨김 */
-.logo-light { display: none; }
-.logo-dark  { display: none; }
-/* 스크롤 후 흰 헤더: 컬러 로고 표시 */
-header.solid .logo-dark { display: block; }
+/* 로고 전체 숨김 */
+.logo { display: none !important; }
 
 nav { display: flex; align-items: center; gap: 44px; }
 nav a {

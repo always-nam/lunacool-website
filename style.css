@@ -648,14 +648,22 @@ footer {
 .ft-tel  { font-size: 13px; }
 .ft-tel strong { color: rgba(255,255,255,0.65); }
 
-/* 사업자 정보 */
-.ft-biz {
-  max-width: 1200px; margin: 28px auto 0;
-  padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08);
-  display: flex; flex-wrap: wrap; gap: 6px 24px;
-  font-size: 12px; color: rgba(255,255,255,0.35);
+/* 사업자 정보 — ft-brand 내부 */
+.ft-biz-inline {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255,255,255,0.1);
 }
-.ft-biz span::after { content: ''; }
+.ft-biz-inline p {
+  font-size: 12px;
+  color: rgba(255,255,255,0.38);
+  line-height: 1.9;
+  margin: 0;
+}
+.ft-biz-inline strong {
+  color: rgba(255,255,255,0.6);
+  font-weight: 600;
+}
 
 .ft-col h5 {
   font-size: 11px; font-weight: 700; letter-spacing: 2px;

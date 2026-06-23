@@ -61,14 +61,31 @@
 
     /* ── 포장 ── */
     .packaging-wrap {
-      text-align: center;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 16px;
     }
     .packaging-wrap img {
-      max-width: 520px;
       width: 100%;
       border-radius: 20px;
       box-shadow: 0 16px 48px rgba(0,0,0,0.12);
-      margin-top: 8px;
+      object-fit: cover;
+      aspect-ratio: 4/3;
+    }
+    .pack-gift-badge {
+      display: inline-block;
+      background: var(--blue);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 4px 14px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
+    @media(max-width:640px){
+      .packaging-wrap { grid-template-columns: 1fr; }
     }
 
     /* ── 기술력 카드 ── */
@@ -241,11 +258,13 @@
 <section class="ab-section gray">
   <div class="ab-inner">
     <div class="ab-title">
+      <span class="pack-gift-badge">🎁 GIFT READY</span>
       <h2>신뢰할 수 있는 포장</h2>
-      <p>꼼꼼한 포장으로 상품을 안전하게 배송합니다</p>
+      <p>꼼꼼한 포장으로 상품을 안전하게 배송합니다<br>선물용으로도 손색없는 깔끔한 패키지로 특별한 날을 더욱 빛내보세요</p>
     </div>
     <div class="packaging-wrap">
       <img src="루나쿨포장.jpg" alt="루나쿨 포장">
+      <img src="루나쿨 상품 이미지/냉감 패드 퀸 8.jpg" alt="루나쿨 냉감 패드 침대 위">
     </div>
   </div>
 </section>

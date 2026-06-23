@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>인증 현황 — 루나쿨</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    .cert-hero {
+      background: linear-gradient(135deg, #0D2035 0%, #1A3A5C 100%);
+      padding: 160px 24px 100px;
+      text-align: center;
+      color: white;
+    }
+    .cert-hero .pk {
+      font-size: 11px; font-weight: 700; letter-spacing: 4px;
+      color: rgba(255,255,255,0.45); text-transform: uppercase; margin-bottom: 20px;
+    }
+    .cert-hero h1 { font-size: clamp(32px, 4.5vw, 56px); font-weight: 800; margin-bottom: 20px; line-height: 1.2; }
+    .cert-hero h1 span { color: #66A3FF; }
+    .cert-hero p { font-size: 17px; opacity: 0.65; line-height: 1.9; }
+
+    /* 배지 행 */
+    .cert-badges {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 12px;
+      margin-top: 36px;
+    }
+    .cert-badges span {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.25);
+      color: white; font-size: 12px; font-weight: 700;
+      padding: 6px 18px; border-radius: 20px; letter-spacing: 0.05em;
+    }
+
+    /* 공통 섹션 */
+    .ab-section { padding: 100px 24px; }
+    .ab-section.gray { background: #F8FAFB; }
+    .ab-inner { max-width: 1000px; margin: 0 auto; }
+    .ab-title { text-align: center; margin-bottom: 60px; }
+    .ab-title .label {
+      display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 3px;
+      color: var(--blue); text-transform: uppercase; margin-bottom: 12px;
+    }
+    .ab-title h2 { font-size: clamp(24px, 3vw, 36px); font-weight: 800; color: var(--dark); margin-bottom: 12px; }
+    .ab-title p { font-size: 15px; color: var(--mid); line-height: 1.8; }
+
+    /* 인증 그리드 */
+    .cert-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+    }
+    .cert-card {
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      transition: all 0.3s;
+      display: flex; flex-direction: column;
+    }
+    .cert-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.14);
+    }
+    .cert-card embed {
+      width: 100%; height: 320px;
+      border: none; background: #f0f2f5; display: block;
+    }
+    .cert-card-body {
+      padding: 24px 24px 28px;
+      text-align: center; flex: 1;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .cert-icon { font-size: 28px; margin-bottom: 10px; }
+    .cert-card-body h3 { font-size: 16px; font-weight: 700; color: var(--dark); margin-bottom: 8px; }
+    .cert-card-body p { font-size: 13px; color: #666; line-height: 1.7; flex: 1; margin-bottom: 14px; }
+    .cert-num-tag {
+      display: inline-block;
+      background: #EEF5FF; color: var(--blue);
+      font-size: 11px; font-weight: 700;
+      padding: 4px 14px; border-radius: 10px;
+    }
+
+    /* 요약 카드 행 */
+    .cert-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-bottom: 64px;
+    }
+    .cs-card {
+      background: white;
+      border-radius: 16px;
+      padding: 28px 24px;
+      text-align: center;
+      border: 2px solid var(--border);
+      transition: border-color 0.2s;
+    }
+    .cs-card:hover { border-color: var(--blue); }
+    .cs-icon { font-size: 32px; margin-bottom: 10px; }
+    .cs-card h4 { font-size: 15px; font-weight: 700; color: var(--dark); margin-bottom: 6px; }
+    .cs-card p { font-size: 13px; color: var(--mid); line-height: 1.6; }
+
+    @media (max-width: 860px) {
+      .cert-grid { grid-template-columns: repeat(2, 1fr); }
+      .cert-summary { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 560px) {
+      .cert-grid { grid-template-columns: 1fr; }
+      .ab-section { padding: 64px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<header id="hdr" class="solid">
+  <a href="index.html" class="logo">
+    <img src="루나쿨_로고/루나쿨_로고.png" alt="루나쿨" class="logo-dark">
+  </a>
+  <nav>
+    <a href="index.html">홈</a>
+    <a href="products.html">전체 상품</a>
+    <a href="reviews.html">구매후기</a>
+    <a href="inquiry.html">상품문의</a>
+    <a href="about.html">브랜드</a>
+    <a href="https://smartstore.naver.com" target="_blank" class="hdr-cta">스마트스토어 구매</a>
+  </nav>
+  <div class="burger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+</header>
+<div class="m-nav" id="mNav">
+  <a href="index.html">홈</a>
+  <a href="products.html">전체 상품</a>
+  <a href="reviews.html">구매후기</a>
+  <a href="inquiry.html">상품문의</a>
+  <a href="about.html">브랜드</a>
+  <a href="https://smartstore.naver.com" target="_blank" class="hdr-cta">스마트스토어 구매</a>
+</div>
+
+<!-- 히어로 -->
+<div class="cert-hero">
+  <div class="pk">Luna Cool — Certifications</div>
+  <h1>공인 기관이 검증한<br><span>루나쿨의 안전성</span></h1>
+  <p>체감이 아닌 데이터와 인증으로 증명합니다</p>
+  <div class="cert-badges">
+    <span>OEKO-TEX Standard 100</span>
+    <span>QMAX 550G</span>
+    <span>QMAX 420G</span>
+    <span>방사능 불검출</span>
+    <span>SAAA 품질 인증</span>
+    <span>SAOB 품질 인증</span>
+  </div>
+</div>
+
+<!-- 인증 요약 -->
+<section class="ab-section gray">
+  <div class="ab-inner">
+    <div class="ab-title appear">
+      <span class="label">Why It Matters</span>
+      <h2>인증이 중요한 이유</h2>
+      <p>루나쿨의 모든 인증은 제조사의 자체 주장이 아닌 제3의 공인 기관이 직접 검사한 결과입니다</p>
+    </div>
+    <div class="cert-summary appear">
+      <div class="cs-card">
+        <div class="cs-icon">🌿</div>
+        <h4>친환경 & 안전</h4>
+        <p>OEKO-TEX 인증으로 유해물질 없는 소재임을 보증. 영·유아도 안심하고 사용 가능합니다.</p>
+      </div>
+      <div class="cs-card">
+        <div class="cs-icon">❄️</div>
+        <h4>냉감 성능</h4>
+        <p>QMAX 수치는 피부 접촉 시 열 흡수 속도를 수치화한 것. 높을수록 더 빠르게 시원함을 느낍니다.</p>
+      </div>
+      <div class="cs-card">
+        <div class="cs-icon">🔬</div>
+        <h4>방사능 안전</h4>
+        <p>국가 공인 기관의 방사능 검사에서 불검출 판정. 소재의 근본적인 안전성을 확인했습니다.</p>
+      </div>
+    </div>
+
+    <!-- 인증서 그리드 -->
+    <div class="cert-grid appear">
+
+      <div class="cert-card">
+        <embed src="인증서/OEKOTEX 인증서_SHYO 058758.pdf#toolbar=0&navpanes=0&scrollbar=0" type="application/pdf">
+        <div class="cert-card-body">
+          <div class="cert-icon">🌿</div>
+          <h3>OEKO-TEX Standard 100</h3>
+          <p>독일 기반 국제 친환경 섬유 인증. 인체에 유해한 성분이 없음을 보증합니다.</p>
+          <span class="cert-num-tag">SHYO 058758</span>
+        </div>
+      </div>
+
+      <div class="cert-card">
+        <embed src="인증서/420G_QMAX_40230013_.pdf#toolbar=0&navpanes=0&scrollbar=0" type="application/pdf">
+        <div class="cert-card-body">
+          <div class="cert-icon">❄️</div>
+          <h3>QMAX 냉감 인증 (420G)</h3>
+          <p>소파패드·방석·베개커버 라인의 420G 냉감 성능 공식 인증.</p>
+          <span class="cert-num-tag">QMAX 40230013</span>
+        </div>
+      </div>
+
+      <div class="cert-card">
+        <embed src="인증서/550G_QMAX_40230018_.pdf#toolbar=0&navpanes=0&scrollbar=0" type="application/pdf">
+        <div class="cert-card-body">
+          <div class="cert-icon">❄️</div>
+          <h3>QMAX 냉감 인증 (550G)</h3>
+          <p>냉감 패드 라인의 550G 프리미엄 냉감 성능 공식 인증.</p>
+          <span class="cert-num-tag">QMAX 40230018</span>
+        </div>
+      </div>
+
+      <div class="cert-card">
+        <embed src="인증서/82261405100001_방사능-국문_001.pdf#toolbar=0&navpanes=0&scrollbar=0" type="application/pdf">
+        <div class="cert-card-body">
+          <div class="cert-icon">🔬</div>
+          <h3>방사능 안전 검사</h3>
+          <p>국가 공인 방사능 검사 통과. 방사능이 전혀 검출되지 않았습니다.</p>
+          <span class="cert-num-tag">방사능 불검출</span>
+        </div>
+      </div>
+
+      <div class="cert-card">
+        <embed src="인증서/SAAA26-00000260K.PDF#toolbar=0&navpanes=0&scrollbar=0" type="application/pdf">
+        <div class="cert-card-body">
+          <div class="cert-icon">✅</div>
+          <h3>품질 인증 (SAAA)</h3>
+          <p>제품 품질 및 안전성에 대한 국내 공인 기관 검증 완료.</p>
+          <span class="cert-num-tag">SAAA26-00000260K</span>
+        </div>
+      </div>
+
+      <div class="cert-card">
+        <embed src="인증서/SAOB26-00000095K.PDF#toolbar=0&navpanes=0&scrollbar=0" type="application/pdf">
+        <div class="cert-card-body">
+          <div class="cert-icon">✅</div>
+          <h3>품질 인증 (SAOB)</h3>
+          <p>제품의 지속적인 품질 관리를 위한 추가 공인 인증 보유.</p>
+          <span class="cert-num-tag">SAOB26-00000095K</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="prod-cta" style="background:linear-gradient(135deg,#0D2035 0%,#1A3A5C 100%);text-align:center;padding:80px 24px;color:white;">
+  <h2 style="font-size:clamp(22px,3vw,38px);font-weight:800;margin-bottom:12px;">안전하게 검증된 루나쿨을 만나보세요</h2>
+  <p style="font-size:15px;color:rgba(255,255,255,0.6);margin-bottom:32px;">공인 인증 완료, 지금 바로 주문 가능합니다</p>
+  <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+    <a href="about.html" style="display:inline-block;padding:15px 32px;font-size:14px;border-radius:4px;background:rgba(255,255,255,0.15);color:white;font-weight:700;text-decoration:none;">브랜드 스토리 보기</a>
+    <a href="https://smartstore.naver.com" target="_blank" class="btn-solid" style="display:inline-block;padding:15px 32px;font-size:14px;border-radius:4px;">스마트스토어 바로가기 →</a>
+  </div>
+</div>
+
+<footer>
+  <div class="ft-grid">
+    <div class="ft-brand">
+      <p class="ft-desc">루나쿨 — 달빛처럼 시원한 여름 침구 브랜드.<br>냉감 기술과 친환경 소재로 더 나은 수면을 제안합니다.</p>
+      <div class="ft-biz-inline">
+        <p><strong>(주)테란</strong> &nbsp;|&nbsp; 대표자 : 남대현</p>
+        <p>사업자등록번호 : 517-87-0057</p>
+        <p>고양시 일산동구 은마길185번길 26</p>
+        <p>고객센터 : 070-7717-5231 &nbsp;|&nbsp; 평일 09:00 ~ 18:00</p>
+      </div>
+    </div>
+    <div class="ft-col">
+      <h5>Products</h5>
+      <ul>
+        <li><a href="products.html#pad">냉감 패드</a></li>
+        <li><a href="products.html#blanket">냉감 차렵이불</a></li>
+        <li><a href="products.html#sofa">냉감 소파패드</a></li>
+        <li><a href="products.html#cushion">냉감 방석</a></li>
+        <li><a href="products.html#pillow">냉감 베개커버</a></li>
+      </ul>
+    </div>
+    <div class="ft-col">
+      <h5>Brand</h5>
+      <ul>
+        <li><a href="about.html">브랜드 스토리</a></li>
+        <li><a href="cert.html">인증 현황</a></li>
+        <li><a href="reviews.html">구매 후기</a></li>
+        <li><a href="inquiry.html">상품 문의</a></li>
+        <li><a href="https://smartstore.naver.com" target="_blank">스마트스토어</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="ft-bottom">
+    <p>© 2025 루나쿨(LUNA COOL) | (주)테란. All rights reserved.</p>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

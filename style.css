@@ -329,6 +329,7 @@ header.solid .burger span { background: var(--dark); }
    COLLECTION GRID
 ─────────────────────────── */
 .collection { padding: 96px 56px; background: var(--light); }
+.collection > * { max-width: 1200px; margin-left: auto; margin-right: auto; }
 .col-header {
   display: flex; align-items: flex-end; justify-content: space-between;
   margin-bottom: 48px; padding-bottom: 20px;

@@ -85,35 +85,59 @@
     /* CERT SECTION */
     #cert { scroll-margin-top: 80px; }
     .cert-detail-grid {
-      max-width: 960px;
+      max-width: 1100px;
       margin: 0 auto;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 24px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
     }
     .cert-detail-card {
       background: white;
-      border-radius: 20px;
-      padding: 32px 24px;
-      text-align: center;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
       transition: all 0.3s;
+      display: flex;
+      flex-direction: column;
     }
     .cert-detail-card:hover {
       transform: translateY(-4px);
-      box-shadow: 0 12px 32px rgba(0,0,0,0.1);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.12);
     }
-    .cert-icon-big { font-size: 52px; margin-bottom: 16px; }
-    .cert-detail-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 10px; }
-    .cert-detail-card p { font-size: 14px; color: #555; line-height: 1.6; margin-bottom: 14px; }
+    .cert-pdf-embed {
+      width: 100%;
+      height: 320px;
+      border: none;
+      background: #f5f5f5;
+    }
+    .cert-card-body {
+      padding: 20px 20px 22px;
+      text-align: center;
+    }
+    .cert-detail-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 8px; color: var(--dark); }
+    .cert-detail-card p { font-size: 13px; color: #666; line-height: 1.6; margin-bottom: 12px; }
     .cert-num {
       display: inline-block;
       background: #EEF5FF;
       color: var(--blue);
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
-      padding: 5px 14px;
-      border-radius: 12px;
+      padding: 4px 12px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+    }
+    .cert-dl {
+      display: inline-block;
+      font-size: 12px;
+      color: var(--blue);
+      font-weight: 600;
+      text-decoration: underline;
+    }
+    @media (max-width: 900px) {
+      .cert-detail-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 560px) {
+      .cert-detail-grid { grid-template-columns: 1fr; }
     }
 
     .values-section {
@@ -182,10 +206,6 @@
     루나쿨은 독일 OEKO-TEX 인증 친환경 소재와 첨단 냉감 기술을 결합한<br>
     프리미엄 냉감 침구를 합리적인 가격으로 제공합니다.
   </p>
-  <div class="brand-logo-wrap reveal">
-    <img src="루나쿨_로고/루나쿨_로고.png" alt="루나쿨 로고">
-    <img src="루나쿨_로고/루나쿨_로고3.png" alt="루나쿨 로고3">
-  </div>
 </section>
 
 <!-- PACKAGING -->
@@ -231,45 +251,63 @@
   <div class="cert-detail-grid">
 
     <div class="cert-detail-card reveal">
-      <div class="cert-icon-big">🌍</div>
-      <h3>OEKO-TEX Standard 100</h3>
-      <p>독일 기반 국제 친환경 섬유 인증.<br>인체에 유해한 성분이 없음을 보증하는 세계 최고 권위의 섬유 인증입니다.</p>
-      <span class="cert-num">SHYO 058758</span>
+      <embed class="cert-pdf-embed" src="인증서/OEKOTEX 인증서_SHYO 058758.pdf#toolbar=0&navpanes=0" type="application/pdf">
+      <div class="cert-card-body">
+        <h3>OEKO-TEX Standard 100</h3>
+        <p>독일 기반 국제 친환경 섬유 인증. 인체 유해 성분 없음을 보증합니다.</p>
+        <span class="cert-num">SHYO 058758</span><br>
+        <a class="cert-dl" href="인증서/OEKOTEX 인증서_SHYO 058758.pdf" target="_blank">인증서 보기 →</a>
+      </div>
     </div>
 
     <div class="cert-detail-card reveal">
-      <div class="cert-icon-big">❄️</div>
-      <h3>QMAX 냉감 인증 (420G)</h3>
-      <p>공인 시험 기관의 냉감지수 측정 검사.<br>소파패드·방석·베개커버 라인에 적용된 420G 냉감 성능을 공식 인증합니다.</p>
-      <span class="cert-num">QMAX 40230013</span>
+      <embed class="cert-pdf-embed" src="인증서/420G_QMAX_40230013_.pdf#toolbar=0&navpanes=0" type="application/pdf">
+      <div class="cert-card-body">
+        <h3>QMAX 냉감 인증 (420G)</h3>
+        <p>소파패드·방석·베개커버 라인 420G 냉감 성능 공식 인증.</p>
+        <span class="cert-num">QMAX 40230013</span><br>
+        <a class="cert-dl" href="인증서/420G_QMAX_40230013_.pdf" target="_blank">인증서 보기 →</a>
+      </div>
     </div>
 
     <div class="cert-detail-card reveal">
-      <div class="cert-icon-big">❄️❄️</div>
-      <h3>QMAX 냉감 인증 (550G)</h3>
-      <p>공인 시험 기관의 냉감지수 측정 검사.<br>냉감 패드 라인에 적용된 550G 프리미엄 냉감 성능을 공식 인증합니다.</p>
-      <span class="cert-num">QMAX 40230018</span>
+      <embed class="cert-pdf-embed" src="인증서/550G_QMAX_40230018_.pdf#toolbar=0&navpanes=0" type="application/pdf">
+      <div class="cert-card-body">
+        <h3>QMAX 냉감 인증 (550G)</h3>
+        <p>냉감 패드 라인 550G 프리미엄 냉감 성능 공식 인증.</p>
+        <span class="cert-num">QMAX 40230018</span><br>
+        <a class="cert-dl" href="인증서/550G_QMAX_40230018_.pdf" target="_blank">인증서 보기 →</a>
+      </div>
     </div>
 
     <div class="cert-detail-card reveal">
-      <div class="cert-icon-big">☢️</div>
-      <h3>방사능 안전 검사</h3>
-      <p>국가 공인 방사능 검사 통과.<br>방사능이 전혀 검출되지 않아 가족 모두가 안심하고 사용할 수 있습니다.</p>
-      <span class="cert-num">방사능 불검출</span>
+      <embed class="cert-pdf-embed" src="인증서/82261405100001_방사능-국문_001.pdf#toolbar=0&navpanes=0" type="application/pdf">
+      <div class="cert-card-body">
+        <h3>방사능 안전 검사</h3>
+        <p>국가 공인 방사능 검사 통과. 방사능이 전혀 검출되지 않았습니다.</p>
+        <span class="cert-num">방사능 불검출</span><br>
+        <a class="cert-dl" href="인증서/82261405100001_방사능-국문_001.pdf" target="_blank">인증서 보기 →</a>
+      </div>
     </div>
 
     <div class="cert-detail-card reveal">
-      <div class="cert-icon-big">🛡️</div>
-      <h3>품질 인증 (SAAA)</h3>
-      <p>한국 공인 품질 시험 통과.<br>제품 품질 및 안전성에 대한 국내 공인 기관 검증을 완료했습니다.</p>
-      <span class="cert-num">SAAA26-00000260K</span>
+      <embed class="cert-pdf-embed" src="인증서/SAAA26-00000260K.PDF#toolbar=0&navpanes=0" type="application/pdf">
+      <div class="cert-card-body">
+        <h3>품질 인증 (SAAA)</h3>
+        <p>제품 품질 및 안전성에 대한 국내 공인 기관 검증 완료.</p>
+        <span class="cert-num">SAAA26-00000260K</span><br>
+        <a class="cert-dl" href="인증서/SAAA26-00000260K.PDF" target="_blank">인증서 보기 →</a>
+      </div>
     </div>
 
     <div class="cert-detail-card reveal">
-      <div class="cert-icon-big">✅</div>
-      <h3>품질 인증 (SAOB)</h3>
-      <p>한국 공인 품질 시험 통과.<br>제품의 지속적인 품질 관리를 위한 추가 공인 인증을 보유하고 있습니다.</p>
-      <span class="cert-num">SAOB26-00000095K</span>
+      <embed class="cert-pdf-embed" src="인증서/SAOB26-00000095K.PDF#toolbar=0&navpanes=0" type="application/pdf">
+      <div class="cert-card-body">
+        <h3>품질 인증 (SAOB)</h3>
+        <p>제품의 지속적인 품질 관리를 위한 추가 공인 인증 보유.</p>
+        <span class="cert-num">SAOB26-00000095K</span><br>
+        <a class="cert-dl" href="인증서/SAOB26-00000095K.PDF" target="_blank">인증서 보기 →</a>
+      </div>
     </div>
 
   </div>

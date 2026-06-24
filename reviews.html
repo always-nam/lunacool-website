@@ -110,6 +110,11 @@
     .rev-card.text-only .rev-body { padding: 24px 22px 20px; }
     .text-quote { font-size: 32px; color: var(--ice); line-height: 0.5; margin-bottom: 12px; }
 
+    /* ── 판매자 답변 ── */
+    .rv-reply { margin-top: 14px; padding: 14px 16px; background: var(--light, #EFF6FF); border-radius: 10px; border-left: 3px solid var(--blue, #3B82F6); }
+    .rv-reply-head { font-size: 12px; font-weight: 700; color: var(--blue, #3B82F6); margin-bottom: 6px; }
+    .rv-reply-text { font-size: 13px; line-height: 1.7; color: var(--mid, #64748B); white-space: pre-line; }
+
     /* ── 더보기 버튼 ── */
     .load-more-wrap { text-align: center; margin-top: 40px; }
     .btn-load-more {
@@ -438,6 +443,11 @@ function renderCard(r) {
         <div class="rv-stars" style="color:#F0A500">${stars}</div>
         <div class="rv-text">${r.text}</div>
         <div class="rv-date">${r.date}</div>
+        ${r.reply ? `
+        <div class="rv-reply">
+          <div class="rv-reply-head">🌙 루나쿨 답변</div>
+          <div class="rv-reply-text">${r.reply}</div>
+        </div>` : ''}
       </div>
     </div>`;
 }

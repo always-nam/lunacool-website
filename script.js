@@ -20,8 +20,12 @@ const io = new IntersectionObserver((entries) => {
 document.querySelectorAll('.appear').forEach(el => io.observe(el));
 
 // Video modal
-// 기본 홍보 영상 (자체 호스팅 MP4 — 사이트 안에서만 재생, 외부 이탈 없음)
-const DEFAULT_VIDEO_SRC = 'videos/promo1.mp4';
+// 기본 홍보 영상 (유튜브 — 저장소 용량/대역폭 부담 없음)
+const DEFAULT_VIDEO_ID = 'umttGaTyZMI';
+// 유튜브 임베드 URL 생성 (이탈 최소화: 관련영상 숨김 + 로고 축소 + 쿠키리스)
+function ytEmbed(id) {
+  return `<iframe width="100%" height="100%" src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&playsinline=1" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius:8px;"></iframe>`;
+}
 function openVideoModal(e) {
   if (e) e.preventDefault();
   // localStorage에 등록된 영상이 있으면 우선 사용, 없으면 기본 영상
@@ -29,11 +33,11 @@ function openVideoModal(e) {
   const player = document.getElementById('vmPlayer');
   if (player) {
     if (!videoUrl) {
-      // 기본 자체 호스팅 영상 (인라인 재생)
-      player.innerHTML = `<video controls autoplay playsinline style="width:100%;height:100%;border-radius:8px;background:#000;"><source src="${DEFAULT_VIDEO_SRC}" type="video/mp4">브라우저가 영상을 지원하지 않습니다.</video>`;
+      // 기본 유튜브 영상
+      player.innerHTML = ytEmbed(DEFAULT_VIDEO_ID);
     } else if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
       const ytId = videoUrl.match(/(?:v=|youtu\.be\/)([^&?]+)/)?.[1];
-      if (ytId) player.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius:8px;"></iframe>`;
+      if (ytId) player.innerHTML = ytEmbed(ytId);
     } else {
       player.innerHTML = `<video controls autoplay playsinline style="width:100%;height:100%;border-radius:8px;background:#000;"><source src="${videoUrl}" type="video/mp4">브라우저가 영상을 지원하지 않습니다.</video>`;
     }

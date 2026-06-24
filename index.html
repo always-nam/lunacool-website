@@ -173,20 +173,8 @@
 <div class="video-modal-bg" id="videoModalBg" onclick="closeVideoModal(event)">
   <div class="video-modal">
     <button class="vm-close" onclick="closeVideoModal()">✕</button>
-    <div class="vm-player" id="vmPlayer">
-      <!-- 실제 MP4 파일이 있을 경우: -->
-      <!-- <video controls autoplay style="width:100%;border-radius:8px;">
-             <source src="영상파일명.mp4" type="video/mp4">
-           </video> -->
-      <!-- YouTube 영상이 있을 경우: -->
-      <!-- <iframe width="100%" height="100%" src="https://www.youtube.com/embed/영상ID?autoplay=1"
-               frameborder="0" allowfullscreen></iframe> -->
-      <iframe width="100%" height="100%"
-        src="https://www.youtube.com/embed/umttGaTyZMI?autoplay=1&rel=0"
-        frameborder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen></iframe>
-    </div>
+    <!-- 영상은 클릭 시 script.js가 동적으로 삽입합니다 (자동재생 방지) -->
+    <div class="vm-player" id="vmPlayer"></div>
   </div>
 </div>
 

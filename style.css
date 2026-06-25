@@ -715,3 +715,36 @@ footer {
   .ft-grid { grid-template-columns: 1fr; gap: 32px; }
   .cta-banner { height: 480px; }
 }
+
+/* ── 상세페이지 제품명 히어로 ── */
+.detail-hero {
+  background: linear-gradient(135deg, #0D2035 0%, #2E6A96 100%);
+  color: #fff;
+  text-align: center;
+  padding: 130px 24px 54px;
+}
+.detail-hero .dh-cat {
+  font-size: 12px; font-weight: 700; letter-spacing: 3px;
+  color: rgba(255,255,255,0.6); text-transform: uppercase; margin-bottom: 14px;
+}
+.detail-hero h1 {
+  font-size: clamp(28px, 5vw, 46px); font-weight: 800;
+  line-height: 1.2; margin-bottom: 16px;
+}
+.detail-hero h1 span { color: #8FC9F0; }
+.detail-hero .dh-sub {
+  font-size: 16px; opacity: 0.8; line-height: 1.7; margin-bottom: 26px;
+}
+.detail-hero .dh-badges {
+  display: flex; justify-content: center; flex-wrap: wrap; gap: 10px;
+}
+.detail-hero .dh-badges span {
+  background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25);
+  padding: 8px 16px; border-radius: 999px; font-size: 13px; font-weight: 600;
+}
+/* 상세 히어로가 있으면 상단 패딩 축소 */
+.detail-hero + .detail-wrap { padding-top: 48px; }
+@media (max-width: 640px) {
+  .detail-hero { padding: 100px 20px 40px; }
+  .detail-hero .dh-sub { font-size: 14px; }
+}

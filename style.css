@@ -748,3 +748,41 @@ footer {
   .detail-hero { padding: 100px 20px 40px; }
   .detail-hero .dh-sub { font-size: 14px; }
 }
+
+/* ── 상세페이지 하단 컬렉션 네비게이션 ── */
+.series-nav { max-width: 980px; margin: 0 auto; padding: 70px 24px 20px; }
+.series-nav-head { text-align: center; margin-bottom: 36px; }
+.series-nav-head .sn-label {
+  display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: 3px;
+  color: var(--blue); text-transform: uppercase; margin-bottom: 10px;
+}
+.series-nav-head h2 { font-size: clamp(22px, 3vw, 32px); font-weight: 800; color: var(--dark); line-height: 1.3; }
+.series-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px;
+}
+.series-card {
+  display: block; text-decoration: none; border-radius: 14px; overflow: hidden;
+  background: #fff; border: 1px solid var(--border);
+  transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+}
+.series-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 14px 32px rgba(46,106,150,0.16);
+  border-color: var(--blue);
+}
+.series-card .sc-img { aspect-ratio: 1/1; overflow: hidden; background: #f4f8fb; }
+.series-card .sc-img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s; }
+.series-card:hover .sc-img img { transform: scale(1.06); }
+.series-card .sc-name {
+  text-align: center; padding: 14px 8px; font-size: 14px; font-weight: 700; color: var(--dark);
+}
+.series-card.current { border-color: var(--blue); }
+.series-card.current .sc-name { color: var(--blue); }
+.series-card.current .sc-name::after { content: ' (현재)'; font-size: 11px; font-weight: 600; color: var(--mid); }
+@media (max-width: 860px) {
+  .series-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 520px) {
+  .series-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .series-card .sc-name { font-size: 13px; padding: 11px 6px; }
+}

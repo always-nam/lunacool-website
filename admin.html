@@ -421,6 +421,23 @@
       </div>
     </div>
 
+    <!-- ── 데이터 내보내기 (실제 사이트 반영용) ── -->
+    <div style="margin-top:48px;">
+      <div class="sec-header">
+        <h2>📤 데이터 내보내기</h2>
+      </div>
+      <div style="background:white;border:1px solid var(--border);border-radius:8px;padding:24px 28px;">
+        <p style="font-size:13px;color:var(--mid);line-height:1.7;margin-bottom:18px;">
+          관리자에서 추가/수정한 내용은 <strong style="color:var(--dark);">이 브라우저에만</strong> 저장됩니다.
+          실제 사이트(모든 방문자)에 반영하려면 아래 버튼으로 파일을 내려받아 제작자에게 전달하세요.
+        </p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn-add" onclick="exportReviews()">📄 reviews-data.js 내보내기</button>
+          <button class="btn-add" onclick="exportInquiries()" style="background:var(--green);">💬 inquiry-data.js 내보내기</button>
+        </div>
+      </div>
+    </div>
+
     <!-- 초기화 버튼 -->
     <div style="margin-top:16px;text-align:right;">
       <button onclick="resetToDefault()"
@@ -482,7 +499,19 @@
 
       <div class="form-group">
         <label>작성일</label>
-        <input class="form-control" type="text" id="fDate" placeholder="예: 2025.06.01">
+        <input class="form-control" type="text" id="fDate" placeholder="예: 2026.06.01">
+      </div>
+
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+          <input type="checkbox" id="fVerified" checked style="width:16px;height:16px;cursor:pointer;">
+          구매인증 뱃지 표시 <small style="color:var(--mid);font-weight:400;">(✔ 구매인증)</small>
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label>판매자 답변 <small style="color:var(--mid);font-weight:400;">(선택 — 입력 시 후기 아래 "🌙 루나쿨 답변" 박스로 표시)</small></label>
+        <textarea class="form-control" id="fReply" placeholder="비워두면 답변이 표시되지 않습니다."></textarea>
       </div>
 
       <div class="form-group">
@@ -637,6 +666,8 @@ function openModal(id) {
     document.getElementById('fLocation').value = rev.location || '';
     document.getElementById('fText').value = rev.text;
     document.getElementById('fDate').value = rev.date;
+    document.getElementById('fVerified').checked = rev.verified !== false;
+    document.getElementById('fReply').value = rev.reply || '';
     currentPhotos = [...(rev.photos || [])];
     setStar(rev.rating);
     renderPreview();
@@ -646,6 +677,8 @@ function openModal(id) {
     document.getElementById('fName').value = '';
     document.getElementById('fLocation').value = '';
     document.getElementById('fText').value = '';
+    document.getElementById('fVerified').checked = true;
+    document.getElementById('fReply').value = '';
     const today = new Date();
     document.getElementById('fDate').value =
       `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`;
@@ -697,6 +730,8 @@ function saveReview() {
   const location = document.getElementById('fLocation').value.trim();
   const text     = document.getElementById('fText').value.trim();
   const date     = document.getElementById('fDate').value.trim();
+  const verified = document.getElementById('fVerified').checked;
+  const reply    = document.getElementById('fReply').value.trim();
 
   if (!name || !text) {
     showToast('작성자 이름과 후기 내용은 필수입니다.', 'error');
@@ -704,16 +739,17 @@ function saveReview() {
   }
 
   const revs = getReviews();
+  const fields = { product, name, location, text, date, rating: currentRating, photos: currentPhotos, verified, reply };
 
   if (editId) {
     const idx = revs.findIndex(r => r.id === editId);
     if (idx > -1) {
-      revs[idx] = { ...revs[idx], product, name, location, text, date, rating: currentRating, photos: currentPhotos };
+      revs[idx] = { ...revs[idx], ...fields };
     }
     showToast('후기가 수정되었습니다.', 'success');
   } else {
     const newId = revs.length ? Math.max(...revs.map(r=>r.id)) + 1 : 1;
-    revs.unshift({ id: newId, product, name, location, text, date, rating: currentRating, photos: currentPhotos });
+    revs.unshift({ id: newId, ...fields });
     showToast('후기가 추가되었습니다.', 'success');
   }
 
@@ -864,6 +900,62 @@ function updateVideoPreview(url) {
     updateVideoPreview(url);
   }
 })();
+
+// ── 데이터 내보내기 ──
+function downloadFile(filename, content) {
+  const blob = new Blob([content], { type: 'text/javascript;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+}
+
+function exportReviews() {
+  const revs = getReviews();
+  const today = new Date();
+  const ver = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  const lines = revs.map(r => '  ' + JSON.stringify(r) + ',').join('\n');
+  const content =
+`// 기본 후기 데이터 — 관리자에서 추가/수정/삭제 가능
+const DEFAULT_REVIEWS = [
+${lines}
+];
+
+// 데이터 버전 — 갱신 시 모든 방문자에게 새 데이터가 반영됩니다.
+const REVIEWS_VERSION = '${ver}-export';
+(function initReviews() {
+  if (localStorage.getItem('lunacool_reviews_ver') !== REVIEWS_VERSION) {
+    localStorage.setItem('lunacool_reviews', JSON.stringify(DEFAULT_REVIEWS));
+    localStorage.setItem('lunacool_reviews_ver', REVIEWS_VERSION);
+  }
+})();
+`;
+  downloadFile('reviews-data.js', content);
+  showToast(`후기 ${revs.length}건을 내보냈습니다.`, 'success');
+}
+
+function exportInquiries() {
+  const inq = getInquiries();
+  const lines = inq.map(i => '  ' + JSON.stringify(i) + ',').join('\n');
+  const content =
+`// 루나쿨 상품문의 기본 데이터
+const DEFAULT_INQUIRIES = [
+${lines}
+];
+
+// localStorage에 기본 데이터 없으면 세팅
+(function initInquiries() {
+  if (!localStorage.getItem('lunacool_inquiries')) {
+    localStorage.setItem('lunacool_inquiries', JSON.stringify(DEFAULT_INQUIRIES));
+  }
+})();
+`;
+  downloadFile('inquiry-data.js', content);
+  showToast(`문의 ${inq.length}건을 내보냈습니다.`, 'success');
+}
 
 // ESC 닫기
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });

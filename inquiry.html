@@ -260,6 +260,31 @@
     .toast.show { transform: translateY(0); opacity: 1; }
     .toast.success { background: #2E8A5F; }
 
+    /* ── 1:1 문의 채널 ── */
+    .contact-channels {
+      background: #fff; border: 1px solid var(--border, #E0E8F0); border-radius: 14px;
+      padding: 32px 28px; margin-bottom: 32px;
+      box-shadow: 0 6px 24px rgba(46,106,150,0.06);
+    }
+    .cc-head { text-align: center; margin-bottom: 24px; }
+    .cc-head h2 { font-size: 20px; font-weight: 800; color: var(--dark, #1A1A1A); margin-bottom: 8px; }
+    .cc-head p { font-size: 14px; color: var(--mid, #666); }
+    .cc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .cc-card {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      padding: 24px 16px; border-radius: 12px; text-decoration: none;
+      border: 1.5px solid var(--border, #E0E8F0); background: #fff;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+    .cc-card:hover { transform: translateY(-4px); box-shadow: 0 10px 26px rgba(0,0,0,0.1); }
+    .cc-card.kakao:hover { border-color: #FEE500; background: #FFFDF0; }
+    .cc-card.naver:hover { border-color: #03C75A; background: #F2FCF6; }
+    .cc-card.tel:hover   { border-color: var(--blue, #4A8FBF); background: #F4F8FB; }
+    .cc-icon { font-size: 34px; margin-bottom: 6px; }
+    .cc-name { font-size: 15px; font-weight: 700; color: var(--dark, #1A1A1A); }
+    .cc-desc { font-size: 12px; color: var(--mid, #666); }
+    .cc-hours { text-align: center; font-size: 12px; color: var(--mid, #888); margin-top: 18px; }
+
     @media (max-width: 768px) {
       .page-hero { padding: 100px 24px 52px; }
       .inq-wrap { padding: 32px 16px 80px; }
@@ -267,6 +292,9 @@
       .inq-table tbody td:nth-child(3) { display: none; }
       .form-row { grid-template-columns: 1fr; }
       .td-date, .td-author { display: none; }
+      .cc-grid { grid-template-columns: 1fr; gap: 10px; }
+      .cc-card { flex-direction: row; justify-content: center; gap: 10px; padding: 16px; }
+      .cc-icon { font-size: 24px; margin-bottom: 0; }
     }
   </style>
 </head>
@@ -303,28 +331,40 @@
 <div class="page-hero">
   <div class="pk">Customer Inquiry</div>
   <h1>상품 문의</h1>
-  <p>궁금한 점은 무엇이든 문의해 주세요 — 1~2 영업일 내 답변 드립니다</p>
+  <p>궁금한 점은 채널로 문의해 주세요 · 아래에서 자주 묻는 질문도 확인하실 수 있습니다</p>
 </div>
 
 <div class="inq-wrap">
 
-  <!-- 안내 배너 -->
-  <div class="inq-notice appear">
-    <span class="n-icon">📌</span>
-    <div>
-      <strong>문의 안내</strong>
-      <ul>
-        <li>답변은 영업일 기준 1~2일 이내 드립니다.</li>
-        <li>주문·배송 문의는 네이버 스마트스토어 고객센터를 이용해 주세요.</li>
-        <li>비밀번호를 설정하면 비밀글로 등록됩니다.</li>
-      </ul>
+  <!-- ── 1:1 실시간 문의 채널 ── -->
+  <div class="contact-channels appear">
+    <div class="cc-head">
+      <h2>💬 1:1 실시간 문의</h2>
+      <p>아래 채널로 문의하시면 영업일 기준 가장 빠르게 답변드립니다.</p>
     </div>
+    <div class="cc-grid">
+      <a class="cc-card kakao" id="ccKakao" href="#" onclick="return openChannel(event,'kakao')">
+        <span class="cc-icon">💛</span>
+        <span class="cc-name">카카오톡 채널</span>
+        <span class="cc-desc">톡으로 바로 문의</span>
+      </a>
+      <a class="cc-card naver" id="ccNaver" href="#" onclick="return openChannel(event,'naver')">
+        <span class="cc-icon">🟢</span>
+        <span class="cc-name">네이버 톡톡</span>
+        <span class="cc-desc">스마트스토어 상담</span>
+      </a>
+      <a class="cc-card tel" href="tel:070-7717-5231">
+        <span class="cc-icon">📞</span>
+        <span class="cc-name">전화 문의</span>
+        <span class="cc-desc">070-7717-5231</span>
+      </a>
+    </div>
+    <p class="cc-hours">상담 가능 시간: 평일 09:00 ~ 18:00 (주말·공휴일 제외)</p>
   </div>
 
-  <!-- 상단 바 -->
+  <!-- ── 자주 묻는 질문(FAQ) ── -->
   <div class="inq-topbar">
-    <div class="inq-count">전체 <strong id="totalCount">0</strong>건</div>
-    <button class="btn-write" onclick="openWriteModal()">+ 문의하기</button>
+    <div class="inq-count">자주 묻는 질문 <strong id="totalCount">0</strong>건</div>
   </div>
 
   <!-- 카테고리 필터 -->
@@ -466,6 +506,22 @@ const PAGE_SIZE = 10;
 let currentCat = 'all';
 let currentPage = 1;
 let openRowId = null;
+
+// ── 1:1 문의 채널 URL (← 실제 주소로 교체하면 버튼이 연결됩니다) ──
+const CHANNEL_URLS = {
+  kakao: '',   // 예: 'http://pf.kakao.com/_xxxxxx'
+  naver: '',   // 예: 'https://talk.naver.com/ct/xxxxxx'
+};
+function openChannel(e, type) {
+  e.preventDefault();
+  const url = CHANNEL_URLS[type];
+  if (url) {
+    window.open(url, '_blank');
+  } else {
+    showToast('채널 준비 중입니다. 전화(070-7717-5231)로 문의해 주세요.', '');
+  }
+  return false;
+}
 
 // 기본 샘플 데이터
 const SAMPLE_INQUIRIES = [

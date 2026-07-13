@@ -117,10 +117,32 @@
     .pcard-body p {
       font-size: 12px; color: var(--mid); line-height: 1.6; margin-bottom: 16px;
     }
+    /* 가격 표시 */
+    .pcard-price {
+      display: flex; align-items: baseline; gap: 4px;
+      margin: 2px 0 14px;
+    }
+    .pcard-price .pp-num { font-size: 21px; font-weight: 800; color: var(--dark); letter-spacing: -0.5px; }
+    .pcard-price .pp-won { font-size: 14px; font-weight: 700; color: var(--dark); }
+    .pcard-price .pp-tag {
+      margin-left: 6px; font-size: 11px; font-weight: 700;
+      color: var(--blue); background: var(--light);
+      padding: 2px 8px; border-radius: 10px;
+    }
+
+    .pcard-btns { display: flex; gap: 8px; }
+    .pcard-view {
+      flex: 1; display: block; text-align: center;
+      border: 1.5px solid var(--border); color: var(--dark); background: white;
+      padding: 10px 4px; border-radius: 6px;
+      font-size: 13px; font-weight: 700;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .pcard-view:hover { border-color: var(--blue); color: var(--blue); }
     .pcard-buy {
-      display: block; text-align: center;
+      flex: 1; display: block; text-align: center;
       background: var(--blue); color: white;
-      padding: 10px; border-radius: 6px;
+      padding: 10px 4px; border-radius: 6px;
       font-size: 13px; font-weight: 700;
       transition: background 0.2s;
     }
@@ -212,19 +234,27 @@
       <div class="pcard">
         <div class="pcard-img"><img src="루나쿨 상품 이미지/냉감 패드 퀸 6.jpg" alt="냉감 패드 퀸"></div>
         <div class="pcard-body">
-          <span class="pcard-badge">냉감 패드 · 퀸</span>
+          <span class="pcard-badge">냉감 패드 · 퀸(Q)</span>
           <h3>루나쿨 냉감 패드 퀸</h3>
-          <p>160×200cm / QMAX 550G<br>OEKO-TEX 인증 · 4면 고정밴드</p>
-          <a href="detail-pad.html" class="pcard-buy">제품 상세 보기 →</a>
+          <p>QMAX 550G · OEKO-TEX 인증<br>4면 고정밴드</p>
+          <div class="pcard-price"><span class="pp-num">49,800</span><span class="pp-won">원</span><span class="pp-tag">BEST</span></div>
+          <div class="pcard-btns">
+            <a href="detail-pad.html" class="pcard-view">상세보기</a>
+            <a href="https://smartstore.naver.com" target="_blank" class="pcard-buy">구매하기</a>
+          </div>
         </div>
       </div>
       <div class="pcard">
-        <div class="pcard-img"><img src="루나쿨 상품 이미지/냉감 패드 싱글 3.jpg" alt="냉감 패드 싱글"></div>
+        <div class="pcard-img"><img src="루나쿨 상품 이미지/냉감 패드 싱글 3.jpg" alt="냉감 패드 슈퍼싱글"></div>
         <div class="pcard-body">
-          <span class="pcard-badge">냉감 패드 · 싱글</span>
-          <h3>루나쿨 냉감 패드 싱글</h3>
-          <p>100×200cm / QMAX 550G<br>OEKO-TEX 인증 · 4면 고정밴드</p>
-          <a href="detail-pad.html" class="pcard-buy">제품 상세 보기 →</a>
+          <span class="pcard-badge">냉감 패드 · 슈퍼싱글(SS)</span>
+          <h3>루나쿨 냉감 패드 슈퍼싱글</h3>
+          <p>QMAX 550G · OEKO-TEX 인증<br>4면 고정밴드</p>
+          <div class="pcard-price"><span class="pp-num">39,800</span><span class="pp-won">원</span></div>
+          <div class="pcard-btns">
+            <a href="detail-pad.html" class="pcard-view">상세보기</a>
+            <a href="https://smartstore.naver.com" target="_blank" class="pcard-buy">구매하기</a>
+          </div>
         </div>
       </div>
     </div>
@@ -257,19 +287,27 @@
       <div class="pcard">
         <div class="pcard-img"><img src="루나쿨 상품 이미지/냉감 차렵이불 퀸 5.jpg" alt="냉감 차렵이불 퀸"></div>
         <div class="pcard-body">
-          <span class="pcard-badge">차렵이불 · 퀸</span>
+          <span class="pcard-badge">차렵이불 · 퀸(Q)</span>
           <h3>루나쿨 냉감 차렵이불 퀸</h3>
-          <p>200×220cm / 냉감 충전재<br>통기성 우수 · 아이보리</p>
-          <a href="detail-blanket.html" class="pcard-buy">제품 상세 보기 →</a>
+          <p>냉감 충전재 · 양면 냉감<br>통기성 우수</p>
+          <div class="pcard-price"><span class="pp-num">59,800</span><span class="pp-won">원</span><span class="pp-tag">NEW</span></div>
+          <div class="pcard-btns">
+            <a href="detail-blanket.html" class="pcard-view">상세보기</a>
+            <a href="https://smartstore.naver.com" target="_blank" class="pcard-buy">구매하기</a>
+          </div>
         </div>
       </div>
       <div class="pcard">
-        <div class="pcard-img"><img src="루나쿨 상품 이미지/냉감 차렵이불 싱글 3.jpg" alt="냉감 차렵이불 싱글"></div>
+        <div class="pcard-img"><img src="루나쿨 상품 이미지/냉감 차렵이불 싱글 3.jpg" alt="냉감 차렵이불 슈퍼싱글"></div>
         <div class="pcard-body">
-          <span class="pcard-badge">차렵이불 · 싱글</span>
-          <h3>루나쿨 냉감 차렵이불 싱글</h3>
-          <p>150×200cm / 냉감 충전재<br>통기성 우수 · 아이보리</p>
-          <a href="detail-blanket.html" class="pcard-buy">제품 상세 보기 →</a>
+          <span class="pcard-badge">차렵이불 · 슈퍼싱글(SS)</span>
+          <h3>루나쿨 냉감 차렵이불 슈퍼싱글</h3>
+          <p>냉감 충전재 · 양면 냉감<br>통기성 우수</p>
+          <div class="pcard-price"><span class="pp-num">49,800</span><span class="pp-won">원</span></div>
+          <div class="pcard-btns">
+            <a href="detail-blanket.html" class="pcard-view">상세보기</a>
+            <a href="https://smartstore.naver.com" target="_blank" class="pcard-buy">구매하기</a>
+          </div>
         </div>
       </div>
     </div>
@@ -300,21 +338,29 @@
   <div class="cat-products">
     <div class="prod-grid two">
       <div class="pcard">
-        <div class="pcard-img"><img src="루나쿨 상품 이미지/냉감 소파패드 6.jpg" alt="냉감 소파패드"></div>
+        <div class="pcard-img"><img src="루나쿨 상품 이미지/냉감 소파패드 6.jpg" alt="냉감 소파패드 3인용"></div>
         <div class="pcard-body">
-          <span class="pcard-badge">소파패드 · 2인용</span>
-          <h3>루나쿨 냉감 소파패드</h3>
-          <p>QMAX 420G / 미끄럼 방지<br>소파 · 바닥 겸용</p>
-          <a href="detail-sofa.html" class="pcard-buy">제품 상세 보기 →</a>
+          <span class="pcard-badge">소파패드 · 3인용</span>
+          <h3>루나쿨 냉감 소파패드 3인용</h3>
+          <p>QMAX 420G · 미끄럼 방지<br>소파 · 바닥 겸용</p>
+          <div class="pcard-price"><span class="pp-num">39,800</span><span class="pp-won">원</span></div>
+          <div class="pcard-btns">
+            <a href="detail-sofa.html" class="pcard-view">상세보기</a>
+            <a href="https://smartstore.naver.com" target="_blank" class="pcard-buy">구매하기</a>
+          </div>
         </div>
       </div>
       <div class="pcard">
         <div class="pcard-img"><img src="루나쿨 상품 이미지/냉감 소파패드 24.jpg" alt="냉감 소파패드 4인용"></div>
         <div class="pcard-body">
           <span class="pcard-badge">소파패드 · 4인용</span>
-          <h3>루나쿨 냉감 소파패드 라지</h3>
-          <p>QMAX 420G / 4인 소파용<br>미끄럼 방지 · 대형</p>
-          <a href="detail-sofa.html" class="pcard-buy">제품 상세 보기 →</a>
+          <h3>루나쿨 냉감 소파패드 4인용</h3>
+          <p>QMAX 420G · 미끄럼 방지<br>4인 소파용 대형</p>
+          <div class="pcard-price"><span class="pp-num">49,800</span><span class="pp-won">원</span></div>
+          <div class="pcard-btns">
+            <a href="detail-sofa.html" class="pcard-view">상세보기</a>
+            <a href="https://smartstore.naver.com" target="_blank" class="pcard-buy">구매하기</a>
+          </div>
         </div>
       </div>
     </div>
@@ -345,21 +391,16 @@
   <div class="cat-products">
     <div class="prod-grid two">
       <div class="pcard">
-        <div class="pcard-img"><img src="루나쿨 상품 이미지/냉감 방석 2.jpg" alt="냉감 방석"></div>
-        <div class="pcard-body">
-          <span class="pcard-badge">방석 · 아이보리</span>
-          <h3>루나쿨 냉감 방석</h3>
-          <p>QMAX 420G / 의자·바닥 겸용<br>충분한 쿠션감 · 아이보리</p>
-          <a href="detail-cushion.html" class="pcard-buy">제품 상세 보기 →</a>
-        </div>
-      </div>
-      <div class="pcard">
         <div class="pcard-img"><img src="루나쿨 상품 이미지/냉감 방석 15.jpg" alt="냉감 방석 2P 세트"></div>
         <div class="pcard-body">
-          <span class="pcard-badge">방석 · 2P 세트</span>
+          <span class="pcard-badge">방석 · 2개 1세트</span>
           <h3>루나쿨 냉감 방석 2P 세트</h3>
-          <p>QMAX 420G / 2개 구성<br>가족·커플 추천 세트</p>
-          <a href="detail-cushion.html" class="pcard-buy">제품 상세 보기 →</a>
+          <p>QMAX 420G · 의자·바닥 겸용<br>2개 구성 · 가족·커플 추천</p>
+          <div class="pcard-price"><span class="pp-num">19,800</span><span class="pp-won">원</span><span class="pp-tag">가성비</span></div>
+          <div class="pcard-btns">
+            <a href="detail-cushion.html" class="pcard-view">상세보기</a>
+            <a href="https://smartstore.naver.com" target="_blank" class="pcard-buy">구매하기</a>
+          </div>
         </div>
       </div>
     </div>
@@ -390,21 +431,16 @@
   <div class="cat-products">
     <div class="prod-grid two">
       <div class="pcard">
-        <div class="pcard-img"><img src="루나쿨 상품 이미지/냉감 베개커버.jpg" alt="냉감 베개커버 아이보리"></div>
+        <div class="pcard-img"><img src="루나쿨 상품 이미지/냉감 베개커버 10.jpg" alt="냉감 베개커버 2P 세트"></div>
         <div class="pcard-body">
-          <span class="pcard-badge">베개커버 · 아이보리</span>
-          <h3>루나쿨 냉감 베개커버</h3>
-          <p>50×70cm / QMAX 420G<br>지퍼형 탈착 · 아이보리</p>
-          <a href="detail-pillow.html" class="pcard-buy">제품 상세 보기 →</a>
-        </div>
-      </div>
-      <div class="pcard">
-        <div class="pcard-img"><img src="루나쿨 상품 이미지/냉감 베개커버 10.jpg" alt="냉감 베개커버 2P"></div>
-        <div class="pcard-body">
-          <span class="pcard-badge">베개커버 · 2P 세트</span>
-          <h3>루나쿨 냉감 베개커버 2P</h3>
-          <p>50×70cm / QMAX 420G<br>2개 세트 · 커플 추천</p>
-          <a href="detail-pillow.html" class="pcard-buy">제품 상세 보기 →</a>
+          <span class="pcard-badge">베개커버 · 2개 1세트</span>
+          <h3>루나쿨 냉감 베개커버 2P 세트</h3>
+          <p>50×70cm · QMAX 420G<br>지퍼형 탈착 · 2개 구성</p>
+          <div class="pcard-price"><span class="pp-num">19,800</span><span class="pp-won">원</span><span class="pp-tag">가성비</span></div>
+          <div class="pcard-btns">
+            <a href="detail-pillow.html" class="pcard-view">상세보기</a>
+            <a href="https://smartstore.naver.com" target="_blank" class="pcard-buy">구매하기</a>
+          </div>
         </div>
       </div>
     </div>

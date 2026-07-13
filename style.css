@@ -786,3 +786,17 @@ footer {
   .series-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
   .series-card .sc-name { font-size: 13px; padding: 11px 6px; }
 }
+
+/* ── 컬렉션 카드 가격 ── */
+.clabel-price {
+  font-size: 17px; font-weight: 800; color: #fff;
+  margin: 6px 0 10px; letter-spacing: -0.3px;
+}
+/* ── 상세 히어로 가격 ── */
+.detail-hero .dh-price {
+  display: inline-flex; align-items: baseline; gap: 6px;
+  background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25);
+  padding: 10px 22px; border-radius: 999px; margin-top: 4px;
+}
+.detail-hero .dh-price strong { font-size: 22px; font-weight: 800; color: #fff; }
+.detail-hero .dh-price span { font-size: 13px; color: rgba(255,255,255,0.75); }

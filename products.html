@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>전체 상품 — 루나쿨</title>
   <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
   <style>
     /* ── 페이지 히어로 ── */
     .prod-hero {
@@ -170,43 +172,113 @@
       .pcard-body { padding: 14px 14px 18px; }
       .pcard-body h3 { font-size: 13px; }
     }
+    /* ── 2026-09-30: 브랜드 바로가기 · 루나온 칸 ── */
+    .brand-jump { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+    .brand-jump a { padding: 10px 18px; border-radius: 999px; background: #fff; font-size: 14.5px; font-weight: 600; color: var(--dark); border: 1.5px solid transparent; }
+    .brand-jump .bj-lo { border-color: var(--warm-2); }
+    .brand-jump .bj-lc { border-color: var(--cool-1); }
+    .cat-section { scroll-margin-top: 68px; }
+    .lo-cat { background: #F7F4F2; }
+    .lo-cat .lo-brand { height: 34px; width: auto; margin-bottom: 18px; }
+    .lo-cat .cat-feat-tag { color: var(--warm-ink); }
+    .lo-cat .pcard-badge { color: var(--warm-ink); background: #FBEFE6; }
+    .lo-cat .pcard-buy { background: var(--char); }
+    .lo-cat .pcard-buy:hover { background: #3a3d41; }
+    .lo-cat .pcard-view:hover { border-color: var(--warm-2); color: var(--warm-ink); }
+    .pcard-price .pp-note { font-size: 13.5px; color: var(--mid); }
+    .pcard:hover { transform: none; box-shadow: none; border-color: var(--dark); }
+    .pcard:hover .pcard-img img, .cat-intro-img:hover img { transform: none; }
   </style>
 </head>
 <body>
 
 <header id="hdr" class="solid">
-  <a href="index.html" class="logo">
-    <img src="루나쿨_로고/루나쿨_로고.png" alt="루나쿨" class="logo-dark">
+  <a href="index.html" class="brand-pair" aria-label="루나쿨 루나온 홈">
+    <img class="lc" src="assets/lunacool/lunacool-word.png" alt="루나쿨">
+    <i aria-hidden="true"></i>
+    <img class="lo" src="assets/lunaon/lunaon-logo.svg" alt="루나온">
   </a>
   <nav>
-    <a href="index.html">홈</a>
-    <a href="about.html">브랜드</a>
-    <a href="products.html" style="color:var(--blue);font-weight:700;">상품소개</a>
+    <a href="products.html" aria-current="page">전체 상품</a>
+    <a href="lunaon.html" class="nav-lo">루나온</a>
     <a href="reviews.html">구매후기</a>
     <a href="inquiry.html">상품문의</a>
-    <a href="https://smartstore.naver.com" target="_blank" class="hdr-cta">스마트스토어 구매</a>
+    <a href="about.html">브랜드</a>
+    <a href="https://smartstore.naver.com" target="_blank" rel="noopener" class="hdr-cta">스마트스토어 구매</a>
   </nav>
-
-  <div class="burger" onclick="toggleMenu()">
-    <span></span><span></span><span></span>
-  </div>
+  <div class="burger" onclick="toggleMenu()" role="button" tabindex="0" aria-label="메뉴 열기"><span></span><span></span><span></span></div>
 </header>
 <div class="m-nav" id="mNav">
   <a href="index.html">홈</a>
-  <a href="about.html">브랜드</a>
-  <a href="products.html">상품소개</a>
+  <a href="products.html" aria-current="page">전체 상품</a>
+  <a href="lunaon.html" class="nav-lo">루나온</a>
   <a href="reviews.html">구매후기</a>
   <a href="inquiry.html">상품문의</a>
-  <a href="https://smartstore.naver.com" target="_blank" class="hdr-cta">스마트스토어 구매</a>
+  <a href="about.html">브랜드</a>
+  <a href="https://smartstore.naver.com" target="_blank" rel="noopener" class="hdr-cta">스마트스토어 구매</a>
 </div>
 
 
 <!-- 히어로 -->
 <div class="prod-hero">
-  <div class="pk">Luna Cool — Bio Cool Collection</div>
-  <h1>여름을 바꾸는<br>냉감 침구 라인업</h1>
-  <p>QMAX 550G 기술과 OEKO-TEX 인증 소재로 만든 루나쿨의 전 제품을 만나보세요</p>
+  <h1>여름엔 루나쿨,<br>겨울엔 루나온</h1>
+  <p>냉감 침구 루나쿨과 그래핀 발열 이불 루나온의 전체 상품입니다</p>
+  <div class="brand-jump">
+    <a href="#lunaon" class="bj-lo">루나온 그래핀 발열 이불</a>
+    <a href="#pad" class="bj-lc">루나쿨 냉감 침구</a>
+  </div>
 </div>
+
+<!-- ════════════════════════════
+     루나온 (2026-09-30 추가)
+════════════════════════════ -->
+<section class="cat-section lo-cat" id="lunaon">
+  <div class="cat-intro">
+    <div class="cat-intro-img">
+      <img src="assets/lunaon/photo/lo-9403.jpg" alt="스탠드 조명 아래 루나온 이불이 덮인 침실">
+    </div>
+    <div class="cat-intro-text">
+      <img class="lo-brand" src="assets/lunaon/lunaon-logo.svg" alt="루나온">
+      <h2>겨울밤,<br>온기를 켜다</h2>
+      <p>루나온 그래핀 발열 이불은 안쪽 충전재에 그래핀솜을 넣은 양면 이불입니다. 한쪽은 차콜, 한쪽은 라이트그레이라 방 분위기에 맞춰 뒤집어 덮을 수 있습니다.</p>
+      <div class="cat-features">
+        <span class="cat-feat-tag">그래핀 충전재</span>
+        <span class="cat-feat-tag">차콜 / 라이트그레이 양면</span>
+        <span class="cat-feat-tag">퀸 · 슈퍼싱글</span>
+      </div>
+    </div>
+  </div>
+  <div class="cat-products">
+    <div class="prod-grid two">
+      <div class="pcard">
+        <div class="pcard-img"><img src="assets/lunaon/photo/lo-9507.jpg" alt="루나온 그래핀 발열 이불 퀸"></div>
+        <div class="pcard-body">
+          <span class="pcard-badge">그래핀 발열 이불 · 퀸(Q)</span>
+          <h3>루나온 그래핀 발열 이불 퀸</h3>
+          <p>LO-3600Q · 200 × 230 cm<br>차콜 / 라이트그레이 양면</p>
+          <div class="pcard-price"><span class="pp-note">가격은 스마트스토어에서 확인해 주세요</span></div>
+          <div class="pcard-btns">
+            <a href="lunaon.html#queen" class="pcard-view">상세보기</a>
+            <a href="https://smartstore.naver.com" target="_blank" class="pcard-buy">구매하기</a>
+          </div>
+        </div>
+      </div>
+      <div class="pcard">
+        <div class="pcard-img"><img src="assets/lunaon/photo/lo-9435.jpg" alt="루나온 그래핀 발열 이불 슈퍼싱글"></div>
+        <div class="pcard-body">
+          <span class="pcard-badge">그래핀 발열 이불 · 슈퍼싱글(SS)</span>
+          <h3>루나온 그래핀 발열 이불 슈퍼싱글</h3>
+          <p>LO-3610SS · 150 × 200 cm<br>차콜 / 라이트그레이 양면</p>
+          <div class="pcard-price"><span class="pp-note">가격은 스마트스토어에서 확인해 주세요</span></div>
+          <div class="pcard-btns">
+            <a href="lunaon.html#ss" class="pcard-view">상세보기</a>
+            <a href="https://smartstore.naver.com" target="_blank" class="pcard-buy">구매하기</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- ════════════════════════════
      01. 냉감 패드
@@ -454,40 +526,46 @@
   <a href="https://smartstore.naver.com" target="_blank" class="btn-solid" style="display:inline-block;padding:16px 40px;font-size:15px;border-radius:4px;">네이버 스마트스토어 바로가기 →</a>
 </div>
 
-<footer>
-  <div class="ft-grid">
-    <div class="ft-brand">
-      <p class="ft-desc">루나쿨 — 달빛처럼 시원한 여름 침구 브랜드.<br>냉감 기술과 친환경 소재로 더 나은 수면을 제안합니다.</p>
-      <div class="ft-biz-inline">
-        <p><strong>(주)테란</strong> &nbsp;|&nbsp; 대표자 : 남대현</p>
-        <p>사업자등록번호 : 517-87-0057</p>
-        <p>고양시 일산동구 은마길185번길 26</p>
-        <p>고객센터 : 070-7717-5231 &nbsp;|&nbsp; 평일 09:00 ~ 18:00</p>
+<footer class="site-ftr">
+  <div class="in">
+    <div>
+      <div class="ft-pair">
+        <img src="assets/lunacool/lunacool-word.png" alt="루나쿨"><i aria-hidden="true"></i><img class="lo" src="assets/lunaon/lunaon-logo.svg" alt="루나온">
       </div>
+      <strong>(주)테란</strong> | 대표자 남대현<br>
+      사업자등록번호 517-87-0057<br>
+      고양시 일산동구 은마길185번길 26<br>
+      고객센터 070-7717-5231 | 평일 09:00 ~ 18:00
     </div>
-    <div class="ft-col">
-      <h5>Products</h5>
+    <div>
+      <h5>루나쿨</h5>
       <ul>
-        <li><a href="#pad">냉감 패드</a></li>
-        <li><a href="#blanket">냉감 차렵이불</a></li>
-        <li><a href="#sofa">냉감 소파패드</a></li>
-        <li><a href="#cushion">냉감 방석</a></li>
-        <li><a href="#pillow">냉감 베개커버</a></li>
+        <li><a href="detail-pad.html">냉감 패드</a></li>
+        <li><a href="detail-blanket.html">냉감 차렵이불</a></li>
+        <li><a href="detail-sofa.html">냉감 소파패드</a></li>
+        <li><a href="detail-cushion.html">냉감 방석</a></li>
+        <li><a href="detail-pillow.html">냉감 베개커버</a></li>
       </ul>
     </div>
-    <div class="ft-col">
-      <h5>Brand</h5>
+    <div>
+      <h5>루나온</h5>
+      <ul>
+        <li><a href="lunaon.html#queen">그래핀 발열 이불 퀸</a></li>
+        <li><a href="lunaon.html#ss">그래핀 발열 이불 슈퍼싱글</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5>고객 안내</h5>
       <ul>
         <li><a href="about.html">브랜드 소개</a></li>
-        <li><a href="reviews.html">구매 후기</a></li>
-        <li><a href="inquiry.html">상품 문의</a></li>
-        <li><a href="https://smartstore.naver.com" target="_blank">스마트스토어</a></li>
+        <li><a href="reviews.html">구매후기</a></li>
+        <li><a href="inquiry.html">상품문의</a></li>
+        <li><a href="cert.html">루나쿨 인증 현황</a></li>
+        <li><a href="https://smartstore.naver.com" target="_blank" rel="noopener">스마트스토어</a></li>
       </ul>
     </div>
   </div>
-  <div class="ft-bottom">
-    <p>© 2026 루나쿨(LUNA COOL) | (주)테란. All rights reserved.</p>
-  </div>
+  <p class="copy">© 2026 (주)테란. 루나쿨(LUNA COOL) · 루나온(LUNA ON)</p>
 </footer>
 
 <script src="script.js"></script>

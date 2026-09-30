@@ -1,5 +1,9 @@
 # 루나쿨 홈페이지 작업 로그
 
+> **2026-09-30 기준 최신 상태는 맨 아래 「2026-09-30 — 루나쿨·루나온 형제 브랜드 개편」 참고.**
+> 아래 「현재 상품 목록」 표(10개)는 6/23 기준이며, 실제 products.html은 루나쿨 8종 + 루나온 2종 = 10개임.
+> 6/23 이후 반영됐지만 기록이 빠졌던 커밋: 가격 표시(8종 SKU), 상품문의 1:1 채널 + FAQ 전환, cert.html(인증 현황), sitemap.xml·robots.txt.
+
 ## 사이트 정보
 - **URL**: https://always-nam.github.io/lunacool-website/
 - **저장소**: https://github.com/always-nam/lunacool-website
@@ -137,3 +141,52 @@
 - 스마트스토어 URL이 플레이스홀더 상태 — 개설 후 전체 치환 필요
 - `.gitignore`에 `인증서/` 가 있었음 → `-f` 옵션으로 강제 추가함
 - 상세이미지 경로: `루나쿨_상세이미지/루나쿨_냉감패드/분할이미지/lunacool_냉감패드_상세페이지_01.jpg`
+
+---
+
+## 2026-09-30 — 루나쿨·루나온 형제 브랜드 개편 (진행 중)
+
+- 브랜치: `renewal/lunaon-brand-family` (master에서 분기, **push 안 함**)
+- 방향: B안(형제 브랜드 구조). 기존 상품 10개·후기·문의·관리자 로직과 localStorage 키(`lunacool_*`)는 유지
+- ⚠ 이 로그는 6/23 이후 커밋(가격 표시, 1:1 채널+FAQ, cert.html, sitemap/robots)이 빠져 있음 → 전체 적용 단계에서 보정 예정
+
+### 추가한 파일 (원본은 건드리지 않음)
+- `assets/lunaon/lunaon-logo.svg` — 원본 `루나온_가로형_간결_투명.svg` 복사 후 viewBox만 여백 잘라냄 (자가발열 태그라인 없는 간결형)
+- `assets/lunaon/lunaon-symbol.svg` — 원본 `루나온_심볼_그래핀.svg` 복사, viewBox 여백 잘라냄
+- `assets/lunaon/favicon-32.png`
+- `assets/lunaon/photo/lo-*.jpg` — 실제 제품컷 11장을 긴 변 1600px·품질 80으로 축소 (원본 폴더는 커밋 제외)
+- `assets/lunacool/lunacool-logo.png / -symbol.png / -word.png` — `루나쿨_로고.png` 흰 배경을 투명 처리해 잘라낸 것
+
+### 시안 (git 제외: `.git/info/exclude`에 `_시안_*/` 등록)
+- `_시안_20260930/시안1_두개의밤.html` — 좌우 반반, 두 브랜드 동등
+- `_시안_20260930/시안2_계절스위치.html` — 스위치로 한 브랜드씩, 10~3월 루나온 기본
+- `_시안_20260930/시안3_주연조연.html` — 제철 브랜드 크게 + 다른 브랜드 옆 레일
+- 공통 토큰 `shared.css`: 공통 그레이 #A0A0A0 / 루나쿨 #66A3FF→#A8E6CF / 루나온 #F2703C→#FF9A3D→#FFD08A(로고 SVG 원본값) / 차콜 #4A4D52
+- 글꼴: Hahmlet(제목) + Pretendard(본문)
+
+### 전체 적용 (시안 3 + 시안 2 계절 스위치 선택)
+- `index.html` 전면 교체: 제철 브랜드 주연 커버 + 옆 레일, 「여름밤, 루나쿨 / 겨울밤, 루나온」 스위치
+  - 기본값 10~3월 루나온 / 4~9월 루나쿨, 방문자 선택은 localStorage `lunafamily_season` (기존 `lunacool_*` 키와 겹치지 않음)
+  - `index.html#lunaon` / `#lunacool` 로 특정 브랜드 첫 화면 링크 가능
+  - 영상 모달(관리자 등록 URL `lunacool_video_url`) 그대로 유지
+  - 제거: 가상 후기 카드 3개·「4.9 / 127·710개 리뷰」 수치·통계 줄·인증 이모지 띠 (후기 페이지 자체는 그대로)
+- `lunaon.html` 신규: 히어로, 양면 설명, 크기 선택(#queen / #ss), 사진, 상품정보(문구 정리 파일 기준), 세탁 주의사항, 루나쿨 안내
+- `products.html`: 히어로 문구 변경 + 브랜드 바로가기 + 맨 위 루나온 칸(카드 2개, 가격 미기재 → 「스마트스토어에서 확인」)
+- `about.html`: 맨 아래 형제 브랜드 루나온 안내 추가
+- 공통 머리글·바닥글 교체 (about, cert, products, reviews, inquiry, detail-* 5개): 두 로고 나란히, 메뉴 = 전체 상품 / 루나온 / 구매후기 / 상품문의 / 브랜드 / 스마트스토어 구매. `#hdr`, `#mNav`, `toggleMenu()` 구조는 유지
+- `style.css`: `:root` 색상 토큰 교체 + 맨 아래 「리뉴얼 레이어」 추가 (기존 규칙은 삭제하지 않고 덮어씀)
+  - 주의: 기존 `.logo { display:none !important }` 규칙이 남아 있음 → 새 로고는 `.brand-pair`, `.brand-logo` 클래스 사용
+- 글꼴: Noto Sans KR → Pretendard(본문) + Hahmlet(제목)
+- `sitemap.xml`: lunaon.html 추가
+- 건드리지 않은 파일: admin.html, script.js, reviews-data.js, inquiry-data.js, review-generator.js (master와 diff 0)
+
+### 회귀 테스트 (master vs 브랜치, Playwright)
+- 후기: 첫 화면 60개, 탭별 12개씩 — 동일
+- 상품문의: 카테고리 탭 동작, 기본 100건 — 동일
+- 관리자 페이지 로드, 영상 모달(관리자 URL 사용·닫을 때 정지), 모바일 메뉴 — 동일
+- 상품 카드: 8 → 10 (루나온 2개 추가, 의도한 변화)
+- 전 페이지 콘솔 오류 없음, 390px 모바일 가로 스크롤 없음, 로컬 링크·앵커 깨짐 없음
+
+### 루나온 문구 원칙
+- '자가발열', 온도 수치, 효능(혈액순환·통증 등), 인증 문구 사용 안 함
+- 모델명 LO-3600Q(퀸 200×230) / LO-3610SS(슈퍼싱글 150×200)

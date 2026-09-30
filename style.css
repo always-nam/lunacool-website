@@ -1,21 +1,38 @@
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  --ice:     #C8DFF0;
-  --blue:    #4A8FBF;
-  --blue-dk: #2E6A96;
-  --mint:    #A8D8C8;
-  --dark:    #1A1A1A;
-  --mid:     #666666;
-  --light:   #F4F8FB;
-  --border:  #E8EEF4;
+  /* 2026-09-30 리뉴얼: 루나쿨·루나온 형제 브랜드 토큰 */
+  --ice:     #D6E6FF;
+  --blue:    #2F6FD6;   /* 루나쿨 블루 — 흰 바탕 글자 대비용 (로고 #66A3FF 계열) */
+  --blue-dk: #2459B3;
+  --mint:    #A8E6CF;
+  --dark:    #2B333C;   /* 잉크 */
+  --mid:     #5C6670;
+  --light:   #F4F5F6;
+  --border:  #E3E5E8;
   --white:   #FFFFFF;
+
+  --gray:    #A0A0A0;   /* 두 브랜드 공통 그레이 */
+  --cool-1:  #66A3FF;
+  --cool-2:  #A8E6CF;
+  --cool-grad: linear-gradient(120deg, #66A3FF, #A8E6CF);
+  --warm-1:  #F2703C;   /* 루나온 코랄 */
+  --warm-2:  #FF9A3D;   /* 앰버 */
+  --warm-3:  #FFD08A;   /* 골드 */
+  --warm-ink:#C2521F;
+  --char:    #4A4D52;
+  --warm-grad: linear-gradient(120deg, #F2703C, #FF9A3D 52%, #FFD08A);
+  --serif: 'Hahmlet', 'Noto Serif KR', serif;
+  --sans: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  --gutter: clamp(20px, 5vw, 72px);
+  --maxw: 1240px;
 }
 
 html { scroll-behavior: smooth; }
 body {
-  font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+  font-family: var(--sans);
   background: var(--white);
+  word-break: keep-all;
   color: var(--dark);
   overflow-x: hidden;
 }
@@ -800,3 +817,134 @@ footer {
 }
 .detail-hero .dh-price strong { font-size: 22px; font-weight: 800; color: #fff; }
 .detail-hero .dh-price span { font-size: 13px; color: rgba(255,255,255,0.75); }
+
+/* ═══════════════════════════════════════════
+   2026-09-30 리뉴얼 레이어 — 루나쿨 · 루나온
+   (위쪽 기존 규칙은 그대로 두고 여기서 덮어씀)
+═══════════════════════════════════════════ */
+:focus-visible { outline: 2px solid var(--dark); outline-offset: 3px; }
+
+/* ── 머리글: 두 로고 나란히, 항상 흰 바탕 ── */
+header#hdr {
+  height: 68px; padding: 0 var(--gutter);
+  justify-content: space-between; gap: 24px;
+  background: rgba(255,255,255,.95);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+.brand-pair { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+.brand-pair img { width: auto; }
+.brand-pair .lc { height: 22px; }
+.brand-pair .lo { height: 27px; }
+.brand-pair i { width: 1px; height: 22px; background: var(--gray); opacity: .6; }
+header#hdr nav { gap: 28px; }
+header#hdr nav a { font-size: 14.5px; font-weight: 500; letter-spacing: 0; color: var(--dark); }
+header#hdr nav a:hover { color: var(--mid); }
+header#hdr nav a[aria-current="page"] { font-weight: 700; box-shadow: inset 0 -2px 0 var(--gray); padding-bottom: 2px; }
+header#hdr nav a[aria-current="page"].nav-lo { box-shadow: inset 0 -2px 0 var(--warm-2); }
+.hdr-cta, header#hdr nav .hdr-cta {
+  color: #fff !important; background: var(--dark);
+  padding: 9px 18px; border-radius: 999px; font-size: 14px; font-weight: 600;
+}
+.hdr-cta:hover, header#hdr nav .hdr-cta:hover { background: #3c4652; }
+header#hdr .burger span { background: var(--dark); }
+.m-nav { top: 68px; }
+.m-nav a { color: var(--dark); }
+.m-nav a[aria-current="page"] { font-weight: 700; }
+.m-nav .hdr-cta { border-radius: 999px; }
+@media (max-width: 960px) {
+  header#hdr nav { display: none; }
+  header#hdr .burger { display: flex; }
+}
+@media (max-width: 768px) {
+  header#hdr { height: 60px; }
+  .m-nav { top: 60px; }
+  .brand-pair .lc { height: 19px; }
+  .brand-pair .lo { height: 23px; }
+}
+
+/* ── 글꼴: 제목은 Hahmlet, 굵기·자간 과한 것 정리 ── */
+body h1, body h2 { font-family: var(--serif); font-weight: 400 !important; letter-spacing: -0.01em !important; }
+body h3 { letter-spacing: 0; }
+
+/* 영문 대문자 머리표(eyebrow)는 조용하게 */
+body .pk, body .kicker, body .bkicker, body .sn-label, body .cat-num, body .dh-cat, body .hero-kicker {
+  text-transform: none !important; letter-spacing: 0 !important;
+  font-size: 13.5px !important; font-weight: 500 !important;
+}
+
+/* ── 하위 페이지 히어로 공통 톤 ── */
+body .page-hero, body .prod-hero, body .about-hero, body .cert-hero {
+  background: #EEF4FB !important; color: var(--dark) !important;
+  text-align: left !important;
+  padding-left: var(--gutter) !important; padding-right: var(--gutter) !important;
+}
+body .page-hero h1, body .prod-hero h1, body .about-hero h1, body .cert-hero h1 { color: var(--dark) !important; }
+body .page-hero p, body .prod-hero p, body .about-hero p, body .cert-hero p { color: var(--mid) !important; }
+body .page-hero .pk, body .prod-hero .pk, body .about-hero .pk, body .cert-hero .pk { color: var(--blue) !important; }
+
+/* 상세 히어로: 어두운 그라데이션 → 밝은 여름 톤 */
+body .detail-hero { background: #EEF4FB; color: var(--dark); text-align: left; padding-left: var(--gutter); padding-right: var(--gutter); }
+body .detail-hero .dh-cat { color: var(--blue); }
+body .detail-hero h1 span { color: var(--blue); }
+body .detail-hero .dh-sub { opacity: 1; color: var(--mid); }
+body .detail-hero .dh-price { background: #fff; border-color: var(--border); }
+body .detail-hero .dh-price strong { color: var(--dark); }
+body .detail-hero .dh-price span { color: var(--mid); }
+body .detail-back a { border-radius: 999px !important; }
+
+/* 시리즈 카드: 떠오르는 효과 대신 테두리만 */
+.series-card:hover { transform: none; box-shadow: none; border-color: var(--dark); }
+.series-card:hover .sc-img img { transform: none; }
+.series-card.current, .series-card.current:hover { border-color: var(--blue); }
+
+/* ── 버튼 ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 13px 22px; border-radius: 999px;
+  font-weight: 600; font-size: 15px; cursor: pointer; border: 0; font-family: inherit;
+  transition: background-color .2s, color .2s, filter .2s;
+}
+.btn-ink { background: var(--dark); color: #fff; }
+.btn-ink:hover { background: #3c4652; }
+.btn-ghost { border: 1.5px solid currentColor; background: transparent; }
+.btn-warm { background: var(--warm-grad); color: #3a2414; }
+.btn-warm:hover { filter: brightness(1.06); }
+
+/* ── 바닥글 ── */
+.site-ftr {
+  padding: 56px var(--gutter) 36px; background: var(--light);
+  color: var(--mid); font-size: 13.5px; line-height: 1.9;
+}
+.site-ftr .in { max-width: var(--maxw); margin: 0 auto; display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 40px; }
+.site-ftr .ft-pair { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.site-ftr .ft-pair img { height: 20px; width: auto; }
+.site-ftr .ft-pair .lo { height: 25px; }
+.site-ftr .ft-pair i { width: 1px; height: 18px; background: var(--gray); opacity: .6; }
+.site-ftr strong { color: var(--dark); font-weight: 600; }
+.site-ftr h5 { font-size: 13.5px; font-weight: 700; color: var(--dark); margin-bottom: 8px; }
+.site-ftr ul { list-style: none; }
+.site-ftr a:hover { color: var(--dark); }
+.site-ftr .copy { max-width: var(--maxw); margin: 36px auto 0; padding-top: 20px; border-top: 1px solid var(--border); font-size: 12.5px; }
+@media (max-width: 860px) { .site-ftr .in { grid-template-columns: 1fr 1fr; } .site-ftr .in > :first-child { grid-column: 1 / -1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+  .appear { opacity: 1 !important; transform: none !important; }
+}
+
+/* 어두운 히어로였던 브랜드·인증 페이지 보정 */
+body .about-hero h1, body .about-hero .hero-sub { text-align: left !important; }
+body .about-hero .hero-sub, body .cert-hero p { opacity: 1 !important; color: var(--mid) !important; }
+body .cert-badges { justify-content: flex-start; }
+body .cert-badges span { background: #fff; color: var(--dark); border-color: var(--border); }
+
+/* 형제 브랜드 안내 (브랜드 페이지) */
+.family-note { margin: clamp(56px, 7vw, 88px) var(--gutter) clamp(72px, 9vw, 112px); }
+.family-note .in { max-width: var(--maxw); margin: 0 auto; border-radius: 14px; overflow: hidden; display: grid; grid-template-columns: 1.1fr 1fr; background: #3E4146; color: #fff; }
+.family-note .in > img { width: 100%; height: 100%; min-height: 280px; object-fit: cover; }
+.family-note .txt { padding: clamp(28px, 4vw, 52px); align-self: center; }
+.family-note .txt img { height: 30px; width: auto; margin-bottom: 18px; }
+.family-note h2 { font-size: 26px; line-height: 1.4; margin-bottom: 12px; color: #fff; }
+.family-note p { color: rgba(255,255,255,.78); margin-bottom: 22px; line-height: 1.7; }
+@media (max-width: 900px) { .family-note .in { grid-template-columns: 1fr; } }

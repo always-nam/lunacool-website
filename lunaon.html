@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>루나온 그래핀 발열 이불 — 겨울밤, 온기를 켜다</title>
+  <meta name="description" content="루나온 그래핀 발열 이불. 그래핀 충전재를 넣은 차콜·라이트그레이 양면 이불. 퀸 LO-3600Q, 슈퍼싱글 LO-3610SS.">
+  <link rel="icon" href="assets/lunaon/favicon-32.png">
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <style>
+    .wrap { max-width: var(--maxw); margin: 0 auto; }
+
+    /* ── 히어로: 겨울밤 차콜 + 달 모양 창 ── */
+    .lo-hero {
+      margin-top: 68px; color: #fff;
+      background:
+        radial-gradient(55% 65% at 82% 22%, rgba(255,154,61,.30), transparent 70%),
+        radial-gradient(45% 55% at 62% 95%, rgba(242,112,60,.20), transparent 70%),
+        #3E4146;
+      padding: clamp(48px, 7vw, 96px) var(--gutter);
+    }
+    .lo-hero .wrap { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 5vw, 80px); align-items: center; }
+    .lo-hero .brand-logo { height: 44px; width: auto; margin-bottom: 30px; }
+    .lo-hero h1 { font-weight: 300 !important; font-size: clamp(42px, 5.6vw, 76px); line-height: 1.12; margin-bottom: 22px; }
+    .lo-hero p { color: rgba(255,255,255,.78); font-size: 17px; line-height: 1.75; max-width: 26em; margin-bottom: 32px; }
+    .lo-hero .acts { display: flex; flex-wrap: wrap; gap: 10px; }
+    .lo-hero .btn-ghost { color: #fff; }
+    .moon-window { justify-self: end; width: min(100%, 500px); }
+    .moon-window img { width: 100%; aspect-ratio: 4/5; object-fit: cover; border-radius: 999px 999px 10px 10px; }
+
+    /* ── 양면 ── */
+    .reverse { padding: clamp(72px, 10vw, 128px) var(--gutter); }
+    .reverse .wrap { display: grid; grid-template-columns: 7fr 5fr; gap: clamp(32px, 6vw, 96px); align-items: center; }
+    .reverse .pics { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .reverse .pics img { width: 100%; aspect-ratio: 4/5; object-fit: cover; border-radius: 8px; }
+    .reverse .pics img:last-child { margin-top: 48px; }
+    .reverse h2 { font-size: clamp(28px, 3.2vw, 42px); line-height: 1.35; margin-bottom: 22px; }
+    .reverse p { color: var(--mid); line-height: 1.8; max-width: 30em; }
+    .reverse p + p { margin-top: 14px; }
+    .swatches { display: flex; gap: 18px; margin-top: 26px; font-size: 14.5px; }
+    .swatches span { display: inline-flex; align-items: center; gap: 8px; }
+    .swatches i { width: 18px; height: 18px; border-radius: 50%; border: 1px solid rgba(0,0,0,.08); }
+
+    /* ── 크기 ── */
+    .sizes { background: var(--light); padding: clamp(64px, 8vw, 104px) var(--gutter); }
+    .sizes h2 { font-size: clamp(26px, 2.8vw, 36px); margin-bottom: 28px; }
+    .size-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .size { background: #fff; border-radius: 14px; overflow: hidden; scroll-margin-top: 90px; }
+    .size .top { display: grid; grid-template-columns: 110px 1fr; gap: 24px; align-items: center; padding: 30px 30px 8px; }
+    .size .shape { justify-self: center; background: var(--warm-grad); border-radius: 4px; }
+    .size h3 { font-size: 22px; font-weight: 700; margin-bottom: 2px; }
+    .size .model { color: var(--mid); font-size: 14.5px; }
+    .size dl { display: grid; grid-template-columns: 84px 1fr; gap: 8px 12px; font-size: 15px; padding: 18px 30px 0; }
+    .size dt { color: var(--mid); }
+    .size .buy { padding: 24px 30px 30px; }
+    .size:target { outline: 2px solid var(--warm-2); outline-offset: 0; }
+
+    /* ── 갤러리 ── */
+    .gallery { padding: clamp(64px, 8vw, 104px) var(--gutter) 0; }
+    .gallery .grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 220px; gap: 14px; }
+    .gallery img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+    .gallery .tall { grid-row: span 2; }
+    .gallery .wide { grid-column: span 2; }
+
+    /* ── 상품 정보 · 주의사항 ── */
+    .info { padding: clamp(64px, 8vw, 104px) var(--gutter); }
+    .info .wrap { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 5vw, 72px); }
+    .info h2 { font-size: 24px; margin-bottom: 18px; }
+    .spec { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+    .spec th, .spec td { text-align: left; vertical-align: top; padding: 11px 0; border-bottom: 1px solid var(--border); line-height: 1.6; }
+    .spec th { width: 104px; color: var(--mid); font-weight: 500; }
+    .care { list-style: none; font-size: 14.5px; color: var(--dark); }
+    .care li { padding: 11px 0 11px 18px; border-bottom: 1px solid var(--border); position: relative; line-height: 1.6; }
+    .care li::before { content: ""; position: absolute; left: 2px; top: 20px; width: 6px; height: 6px; border-radius: 50%; background: var(--warm-2); }
+
+    /* ── 형제 브랜드 ── */
+    .sibling { margin: 0 var(--gutter) clamp(72px, 9vw, 112px); }
+    .sibling .wrap { border-radius: 14px; overflow: hidden; display: grid; grid-template-columns: 1.1fr 1fr; background: #EEF4FB; }
+    .sibling .wrap > img { width: 100%; height: 100%; min-height: 260px; object-fit: cover; }
+    .sibling .txt { padding: clamp(28px, 4vw, 52px); align-self: center; }
+    .sibling .txt img { height: 24px; width: auto; margin-bottom: 18px; }
+    .sibling h2 { font-size: 26px; line-height: 1.4; margin-bottom: 12px; }
+    .sibling p { color: var(--mid); margin-bottom: 22px; line-height: 1.7; }
+
+    @media (max-width: 900px) {
+      .lo-hero { margin-top: 60px; }
+      .lo-hero .wrap, .reverse .wrap, .info .wrap, .sibling .wrap { grid-template-columns: 1fr; }
+      .moon-window { justify-self: stretch; width: 100%; }
+      .moon-window img { aspect-ratio: 1/1; }
+      .size-row { grid-template-columns: 1fr; }
+      .gallery .grid { grid-template-columns: 1fr 1fr; grid-auto-rows: 160px; }
+    }
+    @media (max-width: 520px) {
+      .size .top { grid-template-columns: 80px 1fr; padding: 24px 22px 6px; }
+      .size dl { padding: 16px 22px 0; }
+      .size .buy { padding: 20px 22px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<header id="hdr" class="solid">
+  <a href="index.html" class="brand-pair" aria-label="루나쿨 루나온 홈">
+    <img class="lc" src="assets/lunacool/lunacool-word.png" alt="루나쿨">
+    <i aria-hidden="true"></i>
+    <img class="lo" src="assets/lunaon/lunaon-logo.svg" alt="루나온">
+  </a>
+  <nav>
+    <a href="products.html">전체 상품</a>
+    <a href="lunaon.html" class="nav-lo" aria-current="page">루나온</a>
+    <a href="reviews.html">구매후기</a>
+    <a href="inquiry.html">상품문의</a>
+    <a href="about.html">브랜드</a>
+    <a href="https://smartstore.naver.com" target="_blank" rel="noopener" class="hdr-cta">스마트스토어 구매</a>
+  </nav>
+  <div class="burger" onclick="toggleMenu()" role="button" tabindex="0" aria-label="메뉴 열기"><span></span><span></span><span></span></div>
+</header>
+<div class="m-nav" id="mNav">
+  <a href="index.html">홈</a>
+  <a href="products.html">전체 상품</a>
+  <a href="lunaon.html" class="nav-lo" aria-current="page">루나온</a>
+  <a href="reviews.html">구매후기</a>
+  <a href="inquiry.html">상품문의</a>
+  <a href="about.html">브랜드</a>
+  <a href="https://smartstore.naver.com" target="_blank" rel="noopener" class="hdr-cta">스마트스토어 구매</a>
+</div>
+
+<section class="lo-hero">
+  <div class="wrap">
+    <div>
+      <img class="brand-logo" src="assets/lunaon/lunaon-logo.svg" alt="루나온">
+      <h1>겨울밤,<br>온기를 켜다</h1>
+      <p>루나온 그래핀 발열 이불. 그래핀 충전재를 넣은 양면 이불을 퀸과 슈퍼싱글 두 가지 크기로 준비했습니다.</p>
+      <div class="acts">
+        <a href="#sizes" class="btn btn-warm">크기 고르기</a>
+        <a href="https://smartstore.naver.com" target="_blank" rel="noopener" class="btn btn-ghost">스마트스토어에서 구매</a>
+      </div>
+    </div>
+    <figure class="moon-window">
+      <img src="assets/lunaon/photo/lo-9673.jpg" alt="스탠드 조명 아래 반쯤 젖혀진 루나온 이불">
+    </figure>
+  </div>
+</section>
+
+<section class="reverse">
+  <div class="wrap">
+    <div class="pics">
+      <img src="assets/lunaon/photo/lo-9541.jpg" alt="접힌 루나온 이불, 차콜 면과 라이트그레이 면" loading="lazy">
+      <img src="assets/lunaon/photo/lo-9650.jpg" alt="침대 끝으로 젖혀 양면이 보이는 루나온 이불" loading="lazy">
+    </div>
+    <div>
+      <h2>한쪽은 차콜,<br>한쪽은 라이트그레이</h2>
+      <p>루나온은 뒤집어 덮는 양면 이불입니다. 방 분위기나 그날 기분에 맞춰 위로 올 면을 고르세요.</p>
+      <p>겉면은 폴리에스테르 100%, 안쪽 충전재에는 그래핀솜을 넣었습니다.</p>
+      <div class="swatches">
+        <span><i style="background:#5E5866"></i>차콜</span>
+        <span><i style="background:#CFCFD1"></i>라이트그레이</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sizes" id="sizes">
+  <div class="wrap">
+    <h2>크기를 골라주세요</h2>
+    <div class="size-row">
+      <article class="size" id="queen">
+        <div class="top">
+          <span class="shape" style="width:100px;height:115px" aria-hidden="true"></span>
+          <div><h3>퀸</h3><div class="model">LO-3600Q</div></div>
+        </div>
+        <dl>
+          <dt>규격</dt><dd>200 × 230 cm</dd>
+          <dt>색상</dt><dd>차콜 / 라이트그레이 양면</dd>
+        </dl>
+        <div class="buy"><a href="https://smartstore.naver.com" target="_blank" rel="noopener" class="btn btn-ink">퀸 구매하기</a></div>
+      </article>
+      <article class="size" id="ss">
+        <div class="top">
+          <span class="shape" style="width:75px;height:100px" aria-hidden="true"></span>
+          <div><h3>슈퍼싱글</h3><div class="model">LO-3610SS</div></div>
+        </div>
+        <dl>
+          <dt>규격</dt><dd>150 × 200 cm</dd>
+          <dt>색상</dt><dd>차콜 / 라이트그레이 양면</dd>
+        </dl>
+        <div class="buy"><a href="https://smartstore.naver.com" target="_blank" rel="noopener" class="btn btn-ink">슈퍼싱글 구매하기</a></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="gallery" aria-label="루나온 제품 사진">
+  <div class="wrap grid">
+    <img class="tall" src="assets/lunaon/photo/lo-9483.jpg" alt="라이트그레이 면이 위로 온 루나온 이불" loading="lazy">
+    <img class="wide" src="assets/lunaon/photo/lo-9403.jpg" alt="차콜 면이 위로 온 루나온 이불과 침실" loading="lazy">
+    <img src="assets/lunaon/photo/lo-9528.jpg" alt="반듯하게 접은 루나온 이불" loading="lazy">
+    <img src="assets/lunaon/photo/lo-9560.jpg" alt="루나온 이불 퀼팅 가까이" loading="lazy">
+    <img class="wide" src="assets/lunaon/photo/lo-9507.jpg" alt="넓은 침대 위 루나온 이불" loading="lazy">
+    <img src="assets/lunaon/photo/lo-9678.jpg" alt="돌돌 만 루나온 이불" loading="lazy">
+  </div>
+</section>
+
+<section class="info">
+  <div class="wrap">
+    <div>
+      <h2>상품 정보</h2>
+      <table class="spec">
+        <tr><th scope="row">제품명</th><td>루나온 그래핀 발열 이불</td></tr>
+        <tr><th scope="row">모델명</th><td>LO-3600Q (퀸)<br>LO-3610SS (슈퍼싱글)</td></tr>
+        <tr><th scope="row">재질</th><td>겉면 폴리에스테르 100%<br>안감 충전재 (그래핀솜)</td></tr>
+        <tr><th scope="row">규격</th><td>퀸 200 × 230 cm<br>슈퍼싱글 150 × 200 cm</td></tr>
+        <tr><th scope="row">수입원</th><td>스트로마</td></tr>
+        <tr><th scope="row">판매원</th><td>(주)테란</td></tr>
+        <tr><th scope="row">주소</th><td>고양시 일산동구 은마길185번길 26</td></tr>
+        <tr><th scope="row">제조국</th><td>중국 (OEM)</td></tr>
+        <tr><th scope="row">소비자상담실</th><td>070-7717-5231</td></tr>
+      </table>
+    </div>
+    <div>
+      <h2>세탁과 사용 시 주의사항</h2>
+      <ul class="care">
+        <li>30℃ 이하의 미지근한 물로 세탁하고, 세탁기를 쓸 때는 울코스로 약하게 돌려주세요.</li>
+        <li>고온 세탁과 기계 건조는 제품 변형이 생길 수 있으니 피해주세요.</li>
+        <li>산소계, 염소계 표백제는 쓰지 마세요.</li>
+        <li>그늘에 뉘어서 말려주세요.</li>
+        <li>다리미를 쓰면 제품이 훼손될 수 있습니다.</li>
+        <li>제품에 이상이 있으면 공정거래위원회 고시 「소비자분쟁해결기준」에 따라 보상해 드립니다.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="sibling">
+  <div class="wrap">
+    <img src="루나쿨 상품 이미지/냉감 시리즈 3.jpg" alt="루나쿨 냉감 침구를 깐 밝은 침실" loading="lazy">
+    <div class="txt">
+      <img src="assets/lunacool/lunacool-word.png" alt="루나쿨">
+      <h2>더운 밤에는 루나쿨</h2>
+      <p>루나온의 여름 형제 브랜드. 냉감 패드부터 베개커버까지 다섯 가지 침구가 있습니다.</p>
+      <a href="products.html" class="btn btn-ink">루나쿨 상품 보기</a>
+    </div>
+  </div>
+</section>
+
+<footer class="site-ftr">
+  <div class="in">
+    <div>
+      <div class="ft-pair">
+        <img src="assets/lunacool/lunacool-word.png" alt="루나쿨"><i aria-hidden="true"></i><img class="lo" src="assets/lunaon/lunaon-logo.svg" alt="루나온">
+      </div>
+      <strong>(주)테란</strong> | 대표자 남대현<br>
+      사업자등록번호 517-87-0057<br>
+      고양시 일산동구 은마길185번길 26<br>
+      고객센터 070-7717-5231 | 평일 09:00 ~ 18:00
+    </div>
+    <div>
+      <h5>루나쿨</h5>
+      <ul>
+        <li><a href="detail-pad.html">냉감 패드</a></li>
+        <li><a href="detail-blanket.html">냉감 차렵이불</a></li>
+        <li><a href="detail-sofa.html">냉감 소파패드</a></li>
+        <li><a href="detail-cushion.html">냉감 방석</a></li>
+        <li><a href="detail-pillow.html">냉감 베개커버</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5>루나온</h5>
+      <ul>
+        <li><a href="lunaon.html#queen">그래핀 발열 이불 퀸</a></li>
+        <li><a href="lunaon.html#ss">그래핀 발열 이불 슈퍼싱글</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5>고객 안내</h5>
+      <ul>
+        <li><a href="about.html">브랜드 소개</a></li>
+        <li><a href="reviews.html">구매후기</a></li>
+        <li><a href="inquiry.html">상품문의</a></li>
+        <li><a href="cert.html">루나쿨 인증 현황</a></li>
+        <li><a href="https://smartstore.naver.com" target="_blank" rel="noopener">스마트스토어</a></li>
+      </ul>
+    </div>
+  </div>
+  <p class="copy">© 2026 (주)테란. 루나쿨(LUNA COOL) · 루나온(LUNA ON)</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

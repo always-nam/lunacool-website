@@ -188,6 +188,14 @@
     .rw-body .rw-check { display: block; font-weight: 500; font-size: 13.5px; }
     .rw-body .rw-check small { color: var(--mid); font-weight: 400; }
     .rw-note { font-size: 13px; color: var(--mid); }
+    .rw-photos { display: grid; gap: 8px; }
+    .rw-label { font-size: 14px; font-weight: 600; }
+    .rw-label small { color: var(--mid); font-weight: 400; }
+    .rw-add { justify-self: start; padding: 8px 14px; border: 1.5px dashed var(--border); border-radius: 8px; cursor: pointer; font-size: 13.5px; font-weight: 600; }
+    .rw-thumbs { display: flex; gap: 8px; flex-wrap: wrap; }
+    .rw-thumbs div { position: relative; }
+    .rw-thumbs img { width: 76px; height: 76px; object-fit: cover; border-radius: 8px; }
+    .rw-thumbs button { position: absolute; top: -6px; right: -6px; width: 22px; height: 22px; border-radius: 50%; border: 0; background: var(--dark); color: #fff; font-size: 12px; cursor: pointer; }
     .rw-foot { display: flex; gap: 8px; justify-content: flex-end; padding: 16px 24px 22px; }
     .rw-foot button { padding: 11px 22px; border-radius: 999px; font: inherit; font-weight: 600; cursor: pointer; }
     .rw-cancel { background: #fff; border: 1.5px solid var(--border); }
@@ -302,6 +310,12 @@
       <label>후기 <span class="req">*</span>
         <textarea id="rwText" maxlength="2000" placeholder="10자 이상 적어주세요"></textarea>
       </label>
+      <div class="rw-photos">
+        <span class="rw-label">사진 <small>(선택, 최대 3장 · 자동으로 줄여서 올라갑니다)</small></span>
+        <label class="rw-add" for="rwFiles">＋ 사진 추가</label>
+        <input id="rwFiles" type="file" accept="image/*" multiple hidden onchange="addReviewPhotos(this)">
+        <div class="rw-thumbs" id="rwThumbs"></div>
+      </div>
       <label class="rw-check"><input type="checkbox" id="rwAgree"> 개인정보(이름) 수집·이용에 동의합니다 <small>— 후기 게시 목적, 삭제 요청 시까지 보관</small></label>
       <p class="rw-note">남겨주신 후기는 관리자 확인 후 게시됩니다.</p>
     </div>
@@ -399,10 +413,14 @@ async function loadLiveReviews() {
   if (!B || !B.enabled) return;
   try {
     const rows = await B.listApprovedReviews();
-    LIVE_REVIEWS = rows.map(r => ({ id: 'L-' + r.id, product: r.product, name: r.name, location: '홈페이지 작성',
+    LIVE_REVIEWS = rows.map(r => ({ id: 'L-' + r.id, liveId: r.id, photoCount: r.photoCount || 0, product: r.product, name: r.name, location: '홈페이지 작성',
       rating: r.rating, verified: false, text: r.text, date: fmtTs(r.createdAt), photos: [], reply: r.reply || '' }));
     renderRatingSummary(getReviews());
     renderReviews(currentFilter);
+    // 사진은 글을 먼저 보여준 뒤 불러옴
+    const withPhotos = LIVE_REVIEWS.filter(r => r.photoCount > 0).slice(0, 60);
+    await Promise.all(withPhotos.map(async r => { r.photos = await B.getReviewPhotos(r.liveId, r.photoCount); }));
+    if (withPhotos.length) renderReviews(currentFilter);
   } catch (e) { console.error('후기 불러오기 실패', e); }
 }
 if (window.LunaBoard) loadLiveReviews(); else window.addEventListener('lunaboard:ready', loadLiveReviews);
@@ -415,9 +433,25 @@ function rwToast(msg) {
 function openReviewModal() {
   if (!window.LunaBoard || !window.LunaBoard.enabled) { rwToast('후기 쓰기 연결을 준비 중입니다.'); return; }
   ['rwName','rwText'].forEach(id => document.getElementById(id).value = '');
+  RW_PHOTOS = []; drawReviewThumbs();
   document.getElementById('rwAgree').checked = false;
   document.getElementById('reviewModal').classList.add('open');
   document.body.style.overflow = 'hidden';
+}
+let RW_PHOTOS = [];
+async function addReviewPhotos(input) {
+  const files = [...input.files].filter(f => f.type.startsWith('image/'));
+  input.value = '';
+  for (const f of files) {
+    if (RW_PHOTOS.length >= 3) { rwToast('사진은 최대 3장까지 올릴 수 있습니다.'); break; }
+    try { RW_PHOTOS.push(await window.LunaBoard.shrinkPhoto(f)); }
+    catch (e) { console.error(e); rwToast('이 사진은 올릴 수 없습니다. 다른 사진을 골라주세요.'); }
+  }
+  drawReviewThumbs();
+}
+function drawReviewThumbs() {
+  document.getElementById('rwThumbs').innerHTML = RW_PHOTOS.map((src, i) =>
+    `<div><img src="${src}" alt="첨부 사진 ${i + 1}"><button type="button" aria-label="사진 빼기" onclick="RW_PHOTOS.splice(${i},1);drawReviewThumbs()">✕</button></div>`).join('');
 }
 function closeReviewModal() {
   document.getElementById('reviewModal').classList.remove('open');
@@ -434,7 +468,7 @@ async function submitReview() {
   const btn = document.getElementById('rwSubmit');
   btn.disabled = true; btn.textContent = '등록 중…';
   try {
-    await window.LunaBoard.createReview({ product, name, rating, text });
+    await window.LunaBoard.createReview({ product, name, rating, text, photos: RW_PHOTOS });
     closeReviewModal();
     rwToast('후기가 접수되었습니다. 관리자 확인 후 게시됩니다.');
   } catch (e) {
@@ -560,7 +594,7 @@ function renderCard(r) {
   const photoHTML = hasPhotos ? `
     <div class="rev-photos count-${Math.min(r.photos.length, 3)}">
       ${r.photos.slice(0,3).map(src => `
-        <div class="rev-photo-item" onclick="openLightbox('${src}')">
+        <div class="rev-photo-item" onclick="openLightbox(this.querySelector('img').src)">
           <img src="${src}" alt="후기 이미지" loading="lazy">
         </div>`).join('')}
     </div>` : '';

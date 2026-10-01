@@ -58,7 +58,9 @@ service cloud.firestore {
     // ── 후기: 누구나 작성, 관리자 승인 후 공개 ──
     match /reviews/{id} {
       allow read: if resource.data.status == 'approved' || isAdmin();
-      allow create: if request.resource.data.keys().hasOnly(['product','name','rating','text','status','createdAt'])
+      allow create: if request.resource.data.keys().hasOnly(['product','name','rating','text','photoCount','status','createdAt'])
+        && request.resource.data.photoCount is int
+        && request.resource.data.photoCount >= 0 && request.resource.data.photoCount <= 3
         && request.resource.data.product in ['pad','blanket','sofa','cushion','pillow','lunaon']
         && okStr(request.resource.data.name, 1, 20)
         && request.resource.data.rating is int
@@ -67,6 +69,26 @@ service cloud.firestore {
         && request.resource.data.status == 'pending'
         && request.resource.data.createdAt == request.time;
       allow update, delete: if isAdmin();
+    }
+
+    // ── 후기 사진: 줄인 JPEG(약 180KB) 문서 1장 = 사진 1장 ──
+    // 문서 이름 = {후기ID}_{0~2}, 후기와 같은 묶음으로 처음 만들 때만 허용, 승인된 후기만 공개
+    match /review_photos/{photoId} {
+      allow get: if isAdmin()
+        || get(/databases/$(database)/documents/reviews/$(resource.data.reviewId)).data.status == 'approved';
+      allow list: if isAdmin();
+      allow create: if request.resource.data.keys().hasOnly(['reviewId','idx','data'])
+        && photoId == request.resource.data.reviewId + '_' + string(request.resource.data.idx)
+        && request.resource.data.idx is int
+        && request.resource.data.idx >= 0 && request.resource.data.idx <= 2
+        && !exists(/databases/$(database)/documents/reviews/$(request.resource.data.reviewId))
+        && getAfter(/databases/$(database)/documents/reviews/$(request.resource.data.reviewId)).data.status == 'pending'
+        && request.resource.data.idx < getAfter(/databases/$(database)/documents/reviews/$(request.resource.data.reviewId)).data.photoCount
+        && request.resource.data.data is string
+        && request.resource.data.data.size() <= 350000
+        && request.resource.data.data.matches('^data:image/jpeg;base64,[A-Za-z0-9+/=]+$');
+      allow update: if false;
+      allow delete: if isAdmin();
     }
 
     // ── 사이트 설정 (홍보 영상 주소 등) ──

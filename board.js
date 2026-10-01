@@ -39,6 +39,23 @@ export function maskName(name) {
   return n[0] + '*'.repeat(Math.min(n.length - 1, 2));
 }
 
+// 사진: 화면에 넣기 전 형식 확인 (JPEG data URL만 허용)
+export function isSafePhoto(s) {
+  return typeof s === 'string' && s.length < 400000 && /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(s);
+}
+
+// 사진 줄이기: 긴 변 1000px, JPEG 품질 0.72부터 낮춰가며 약 180KB 이하로
+export async function shrinkPhoto(file, maxSide = 1000, maxBytes = 180000) {
+  const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  const scale = Math.min(1, maxSide / Math.max(bmp.width, bmp.height));
+  const c = document.createElement('canvas');
+  c.width = Math.round(bmp.width * scale); c.height = Math.round(bmp.height * scale);
+  c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+  let q = 0.72, url = c.toDataURL('image/jpeg', q);
+  while (url.length * 0.75 > maxBytes && q > 0.4) { q -= 0.08; url = c.toDataURL('image/jpeg', q); }
+  return url;
+}
+
 // 비밀번호 → 비밀글 문서 이름 (PBKDF2-SHA256, 10만 회 반복으로 무작위 대입을 느리게)
 async function secretKey(inquiryId, password) {
   const enc = new TextEncoder();
@@ -94,11 +111,23 @@ export const Board = {
       .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
   },
 
-  async createReview({ product, name, rating, text }) {
+  // photos: shrinkPhoto()로 줄인 JPEG data URL 배열 (최대 3장)
+  async createReview({ product, name, rating, text, photos = [] }) {
     if (!enabled) throw new Error('disabled');
     const ref = doc(collection(db, 'reviews'));
-    await setDoc(ref, { product, name: maskName(name), rating: Number(rating), text, status: 'pending', createdAt: serverTimestamp() });
+    const list = photos.slice(0, 3);
+    const batch = writeBatch(db);
+    batch.set(ref, { product, name: maskName(name), rating: Number(rating), text, photoCount: list.length, status: 'pending', createdAt: serverTimestamp() });
+    list.forEach((data, idx) => batch.set(doc(db, 'review_photos', `${ref.id}_${idx}`), { reviewId: ref.id, idx, data }));
+    await batch.commit();
     return ref.id;
+  },
+
+  // 후기 사진 불러오기 (승인된 후기 또는 관리자만 읽기 가능)
+  async getReviewPhotos(reviewId, count) {
+    if (!enabled || !count) return [];
+    const snaps = await Promise.all([...Array(Math.min(count, 3)).keys()].map(i => getDoc(doc(db, 'review_photos', `${reviewId}_${i}`))));
+    return snaps.filter(s => s.exists()).map(s => s.data().data).filter(isSafePhoto);
   },
 
   // ── 사이트 설정 (홍보 영상 주소) ──
@@ -141,9 +170,16 @@ export const Board = {
     return snap.docs.map(d => ({ id: d.id, ...d.data() }));
   },
   adminSetReview(id, data) { return updateDoc(doc(db, 'reviews', id), data); },
-  adminDeleteReview(id) { return deleteDoc(doc(db, 'reviews', id)); },
+  async adminDeleteReview(id, photoCount = 0) {
+    const batch = writeBatch(db);
+    batch.delete(doc(db, 'reviews', id));
+    for (let i = 0; i < Math.min(photoCount, 3); i++) batch.delete(doc(db, 'review_photos', `${id}_${i}`));
+    await batch.commit();
+  },
   adminSaveSettings(data) { return setDoc(doc(db, 'settings', 'site'), data, { merge: true }); }
 };
 
+Board.shrinkPhoto = shrinkPhoto;
+Board.isSafePhoto = isSafePhoto;
 window.LunaBoard = Board;
 window.dispatchEvent(new Event('lunaboard:ready'));

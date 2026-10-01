@@ -26,18 +26,25 @@ const DEFAULT_VIDEO_ID = 'umttGaTyZMI';
 function ytEmbed(id) {
   return `<iframe width="100%" height="100%" src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&playsinline=1" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius:8px;"></iframe>`;
 }
-function openVideoModal(e) {
+// 유튜브 주소에서 영상 ID 추출 (watch?v= / youtu.be / shorts / embed / live 모두 지원)
+function ytIdFrom(url) {
+  const m = String(url || '').match(/(?:youtube(?:-nocookie)?\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/);
+  return m ? m[1] : '';
+}
+function openVideoModal(e, brand) {
   if (e) e.preventDefault();
-  // localStorage에 등록된 영상이 있으면 우선 사용, 없으면 기본 영상
-  // 실시간 관리(admin-live.html)에서 저장한 주소 → 없으면 이 브라우저에 저장된 주소 → 없으면 기본 영상
-  const videoUrl = window.LIVE_VIDEO_URL || localStorage.getItem('lunacool_video_url') || '';
+  // 루나온 영상: 실시간 관리에서 저장한 루나온 주소만 사용
+  // 루나쿨 영상: 실시간 관리 주소 → 이 브라우저에 저장된 주소 → 기본 영상
+  const videoUrl = brand === 'lunaon'
+    ? (window.LIVE_VIDEO_URL_LUNAON || '')
+    : (window.LIVE_VIDEO_URL || localStorage.getItem('lunacool_video_url') || '');
   const player = document.getElementById('vmPlayer');
   if (player) {
     if (!videoUrl) {
       // 기본 유튜브 영상
       player.innerHTML = ytEmbed(DEFAULT_VIDEO_ID);
     } else if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
-      const ytId = videoUrl.match(/(?:v=|youtu\.be\/)([^&?]+)/)?.[1];
+      const ytId = ytIdFrom(videoUrl);
       if (ytId) player.innerHTML = ytEmbed(ytId);
     } else {
       player.innerHTML = `<video controls autoplay playsinline style="width:100%;height:100%;border-radius:8px;background:#000;"><source src="${videoUrl}" type="video/mp4">브라우저가 영상을 지원하지 않습니다.</video>`;

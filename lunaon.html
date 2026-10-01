@@ -65,6 +65,17 @@
     .gallery .tall { grid-row: span 2; }
     .gallery .wide { grid-column: span 2; }
 
+    /* ── 루나온 영상 ── */
+    .lo-video-wrap { background: #3E4146; color: #fff; padding: clamp(56px, 7vw, 96px) var(--gutter); margin-top: clamp(64px, 8vw, 104px); }
+    .lo-video-wrap[hidden] { display: none; }
+    .lo-video-grid { display: grid; grid-template-columns: 1fr 1.4fr; gap: clamp(28px, 5vw, 72px); align-items: center; }
+    .lo-video-wrap h2 { font-size: clamp(26px, 3vw, 38px); margin-bottom: 14px; }
+    .lo-video-wrap p { color: rgba(255,255,255,.75); margin-bottom: 24px; }
+    .lo-video-thumb { position: relative; display: block; width: 100%; border: 0; padding: 0; border-radius: 12px; overflow: hidden; cursor: pointer; background: #000; }
+    .lo-video-thumb img { width: 100%; aspect-ratio: 16/9; object-fit: cover; opacity: .9; }
+    .lo-play { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 68px; height: 68px; border-radius: 50%; background: var(--warm-grad); color: #3a2414; display: grid; place-items: center; font-size: 22px; }
+    @media (max-width: 900px) { .lo-video-grid { grid-template-columns: 1fr; } }
+
     /* ── 상품 정보 · 주의사항 ── */
     .info { padding: clamp(64px, 8vw, 104px) var(--gutter); }
     .info .wrap { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 5vw, 72px); }
@@ -200,6 +211,20 @@
   </div>
 </section>
 
+<section class="lo-video-wrap" data-lo-video hidden>
+  <div class="wrap lo-video-grid">
+    <div>
+      <h2>영상으로 보는 루나온</h2>
+      <p>양면 색감과 두께를 영상으로 확인해 보세요.</p>
+      <button type="button" class="btn btn-warm" onclick="openVideoModal(event, 'lunaon')">영상 보기</button>
+    </div>
+    <button type="button" class="lo-video-thumb" onclick="openVideoModal(event, 'lunaon')" aria-label="루나온 영상 재생">
+      <img data-yt-thumb src="assets/lunaon/photo/lo-9403.jpg" alt="" loading="lazy">
+      <span class="lo-play" aria-hidden="true">▶</span>
+    </button>
+  </div>
+</section>
+
 <section class="info">
   <div class="wrap">
     <div>
@@ -274,7 +299,36 @@
   <p class="copy">© 2026 (주)테란. 루나쿨(LUNA COOL) · 루나온(LUNA ON)</p>
 </footer>
 
+<!-- 영상 모달 -->
+<div class="video-modal-bg" id="videoModalBg" onclick="closeVideoModal(event)">
+  <div class="video-modal">
+    <button class="vm-close" onclick="closeVideoModal()" aria-label="영상 닫기">✕</button>
+    <div class="vm-player" id="vmPlayer"></div>
+  </div>
+</div>
+
 <script src="links.js"></script>
 <script src="script.js"></script>
+<script src="firebase-config.js"></script>
+<script type="module" src="board.js"></script>
+<script>
+  // 홍보 영상 주소: 실시간 관리(admin-live.html)에서 저장한 유튜브 주소 사용
+  window.addEventListener('lunaboard:ready', async function () {
+    if (!window.LunaBoard.enabled) return;
+    try {
+      var s = await window.LunaBoard.getSettings();
+      if (s.videoUrl) window.LIVE_VIDEO_URL = s.videoUrl;
+      var id = ytIdFrom(s.videoUrlLunaon || '');
+      if (id) {
+        window.LIVE_VIDEO_URL_LUNAON = s.videoUrlLunaon;
+        document.querySelectorAll('[data-lo-video]').forEach(function (sec) {
+          var img = sec.querySelector('[data-yt-thumb]');
+          if (img) img.src = 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg';
+          sec.hidden = false;
+        });
+      }
+    } catch (e) {}
+  });
+</script>
 </body>
 </html>

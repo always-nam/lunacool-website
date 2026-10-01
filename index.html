@@ -106,6 +106,7 @@
     html[data-season="winter"] .o-lc-goods,
     html[data-season="winter"] .o-reviews,
     html[data-season="winter"] .o-video,
+    html[data-season="summer"] .o-lo-video,
     html[data-season="summer"] .o-lo-story,
     html[data-season="summer"] .o-lo-sizes { display: none !important; }
 
@@ -164,6 +165,8 @@
     .video-text p { color: var(--s-band-mid); }
     .video-player-wrap { border-radius: 10px; overflow: hidden; }
     html[data-season="winter"] .video-text .btn-ink { background: #fff; color: var(--dark); }
+    .lo-video-logo { height: 30px; width: auto; margin-bottom: 18px; }
+    .video-section[hidden] { display: none !important; }
 
     @media (max-width: 1000px) {
       .duo { flex-direction: column; height: auto; max-height: none; }
@@ -367,6 +370,25 @@
   </div>
 </section>
 
+  <!-- 루나온 영상 (유튜브 주소가 등록되면 나타남) -->
+  <section class="video-section o-lo-video lo-video" data-lo-video hidden>
+    <div class="video-section-inner">
+      <div class="video-text">
+        <img class="lo-video-logo" src="assets/lunaon/lunaon-logo.svg" alt="루나온">
+        <h2>루나온 영상</h2>
+        <p>겨울밤 루나온을 영상으로 확인해 보세요.</p>
+        <button type="button" class="btn btn-warm" onclick="openVideoModal(event, 'lunaon')">영상 보기</button>
+      </div>
+      <div class="video-player-wrap" onclick="openVideoModal(event, 'lunaon')">
+        <div class="video-thumbnail">
+          <img data-yt-thumb src="assets/lunaon/photo/lo-9403.jpg" alt="루나온 영상 미리보기" loading="lazy">
+          <div class="video-overlay"></div>
+          <div class="play-btn"><div class="play-icon">▶</div><div class="play-ripple"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="video-section o-video">
     <div class="video-section-inner">
       <div class="video-text">
@@ -446,10 +468,22 @@
 <script src="firebase-config.js"></script>
 <script type="module" src="board.js"></script>
 <script>
-  // 홍보 영상 주소: 실시간 관리에서 저장한 값이 있으면 사용
+  // 홍보 영상 주소: 실시간 관리(admin-live.html)에서 저장한 유튜브 주소 사용
   window.addEventListener('lunaboard:ready', async function () {
     if (!window.LunaBoard.enabled) return;
-    try { var s = await window.LunaBoard.getSettings(); if (s.videoUrl) window.LIVE_VIDEO_URL = s.videoUrl; } catch (e) {}
+    try {
+      var s = await window.LunaBoard.getSettings();
+      if (s.videoUrl) window.LIVE_VIDEO_URL = s.videoUrl;
+      var id = ytIdFrom(s.videoUrlLunaon || '');
+      if (id) {
+        window.LIVE_VIDEO_URL_LUNAON = s.videoUrlLunaon;
+        document.querySelectorAll('[data-lo-video]').forEach(function (sec) {
+          var img = sec.querySelector('[data-yt-thumb]');
+          if (img) img.src = 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg';
+          sec.hidden = false;
+        });
+      }
+    } catch (e) {}
   });
 </script>
 <script>

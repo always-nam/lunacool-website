@@ -259,20 +259,20 @@
 <!-- ── 로그인 화면 ── -->
 <div id="loginScreen">
   <div class="login-box">
-    <div class="logo">🌙 루나쿨</div>
-    <div class="sub">관리자 페이지 로그인</div>
-    <input type="text"     id="loginId"  placeholder="아이디" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false">
+    <div class="logo">🌙 루나쿨 · 루나온</div>
+    <div class="sub">관리자 로그인 (Firebase 관리자 계정)</div>
+    <input type="email"    id="loginId"  placeholder="관리자 이메일" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false">
     <input type="password" id="loginPw"  placeholder="비밀번호" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false"
            onkeydown="if(event.key==='Enter') doLogin()">
-    <button onclick="doLogin()">로그인</button>
-    <div class="login-err" id="loginErr">아이디 또는 비밀번호가 올바르지 않습니다.</div>
+    <button onclick="doLogin()" id="btnLogin">로그인</button>
+    <div class="login-err" id="loginErr">이메일 또는 비밀번호가 올바르지 않습니다.</div>
   </div>
 </div>
 
 <!-- ── 관리자 앱 ── -->
 <div id="adminApp">
   <div class="adm-header">
-    <div class="brand">🌙 루나쿨 <span>관리자</span></div>
+    <div class="brand">🌙 루나쿨 · 루나온 <span>관리자</span></div>
     <div class="adm-header-right">
       <a href="admin-live.html">실시간 문의·후기 관리 →</a>
       <a href="reviews.html" target="_blank">후기 페이지 보기 →</a>
@@ -301,6 +301,7 @@
         <option value="sofa">소파패드</option>
         <option value="cushion">방석</option>
         <option value="pillow">베개커버</option>
+        <option value="lunaon">루나온 이불</option>
       </select>
       <input type="text" id="searchInput" placeholder="이름 또는 후기 내용 검색..." oninput="renderTable()">
     </div>
@@ -468,6 +469,7 @@
             <option value="sofa">냉감 소파패드</option>
             <option value="cushion">냉감 방석</option>
             <option value="pillow">냉감 베개커버</option>
+            <option value="lunaon">루나온 그래핀 발열 이불</option>
           </select>
         </div>
         <div class="form-group">
@@ -539,32 +541,41 @@
 
 <script src="reviews-data.js"></script>
 <script src="inquiry-data.js"></script>
+<script src="firebase-config.js"></script>
+<script type="module" src="board.js"></script>
 <script>
-// ── 인증 ──
-const ADMIN_ID = 'lunacool';
-const ADMIN_PW = 'luna2025!';
-
-function doLogin() {
-  // 휴대폰 자동 대문자·앞뒤 공백 때문에 로그인이 안 되는 경우 방지
-  const id = document.getElementById('loginId').value.trim().toLowerCase();
-  const pw = document.getElementById('loginPw').value.trim();
-  if (id === ADMIN_ID && pw === ADMIN_PW) {
-    sessionStorage.setItem('lc_admin', '1');
+// ── 인증: Firebase 관리자 계정 (admin-live.html과 같은 계정) ──
+// 코드에 비밀번호를 적지 않습니다. 관리자 여부는 Firebase 보안 규칙이 판단합니다.
+function showLoginError(msg) {
+  const el = document.getElementById('loginErr');
+  el.textContent = msg; el.style.display = 'block';
+}
+async function doLogin() {
+  const B = window.LunaBoard;
+  if (!B || !B.enabled) { showLoginError('로그인 연결을 준비 중입니다. 잠시 후 다시 시도해 주세요.'); return; }
+  const email = document.getElementById('loginId').value.trim();
+  const pw = document.getElementById('loginPw').value;
+  const btn = document.getElementById('btnLogin');
+  btn.disabled = true;
+  try { await B.login(email, pw); }
+  catch (e) { showLoginError('이메일 또는 비밀번호가 올바르지 않습니다.'); }
+  btn.disabled = false;
+}
+async function doLogout() {
+  try { await window.LunaBoard.logout(); } catch (e) {}
+  location.reload();
+}
+window.addEventListener('lunaboard:ready', function () {
+  const B = window.LunaBoard;
+  if (!B.enabled) { showLoginError('Firebase 연결 정보가 없습니다.'); return; }
+  B.onAuth(async function (user) {
+    if (!user) return;
+    if (!(await B.isAdmin(user.uid))) { showLoginError('관리자로 등록되지 않은 계정입니다.'); await B.logout(); return; }
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('adminApp').style.display = 'block';
     init();
-  } else {
-    document.getElementById('loginErr').style.display = 'block';
-  }
-}
-function doLogout() {
-  sessionStorage.removeItem('lc_admin');
-  location.reload();
-}
-if (sessionStorage.getItem('lc_admin')) {
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('adminApp').style.display = 'block';
-}
+  });
+});
 
 // ── 데이터 ──
 function getReviews() {
@@ -582,7 +593,7 @@ function resetToDefault() {
   }
 }
 
-const PROD_NAMES = { pad:'냉감 패드', blanket:'차렵이불', sofa:'소파패드', cushion:'방석', pillow:'베개커버' };
+const PROD_NAMES = { pad:'냉감 패드', blanket:'차렵이불', sofa:'소파패드', cushion:'방석', pillow:'베개커버', lunaon:'루나온 이불' };
 
 // ── 통계 ──
 function renderStats() {
@@ -646,7 +657,6 @@ function init() {
   renderTable();
   renderInqTable();
 }
-if (sessionStorage.getItem('lc_admin')) init();
 
 // ── 모달 ──
 let editId = null;

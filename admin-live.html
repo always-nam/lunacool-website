@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>실시간 관리 — 루나쿨 · 루나온</title>
+  <title>통합 관리 — 루나쿨 · 루나온</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
   <style>
     :root { --ink:#2B333C; --mid:#5C6670; --line:#E3E5E8; --paper:#F4F5F6; --cool:#2F6FD6; --warm:#C2521F; --ok:#2E8B57; --bad:#D64545; }
@@ -46,6 +46,8 @@
     .tag.done, .tag.approved { background: #E7F4EC; color: var(--ok); }
     .tag.hidden { background: #EEE; color: var(--mid); }
     .tag.secret { background: #FFF2E6; color: var(--warm); }
+    .tag.brand-lo { background: #FFF0E3; color: #C2521F; }
+    .tag.brand-lc { background: #E8F1FD; color: #2F6FD6; }
     .item h3 { font-size: 16px; margin-bottom: 6px; }
     .item .body { white-space: pre-wrap; background: var(--paper); border-radius: 8px; padding: 12px 14px; margin: 8px 0 12px; }
     .item textarea { width: 100%; min-height: 90px; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 8px; resize: vertical; margin-bottom: 10px; }
@@ -86,11 +88,11 @@
 <div id="vApp" hidden>
   <header>
     <div class="wrap">
-      <strong>루나쿨 · 루나온 실시간 관리</strong>
+      <strong>루나쿨 · 루나온 통합 관리</strong>
       <nav>
         <a href="inquiry.html" target="_blank">문의 게시판</a>
         <a href="reviews.html" target="_blank">후기 페이지</a>
-        <a href="admin.html">샘플 데이터 관리</a>
+        <a href="admin.html">기존 후기·문의 데이터 관리</a>
         <button class="btn btn-line" id="btnLogout">로그아웃</button>
       </nav>
     </div>
@@ -104,6 +106,7 @@
 
     <section id="tabInq">
       <div class="filters">
+        <select id="fInqBrand"><option value="all">두 브랜드 전체</option><option value="lunaon">루나온</option><option value="lunacool">루나쿨</option><option value="none">상품 선택 안 함</option></select>
         <select id="fInqStatus"><option value="all">전체</option><option value="wait" selected>답변대기</option><option value="done">답변완료</option></select>
         <button class="btn btn-line" id="btnReloadInq">새로고침</button>
       </div>
@@ -112,6 +115,7 @@
 
     <section id="tabRev" hidden>
       <div class="filters">
+        <select id="fRevBrand"><option value="all">두 브랜드 전체</option><option value="lunaon">루나온</option><option value="lunacool">루나쿨</option></select>
         <select id="fRevStatus"><option value="all">전체</option><option value="pending" selected>승인 대기</option><option value="approved">게시 중</option><option value="hidden">숨김</option></select>
         <button class="btn btn-line" id="btnReloadRev">새로고침</button>
       </div>
@@ -184,11 +188,13 @@ async function loadInq() {
     renderInq();
   } catch (e) { console.error(e); toast('문의를 불러오지 못했습니다.'); }
 }
+const inqBrand = i => !i.product ? 'none' : (i.product.startsWith('루나온') ? 'lunaon' : 'lunacool');
+const BRAND_TAG = { lunaon: '<span class="tag brand-lo">루나온</span>', lunacool: '<span class="tag brand-lc">루나쿨</span>', none: '' };
 function renderInq() {
-  const f = $('fInqStatus').value;
+  const f = $('fInqStatus').value, fb = $('fInqBrand').value;
   const wait = INQ.filter(i => i.status === 'wait').length;
   $('cntInq').hidden = !wait; $('cntInq').textContent = wait;
-  const list = INQ.filter(i => f === 'all' || i.status === f);
+  const list = INQ.filter(i => (f === 'all' || i.status === f) && (fb === 'all' || inqBrand(i) === fb));
   if (!list.length) { $('inqList').innerHTML = '<div class="empty">해당하는 문의가 없습니다.</div>'; return; }
   $('inqList').innerHTML = list.map(i => {
     const sec = i.secret ? SECRETS[i.id] : null;
@@ -198,6 +204,7 @@ function renderInq() {
     return `<div class="item" data-id="${esc(i.id)}">
       <div class="meta">
         <span class="tag ${i.status}">${i.status === 'done' ? '답변완료' : '답변대기'}</span>
+        ${BRAND_TAG[inqBrand(i)]}
         ${i.secret ? '<span class="tag secret">🔒 비밀글</span>' : ''}
         <span>${esc(CAT[i.cat] || i.cat)}</span>${i.product ? `<span>· ${esc(i.product)}</span>` : ''}
         <span>· ${esc(i.name)}</span><span>· ${esc(fmtDate(i.createdAt))}</span>
@@ -213,6 +220,7 @@ function renderInq() {
   }).join('');
 }
 $('fInqStatus').onchange = renderInq;
+$('fInqBrand').onchange = renderInq;
 $('btnReloadInq').onclick = loadInq;
 $('inqList').addEventListener('click', async e => {
   const act = e.target.dataset.act; if (!act) return;
@@ -238,15 +246,16 @@ async function loadRev() {
   catch (e) { console.error(e); toast('후기를 불러오지 못했습니다.'); }
 }
 function renderRev() {
-  const f = $('fRevStatus').value;
+  const f = $('fRevStatus').value, fb = $('fRevBrand').value;
   const pend = REV.filter(r => r.status === 'pending').length;
   $('cntRev').hidden = !pend; $('cntRev').textContent = pend;
-  const list = REV.filter(r => f === 'all' || r.status === f);
+  const list = REV.filter(r => (f === 'all' || r.status === f) && (fb === 'all' || (fb === 'lunaon') === (r.product === 'lunaon')));
   if (!list.length) { $('revList').innerHTML = '<div class="empty">해당하는 후기가 없습니다.</div>'; return; }
   const LABEL = { pending:'승인 대기', approved:'게시 중', hidden:'숨김' };
   $('revList').innerHTML = list.map(r => `<div class="item" data-id="${esc(r.id)}">
       <div class="meta">
         <span class="tag ${r.status}">${LABEL[r.status] || r.status}</span>
+        ${r.product === 'lunaon' ? BRAND_TAG.lunaon : BRAND_TAG.lunacool}
         <span>${esc(PROD[r.product] || r.product)}</span><span>· ${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
         <span>· ${esc(r.name)}</span><span>· ${esc(fmtDate(r.createdAt))}</span>
       </div>
@@ -271,6 +280,7 @@ async function loadRevPhotos() {
   }
 }
 $('fRevStatus').onchange = () => { renderRev(); loadRevPhotos(); };
+$('fRevBrand').onchange = () => { renderRev(); loadRevPhotos(); };
 $('btnReloadRev').onclick = loadRev;
 $('revList').addEventListener('click', async e => {
   const act = e.target.dataset.act; if (!act) return;

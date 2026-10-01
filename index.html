@@ -81,7 +81,8 @@
     .side .go { display: inline-flex; align-items: center; padding: 13px 22px; border-radius: 999px; font-weight: 600; font-size: 15px; }
     .side.cool .go { background: var(--dark); color: #fff; }
     .side.warm .go { background: var(--warm-grad); color: #3a2414; }
-    @container (max-width: 470px) { .side-copy p { display: none; } }
+    /* PC에서 좁아진 쪽만 서브 문구 숨김 (휴대폰은 항상 보임) */
+    @media (min-width: 1001px) { @container (max-width: 470px) { .side-copy p { display: none; } } }
 
     /* 계절 스위치 — 분할선 위 가운데 */
     .season-switch {
@@ -170,8 +171,9 @@
 
     @media (max-width: 1000px) {
       .duo { flex-direction: column; height: auto; max-height: none; }
-      .side { flex: none; min-height: 44svh; }
-      html[data-season="summer"] .side.cool, html[data-season="winter"] .side.warm { order: -1; min-height: 74svh; }
+      .side { flex: none; min-height: 78svh; }
+      /* 휴대폰: 스위치로 고른 브랜드 하나만 보임 */
+      html[data-season="summer"] .side.warm, html[data-season="winter"] .side.cool { display: none; }
       .season-switch { top: 16px; }
       .lo-story .wrap { grid-template-columns: 1fr; }
       .size-row { grid-template-columns: 1fr; }
@@ -229,7 +231,7 @@
     <div class="side-copy">
       <img class="brand-logo" src="assets/lunacool/lunacool-logo-h.png" alt="루나쿨">
       <h1>닿는 순간,<br>시원함이 시작됩니다</h1>
-      <p>QMAX 550G 냉감 원단으로 만든 패드, 차렵이불, 소파패드, 방석, 베개커버.</p>
+      <p>달빛의 차가움을 담았습니다.<br>열대야에도 산뜻하게 잠드는 여름 침구.</p>
       <span class="go">루나쿨 상품 보기</span>
     </div>
   </a>
@@ -238,7 +240,7 @@
     <div class="side-copy">
       <img class="brand-logo" src="assets/lunaon/lunaon-logo.svg" alt="루나온">
       <h1>겨울밤,<br>온기를 켜다</h1>
-      <p>그래핀 충전재를 넣은 양면 이불. 퀸과 슈퍼싱글 두 가지 크기가 있습니다.</p>
+      <p>차가운 방에 포근함을 더하는 그래핀 이불.<br>그날의 기분대로 뒤집어 덮는 양면입니다.</p>
       <span class="go">루나온 둘러보기</span>
     </div>
   </a>
@@ -251,7 +253,7 @@
       <div>
         <img class="brand" src="assets/lunaon/lunaon-logo.svg" alt="루나온">
         <h2>한쪽은 차콜,<br>한쪽은 라이트그레이</h2>
-        <p>루나온은 뒤집어 덮는 양면 이불입니다. 방 분위기나 그날 기분에 맞춰 위로 올 면을 고르세요.</p>
+        <p>오늘은 차분한 차콜, 내일은 환한 라이트그레이. 뒤집어 덮기만 하면 방의 분위기가 달라집니다.</p>
         <p>겉감은 폴리에스테르 100%, 안쪽 충전재에는 그래핀솜을 넣었습니다.</p>
       </div>
       <div class="pics">

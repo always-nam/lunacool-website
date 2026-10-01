@@ -261,8 +261,8 @@
   <div class="login-box">
     <div class="logo">🌙 루나쿨</div>
     <div class="sub">관리자 페이지 로그인</div>
-    <input type="text"     id="loginId"  placeholder="아이디" autocomplete="username">
-    <input type="password" id="loginPw"  placeholder="비밀번호" autocomplete="current-password"
+    <input type="text"     id="loginId"  placeholder="아이디" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false">
+    <input type="password" id="loginPw"  placeholder="비밀번호" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false"
            onkeydown="if(event.key==='Enter') doLogin()">
     <button onclick="doLogin()">로그인</button>
     <div class="login-err" id="loginErr">아이디 또는 비밀번호가 올바르지 않습니다.</div>
@@ -545,8 +545,9 @@ const ADMIN_ID = 'lunacool';
 const ADMIN_PW = 'luna2025!';
 
 function doLogin() {
-  const id = document.getElementById('loginId').value;
-  const pw = document.getElementById('loginPw').value;
+  // 휴대폰 자동 대문자·앞뒤 공백 때문에 로그인이 안 되는 경우 방지
+  const id = document.getElementById('loginId').value.trim().toLowerCase();
+  const pw = document.getElementById('loginPw').value.trim();
   if (id === ADMIN_ID && pw === ADMIN_PW) {
     sessionStorage.setItem('lc_admin', '1');
     document.getElementById('loginScreen').style.display = 'none';

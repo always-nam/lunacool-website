@@ -282,3 +282,14 @@
 - ⚠ Firestore 연결 후 페이지가 계속 연결을 유지하므로 자동 테스트는 `networkidle` 대신 `load` 기준으로 변경
 - 남은 일: 관리자 계정 추가(대표님이 비밀번호 직접 입력) → UID를 admins 컬렉션에 등록 → 관리자 기능 실제 테스트 → 테스트 글 3건 삭제
   - 테스트 글 ID: 문의 h4uQJxBtsX9pks4Uu5rS(공개)·dGzmOxrT0Sj9tu7807NU(비밀), 후기 QFY1FYDMhsFGYpq7Hn5P + 사진 후기 1건
+
+---
+
+## 2026-10-01 (6) — 관리자 등록
+
+- 관리자 UID `psP9OkMirHRtl5fWcKyH9AKH8kw2` (대표님이 Authentication에 직접 계정 생성)
+- 콘솔 「컬렉션 시작」 창이 Chrome에서 멈춰서 admins 문서 대신 **규칙의 isAdmin() UID 목록**에 등록 → 규칙 재게시(4:25)
+  - board.js `isAdmin()`: admins 문서 확인 → 「비밀글 목록 1건 조회 허용 여부」로 관리자 판별
+  - 콘솔 규칙과 로컬 firestore.rules는 주석 1줄만 다름(기능 동일)
+- Authentication 승인된 도메인에 `always-nam.github.io` 추가 (실사이트에서 관리자 로그인 가능하게)
+- 방문자 쪽 차단 재확인: 비밀글 목록·설정 변경·후기 전체 목록 모두 차단, 방문자 관리자 판별 false

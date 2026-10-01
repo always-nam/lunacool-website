@@ -141,8 +141,10 @@ export const Board = {
   onAuth(cb) { if (enabled) onAuthStateChanged(auth, cb); else cb(null); },
   login(email, pw) { return signInWithEmailAndPassword(auth, email, pw); },
   logout() { return signOut(auth); },
+  // 관리자 확인: 관리자만 볼 수 있는 비밀글 목록을 1건 조회해 보고, 허용되면 관리자
   async isAdmin(uid) {
-    try { return (await getDoc(doc(db, 'admins', uid))).exists(); } catch (e) { return false; }
+    try { await getDocs(query(collection(db, 'inquiry_secrets'), limit(1))); return true; }
+    catch (e) { return false; }
   },
   async adminListSecrets() {
     const snap = await getDocs(collection(db, 'inquiry_secrets'));

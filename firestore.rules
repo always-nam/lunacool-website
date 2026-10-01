@@ -6,15 +6,17 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // 관리자: 아래 UID 목록(Authentication 사용자 UID) 또는 admins/{UID} 문서가 있는 계정
     function isAdmin() {
       return request.auth != null
-        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+        && (request.auth.uid in ['psP9OkMirHRtl5fWcKyH9AKH8kw2']
+            || exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
     }
     function okStr(v, minLen, maxLen) {
       return v is string && v.size() >= minLen && v.size() <= maxLen;
     }
 
-    // 관리자 명단: 콘솔에서만 추가 (admins/{관리자 UID} 문서 하나 만들기)
+    // 관리자 추가 방법: 위 isAdmin()의 UID 목록에 넣거나, 콘솔에서 admins/{관리자 UID} 문서 만들기
     match /admins/{uid} {
       allow read: if request.auth != null && request.auth.uid == uid;
       allow write: if false;

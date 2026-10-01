@@ -19,7 +19,9 @@
 1. 왼쪽 메뉴 「Authentication」 → 시작하기 → 「이메일/비밀번호」 사용 설정
 2. 「사용자」 탭 → 사용자 추가 → 관리자 이메일·비밀번호 입력 (기존 사이트 비밀번호와 다른 것으로)
 3. 만들어진 사용자의 **사용자 UID** 복사
-4. Firestore Database → 「컬렉션 시작」 → 컬렉션 ID `admins` → 문서 ID에 **UID 붙여넣기** → 필드 `name`(문자열) = `남대표` → 저장
+4. firestore.rules의 `isAdmin()` 안 UID 목록에 추가 → 콘솔 규칙 탭에 다시 게시
+   (현재 등록: psP9OkMirHRtl5fWcKyH9AKH8kw2 — 2026-10-01)
+5. Authentication → 설정 → 승인된 도메인에 실제 사이트 주소 추가 (현재: always-nam.github.io 추가됨)
 
 ## 4. 확인 (Claude와 같이)
 - `admin-live.html` 로그인 → 상품문의 / 후기 승인 / 홍보 영상 탭이 보이면 연결 성공

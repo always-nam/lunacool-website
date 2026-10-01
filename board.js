@@ -7,7 +7,7 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js';
 import {
   getFirestore, collection, doc, writeBatch, getDocs, getDoc, setDoc, updateDoc, deleteDoc,
-  query, where, orderBy, limit, serverTimestamp
+  query, where, orderBy, limit, serverTimestamp, Timestamp
 } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js';
 import {
   getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged
@@ -112,12 +112,13 @@ export const Board = {
   },
 
   // photos: shrinkPhoto()로 줄인 JPEG data URL 배열 (최대 3장)
-  async createReview({ product, name, rating, text, photos = [] }) {
+  async createReview({ product, name, rating, text, photos = [], location = '' }) {
     if (!enabled) throw new Error('disabled');
     const ref = doc(collection(db, 'reviews'));
     const list = photos.slice(0, 3);
     const batch = writeBatch(db);
-    batch.set(ref, { product, name: maskName(name), rating: Number(rating), text, photoCount: list.length, status: 'pending', createdAt: serverTimestamp() });
+    const loc = ['스마트스토어 구매', '쿠팡 구매', '카카오메이커스 구매', '홈페이지 작성'].includes(location) ? location : '홈페이지 작성';
+    batch.set(ref, { product, name: maskName(name), rating: Number(rating), text, location: loc, photoCount: list.length, status: 'pending', createdAt: serverTimestamp() });
     list.forEach((data, idx) => batch.set(doc(db, 'review_photos', `${ref.id}_${idx}`), { reviewId: ref.id, idx, data }));
     await batch.commit();
     return ref.id;
@@ -178,7 +179,61 @@ export const Board = {
     for (let i = 0; i < Math.min(photoCount, 3); i++) batch.delete(doc(db, 'review_photos', `${id}_${i}`));
     await batch.commit();
   },
-  adminSaveSettings(data) { return setDoc(doc(db, 'settings', 'site'), data, { merge: true }); }
+  adminSaveSettings(data) { return setDoc(doc(db, 'settings', 'site'), data, { merge: true }); },
+
+  // ── 관리자: 후기 직접 추가 (바로 게시) ──
+  async adminCreateReview({ product, name, location, rating, text, verified, reply, photos = [] }) {
+    const ref = doc(collection(db, 'reviews'));
+    const list = photos.filter(isSafePhoto).slice(0, 3);
+    const batch = writeBatch(db);
+    batch.set(ref, { product, name, location: location || '', rating: Number(rating), text, verified: !!verified, reply: reply || '',
+      photoCount: list.length, status: 'approved', byAdmin: true, createdAt: serverTimestamp() });
+    list.forEach((data, idx) => batch.set(doc(db, 'review_photos', `${ref.id}_${idx}`), { reviewId: ref.id, idx, data }));
+    await batch.commit();
+    return ref.id;
+  },
+  // 관리자: 문의 제목·내용 수정 (비밀글이면 비밀 문서를 수정)
+  async adminEditInquiry(inq, { title, content }, secretKeyId) {
+    if (inq.secret) { if (secretKeyId) await updateDoc(doc(db, 'inquiry_secrets', secretKeyId), { title, content }); }
+    else await updateDoc(doc(db, 'inquiries', inq.id), { title, content });
+  },
+
+  // ── 관리자: 기존 데이터(reviews-data.js / inquiry-data.js) 1회 이전 ──
+  // 같은 문서 이름(legacy-r-번호 / legacy-q-번호)으로 저장하므로 여러 번 실행해도 중복되지 않음
+  async adminMigrateLegacy(seedReviews, seedInquiries, onProgress = () => {}) {
+    const toTs = (d, idx) => {
+      const m = String(d || '').match(/(\d{4})\.(\d{1,2})\.(\d{1,2})/);
+      const base = m ? new Date(+m[1], +m[2] - 1, +m[3], 12, 0, 0) : new Date(2026, 0, 1, 12);
+      return Timestamp.fromDate(new Date(base.getTime() - idx * 1000));
+    };
+    const ops = [];
+    seedReviews.forEach((r, i) => ops.push([doc(db, 'reviews', 'legacy-r-' + r.id), {
+      product: r.product, name: r.name, location: r.location || '', rating: Number(r.rating) || 5,
+      verified: r.verified !== false, text: r.text || '', date: r.date || '', photos: (r.photos || []).filter(p => typeof p === 'string' && !p.startsWith('data:')),
+      reply: r.reply || '', photoCount: 0, status: 'approved', legacy: true, order: i, createdAt: toTs(r.date, i)
+    }]));
+    for (let i = 0; i < seedInquiries.length; i++) {
+      const q = seedInquiries[i]; const id = 'legacy-q-' + q.id;
+      const lockable = q.secret && q.pw;
+      const base = { cat: q.cat, product: q.product || '', name: q.name, secret: !!lockable, status: q.status || 'wait',
+        date: q.date || '', answerDate: q.answerDate || '', legacy: true, order: i, createdAt: toTs(q.date, i) };
+      if (lockable) {
+        ops.push([doc(db, 'inquiries', id), { ...base, title: '', content: '' }]);
+        const key = await secretKey(id, String(q.pw));
+        ops.push([doc(db, 'inquiry_secrets', key), { inquiryId: id, title: q.title, content: q.content, name: q.name,
+          answer: q.answer || '', answerDate: q.answerDate || '', legacy: true, createdAt: base.createdAt }]);
+      } else {
+        ops.push([doc(db, 'inquiries', id), { ...base, title: q.title, content: q.content, answer: q.answer || '' }]);
+      }
+    }
+    for (let i = 0; i < ops.length; i += 400) {
+      const batch = writeBatch(db);
+      ops.slice(i, i + 400).forEach(([ref, data]) => batch.set(ref, data));
+      await batch.commit();
+      onProgress(Math.min(i + 400, ops.length), ops.length);
+    }
+    return { reviews: seedReviews.length, inquiries: seedInquiries.length, writes: ops.length };
+  }
 };
 
 Board.shrinkPhoto = shrinkPhoto;

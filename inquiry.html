@@ -312,6 +312,7 @@
   <nav>
     <a href="products.html" class="nav-lc">루나쿨</a>
     <a href="lunaon.html" class="nav-lo">루나온</a>
+    <a href="videos.html">영상</a>
     <a href="reviews.html">구매후기</a>
     <a href="inquiry.html" aria-current="page">상품문의</a>
     <a href="about.html">브랜드</a>
@@ -324,6 +325,7 @@
   <a href="index.html">홈</a>
   <a href="products.html" class="nav-lc">루나쿨</a>
   <a href="lunaon.html" class="nav-lo">루나온</a>
+  <a href="videos.html">영상</a>
   <a href="reviews.html">구매후기</a>
   <a href="inquiry.html" aria-current="page">상품문의</a>
   <a href="about.html">브랜드</a>
@@ -583,6 +585,8 @@ let LIVE_INQUIRIES = [];
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function getInquiries() {
   const d = localStorage.getItem('lunacool_inquiries');
+  // 기존 문의가 Firebase로 옮겨진 뒤에는 Firebase만 사용 (중복 방지)
+  if (LIVE_INQUIRIES.some(i => i.legacy)) return LIVE_INQUIRIES;
   const base = d ? JSON.parse(d) : (typeof DEFAULT_INQUIRIES !== 'undefined' ? DEFAULT_INQUIRIES : []);
   return LIVE_INQUIRIES.concat(base);
 }
@@ -594,12 +598,15 @@ async function loadLiveInquiries() {
   const B = window.LunaBoard;
   if (!B || !B.enabled) return;
   try {
-    const rows = await B.listInquiries();
-    LIVE_INQUIRIES = rows.map(r => ({
-      id: 'L-' + r.id, liveId: r.id, live: true, cat: r.cat, product: r.product, title: r.title, name: r.name,
-      secret: r.secret, pw: '', content: r.content, date: fmtTs(r.createdAt), status: r.status,
-      answer: r.answer || '', answerDate: r.answeredAt ? fmtTs(r.answeredAt) : ''
+    const rows = await B.listInquiries(); // 최근 300건
+    const mapped = rows.map(r => ({
+      id: 'L-' + r.id, liveId: r.id, live: true, legacy: !!r.legacy, order: r.order || 0,
+      cat: r.cat, product: r.product, title: r.title, name: r.name,
+      secret: r.secret, pw: '', content: r.content, date: r.legacy ? (r.date || fmtTs(r.createdAt)) : fmtTs(r.createdAt), status: r.status,
+      answer: r.answer || '', answerDate: r.answeredAt ? fmtTs(r.answeredAt) : (r.answerDate || '')
     }));
+    // 새 문의(최신순) → 기존 문의(원래 순서)
+    LIVE_INQUIRIES = mapped.filter(i => !i.legacy).concat(mapped.filter(i => i.legacy).sort((a, b) => a.order - b.order));
     renderTable();
   } catch (e) { console.error('문의 불러오기 실패', e); }
 }
@@ -719,7 +726,7 @@ async function unlockDetail(id) {
     try { sec = await window.LunaBoard.openSecret(item.liveId, pw); } catch (e) { console.error(e); }
     if (!sec) { showToast('비밀번호가 올바르지 않습니다.'); return; }
     renderDetailContent(Object.assign({}, item, { title: sec.title, content: sec.content,
-      answer: sec.answer || '', answerDate: sec.answeredAt ? fmtTs(sec.answeredAt) : '' }), document.getElementById(`detail-${id}`));
+      answer: sec.answer || '', answerDate: sec.answeredAt ? fmtTs(sec.answeredAt) : (sec.answerDate || '') }), document.getElementById(`detail-${id}`));
     return;
   }
   if (pw === item.pw) {

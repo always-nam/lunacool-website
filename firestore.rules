@@ -26,7 +26,8 @@ service cloud.firestore {
     // 비밀글은 여기에 제목·내용을 저장하지 않음
     match /inquiries/{id} {
       allow read: if true;
-      allow create: if request.resource.data.keys().hasOnly(['cat','product','name','secret','title','content','status','createdAt'])
+      // 관리자는 기존 데이터 이전·직접 등록 가능
+      allow create: if isAdmin() || request.resource.data.keys().hasOnly(['cat','product','name','secret','title','content','status','createdAt'])
         && request.resource.data.cat in ['product','delivery','exchange','etc']
         && okStr(request.resource.data.product, 0, 60)
         && okStr(request.resource.data.name, 1, 20)
@@ -46,7 +47,7 @@ service cloud.firestore {
       allow get: if true;
       allow list: if isAdmin();
       // 비밀글 목록 문서와 「같은 묶음」으로 처음 만들 때만 허용 (남의 비밀글에 끼워 넣기 방지)
-      allow create: if key.size() == 64
+      allow create: if isAdmin() || key.size() == 64
         && request.resource.data.keys().hasOnly(['inquiryId','title','content','name','createdAt'])
         && !exists(/databases/$(database)/documents/inquiries/$(request.resource.data.inquiryId))
         && getAfter(/databases/$(database)/documents/inquiries/$(request.resource.data.inquiryId)).data.secret == true
@@ -60,7 +61,8 @@ service cloud.firestore {
     // ── 후기: 누구나 작성, 관리자 승인 후 공개 ──
     match /reviews/{id} {
       allow read: if resource.data.status == 'approved' || isAdmin();
-      allow create: if request.resource.data.keys().hasOnly(['product','name','rating','text','photoCount','status','createdAt'])
+      allow create: if isAdmin() || request.resource.data.keys().hasOnly(['product','name','rating','text','location','photoCount','status','createdAt'])
+        && (!('location' in request.resource.data) || request.resource.data.location in ['스마트스토어 구매','쿠팡 구매','카카오메이커스 구매','홈페이지 작성'])
         && request.resource.data.photoCount is int
         && request.resource.data.photoCount >= 0 && request.resource.data.photoCount <= 3
         && request.resource.data.product in ['pad','blanket','sofa','cushion','pillow','lunaon']
@@ -79,7 +81,7 @@ service cloud.firestore {
       allow get: if isAdmin()
         || get(/databases/$(database)/documents/reviews/$(resource.data.reviewId)).data.status == 'approved';
       allow list: if isAdmin();
-      allow create: if request.resource.data.keys().hasOnly(['reviewId','idx','data'])
+      allow create: if isAdmin() || request.resource.data.keys().hasOnly(['reviewId','idx','data'])
         && photoId == request.resource.data.reviewId + '_' + string(request.resource.data.idx)
         && request.resource.data.idx is int
         && request.resource.data.idx >= 0 && request.resource.data.idx <= 2
@@ -89,8 +91,7 @@ service cloud.firestore {
         && request.resource.data.data is string
         && request.resource.data.data.size() <= 350000
         && request.resource.data.data.matches('^data:image/jpeg;base64,[A-Za-z0-9+/=]+$');
-      allow update: if false;
-      allow delete: if isAdmin();
+      allow update, delete: if isAdmin();
     }
 
     // ── 사이트 설정 (홍보 영상 주소 등) ──

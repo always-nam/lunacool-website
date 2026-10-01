@@ -55,6 +55,21 @@ function openVideoModal(e, brand) {
   document.getElementById('videoModalBg')?.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
+// 영상 목록 카드에서 호출: 주소 하나를 바로 재생 (쇼츠는 세로 화면)
+function playVideoUrl(url, vertical) {
+  const player = document.getElementById('vmPlayer');
+  const modal = document.querySelector('.video-modal');
+  if (!player) return;
+  if (modal) modal.classList.toggle('vm-vertical', !!vertical);
+  const id = ytIdFrom(url);
+  if (id) player.innerHTML = ytEmbed(id);
+  else if (/\.mp4(\?.*)?$/i.test(url)) {
+    player.innerHTML = '<video controls autoplay playsinline style="width:100%;height:100%;border-radius:8px;background:#000;"></video>';
+    player.querySelector('video').src = url;
+  } else return;
+  document.getElementById('videoModalBg')?.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
 function closeVideoModal(e) {
   if (e && e.target !== document.getElementById('videoModalBg') && e.type !== 'click') return;
   const bg = document.getElementById('videoModalBg');
@@ -63,6 +78,7 @@ function closeVideoModal(e) {
   document.body.style.overflow = '';
   const player = document.getElementById('vmPlayer');
   if (player) player.innerHTML = ''; // iframe/video 제거 → 재생 완전 정지
+  document.querySelector('.video-modal')?.classList.remove('vm-vertical');
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeVideoModal({type:'click',target:document.getElementById('videoModalBg')}); });
 

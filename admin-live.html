@@ -53,6 +53,19 @@
     .item textarea { width: 100%; min-height: 90px; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 8px; resize: vertical; margin-bottom: 10px; }
     .item .acts { display: flex; gap: 8px; flex-wrap: wrap; }
     .empty { text-align: center; color: var(--mid); padding: 48px 0; }
+    .add-box summary { cursor: pointer; list-style: none; }
+    .add-box summary::-webkit-details-marker { display: none; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; margin: 14px 0; }
+    .form-grid label { display: grid; gap: 4px; font-size: 13px; font-weight: 600; color: var(--mid); }
+    .form-grid .full { grid-column: 1 / -1; }
+    .form-grid .chk { display: flex; align-items: center; gap: 6px; }
+    .chan { display: grid; gap: 6px; }
+    .form-grid input:not([type=checkbox]), .form-grid select, .form-grid textarea { padding: 9px 11px; border: 1.5px solid var(--line); border-radius: 8px; font-weight: 400; color: var(--ink); background: #fff; }
+    .form-grid textarea { min-height: 80px; margin: 0; }
+    details.edit { margin: 0 0 10px; }
+    details.edit summary { cursor: pointer; font-size: 13.5px; color: var(--mid); font-weight: 600; }
+    .tag.legacy { background: #F1F2F4; color: var(--mid); }
+    @media (max-width: 700px) { .form-grid { grid-template-columns: 1fr; } }
     .photos { display: flex; gap: 8px; flex-wrap: wrap; margin: -4px 0 12px; font-size: 13px; color: var(--mid); }
     .photos img { width: 120px; height: 120px; object-fit: cover; border-radius: 8px; }
     .set { background: #fff; border-radius: 12px; padding: 22px; display: grid; gap: 10px; }
@@ -92,7 +105,6 @@
       <nav>
         <a href="inquiry.html" target="_blank">문의 게시판</a>
         <a href="reviews.html" target="_blank">후기 페이지</a>
-        <a href="admin.html">기존 후기·문의 데이터 관리</a>
         <button class="btn btn-line" id="btnLogout">로그아웃</button>
       </nav>
     </div>
@@ -100,14 +112,16 @@
   <main class="wrap">
     <div class="tabs" role="tablist">
       <button role="tab" data-tab="inq" aria-selected="true">상품문의 <span class="cnt" id="cntInq" hidden></span></button>
-      <button role="tab" data-tab="rev" aria-selected="false">후기 승인 <span class="cnt" id="cntRev" hidden></span></button>
+      <button role="tab" data-tab="rev" aria-selected="false">후기 관리 <span class="cnt" id="cntRev" hidden></span></button>
       <button role="tab" data-tab="set" aria-selected="false">홍보 영상</button>
+      <button role="tab" data-tab="mig" aria-selected="false">기존 데이터 옮기기</button>
     </div>
 
     <section id="tabInq">
       <div class="filters">
         <select id="fInqBrand"><option value="all">두 브랜드 전체</option><option value="lunaon">루나온</option><option value="lunacool">루나쿨</option><option value="none">상품 선택 안 함</option></select>
         <select id="fInqStatus"><option value="all">전체</option><option value="wait" selected>답변대기</option><option value="done">답변완료</option></select>
+        <input id="fInqQ" type="search" placeholder="제목·이름·내용 검색" style="padding:8px 12px;border:1.5px solid var(--line);border-radius:8px;min-width:200px">
         <button class="btn btn-line" id="btnReloadInq">새로고침</button>
       </div>
       <div id="inqList"></div>
@@ -117,9 +131,34 @@
       <div class="filters">
         <select id="fRevBrand"><option value="all">두 브랜드 전체</option><option value="lunaon">루나온</option><option value="lunacool">루나쿨</option></select>
         <select id="fRevStatus"><option value="all">전체</option><option value="pending" selected>승인 대기</option><option value="approved">게시 중</option><option value="hidden">숨김</option></select>
+        <select id="fRevChan"><option value="all">구매처 전체</option>${''}</select>
+        <input id="fRevQ" type="search" placeholder="이름·내용 검색" style="padding:8px 12px;border:1.5px solid var(--line);border-radius:8px;min-width:200px">
         <button class="btn btn-line" id="btnReloadRev">새로고침</button>
       </div>
+      <details class="item add-box">
+        <summary><b>＋ 후기 직접 추가</b> <span class="hint">(바로 게시됩니다)</span></summary>
+        <div class="form-grid">
+          <label>상품<select id="aProduct"><option value="lunaon">루나온 그래핀 발열 이불</option><option value="pad">냉감 패드</option><option value="blanket">냉감 차렵이불</option><option value="sofa">냉감 소파패드</option><option value="cushion">냉감 방석</option><option value="pillow">냉감 베개커버</option></select></label>
+          <label>별점<select id="aRating"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select></label>
+          <label>이름<input id="aName" maxlength="20" placeholder="홍**"></label>
+          <label>구매처<span class="chan" data-chan-for="aLoc"></span><input id="aLoc" type="hidden"></label>
+          <label class="full">후기 내용<textarea id="aText" maxlength="2000"></textarea></label>
+          <label class="full">판매자 답글 (선택)<textarea id="aReply" maxlength="1000"></textarea></label>
+          <label class="chk"><input type="checkbox" id="aVerified" checked> 구매인증 표시</label>
+          <label class="full">사진 (최대 3장, 자동 축소)<input type="file" id="aFiles" accept="image/*" multiple></label>
+        </div>
+        <div class="acts"><button class="btn btn-ok" id="btnAddRev">후기 추가</button></div>
+      </details>
       <div id="revList"></div>
+    </section>
+
+    <section id="tabMig" hidden>
+      <div class="set">
+        <b>기존 후기·문의를 Firebase로 옮기기 (1회)</b>
+        <p class="hint">reviews-data.js(후기)와 inquiry-data.js(문의)의 내용을 그대로 옮깁니다. 옮긴 뒤에는 이 화면에서 고치면 고객 화면에 바로 반영되고, 내보내기가 필요 없습니다. 여러 번 눌러도 중복되지 않습니다(같은 글을 덮어씀).</p>
+        <div id="migStatus" class="hint">확인 중…</div>
+        <div><button class="btn btn-ink" id="btnMigrate">옮기기 시작</button></div>
+      </div>
     </section>
 
     <section id="tabSet" hidden>
@@ -130,6 +169,8 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="reviews-data.js"></script>
+<script src="inquiry-data.js"></script>
 <script src="firebase-config.js"></script>
 <script type="module">
 import { Board as B, esc, fmtDate } from './board.js';
@@ -170,7 +211,27 @@ document.querySelectorAll('[role=tab]').forEach(b => b.onclick = () => {
   $('tabInq').hidden = b.dataset.tab !== 'inq';
   $('tabRev').hidden = b.dataset.tab !== 'rev';
   $('tabSet').hidden = b.dataset.tab !== 'set';
+  $('tabMig').hidden = b.dataset.tab !== 'mig';
+  if (b.dataset.tab === 'mig') checkMig();
 });
+// 구매처: 정해진 목록에서 고르거나 「직접 입력」
+const CHANNELS = ["스마트스토어 구매", "쿠팡 구매", "카카오메이커스 구매", "홈페이지 작성", "체험단 (제품 제공)"];
+function chanSelectHTML(value) {
+  const known = CHANNELS.includes(value);
+  return `<span class="chan"><select class="eChanSel">${CHANNELS.map(c => `<option ${c === value ? 'selected' : ''}>${esc(c)}</option>`).join('')}
+    <option value="__custom" ${value && !known ? 'selected' : ''}>직접 입력</option><option value="" ${!value ? 'selected' : ''}>표시 안 함</option></select>
+    <input class="eChanTxt" maxlength="40" placeholder="예: 오프라인 매장 구매" value="${known ? '' : esc(value)}" ${value && !known ? '' : 'hidden'}></span>`;
+}
+const chanValue = box => { const sel = box.querySelector('.eChanSel'); return sel.value === '__custom' ? box.querySelector('.eChanTxt').value.trim() : sel.value; };
+document.addEventListener('change', e => {
+  if (e.target.classList && e.target.classList.contains('eChanSel')) {
+    const t = e.target.parentElement.querySelector('.eChanTxt'); t.hidden = e.target.value !== '__custom'; if (!t.hidden) t.focus();
+  }
+});
+document.querySelector('[data-chan-for="aLoc"]').innerHTML = chanSelectHTML('스마트스토어 구매');
+document.getElementById('fRevChan').innerHTML = '<option value="all">구매처 전체</option>' + CHANNELS.map(c => `<option>${esc(c)}</option>`).join('') + '<option value="__other">그 외</option>';
+const matchQ = (q, ...fields) => !q || fields.some(v => String(v || '').toLowerCase().includes(q));
+const dateOf = x => x.legacy && x.date ? x.date : fmtDate(x.createdAt);
 
 // ── 문의 ──
 async function loadInq() {
@@ -187,7 +248,9 @@ function renderInq() {
   const f = $('fInqStatus').value, fb = $('fInqBrand').value;
   const wait = INQ.filter(i => i.status === 'wait').length;
   $('cntInq').hidden = !wait; $('cntInq').textContent = wait;
-  const list = INQ.filter(i => (f === 'all' || i.status === f) && (fb === 'all' || inqBrand(i) === fb));
+  const q = $('fInqQ').value.trim().toLowerCase();
+  const list = INQ.filter(i => (f === 'all' || i.status === f) && (fb === 'all' || inqBrand(i) === fb)
+    && matchQ(q, i.title, i.name, i.content, i.secret && SECRETS[i.id] ? SECRETS[i.id].title + ' ' + SECRETS[i.id].content : ''));
   if (!list.length) { $('inqList').innerHTML = '<div class="empty">해당하는 문의가 없습니다.</div>'; return; }
   $('inqList').innerHTML = list.map(i => {
     const sec = i.secret ? SECRETS[i.id] : null;
@@ -200,11 +263,16 @@ function renderInq() {
         ${BRAND_TAG[inqBrand(i)]}
         ${i.secret ? '<span class="tag secret">🔒 비밀글</span>' : ''}
         <span>${esc(CAT[i.cat] || i.cat)}</span>${i.product ? `<span>· ${esc(i.product)}</span>` : ''}
-        <span>· ${esc(i.name)}</span><span>· ${esc(fmtDate(i.createdAt))}</span>
+        <span>· ${esc(i.name)}</span><span>· ${esc(dateOf(i))}</span>${i.legacy ? '<span class="tag legacy">기존 문의</span>' : ''}
       </div>
       <h3>${esc(title)}</h3>
       <div class="body">${esc(body)}</div>
-      <textarea placeholder="답변을 입력하세요">${esc(ans)}</textarea>
+      <details class="edit"><summary>제목·내용 수정</summary>
+        <div class="form-grid"><label class="full">제목<input class="eTitle" maxlength="100" value="${esc(title)}"></label>
+        <label class="full">내용<textarea class="eContent" maxlength="3000">${esc(body)}</textarea></label></div>
+        <div class="acts"><button class="btn btn-line" data-act="edit">수정 저장</button></div>
+      </details>
+      <textarea class="eAnswer" placeholder="답변을 입력하세요">${esc(ans)}</textarea>
       <div class="acts">
         <button class="btn btn-ink" data-act="answer">답변 저장</button>
         <button class="btn btn-bad" data-act="del">삭제</button>
@@ -214,6 +282,7 @@ function renderInq() {
 }
 $('fInqStatus').onchange = renderInq;
 $('fInqBrand').onchange = renderInq;
+$('fInqQ').oninput = renderInq;
 $('btnReloadInq').onclick = loadInq;
 $('inqList').addEventListener('click', async e => {
   const act = e.target.dataset.act; if (!act) return;
@@ -222,8 +291,11 @@ $('inqList').addEventListener('click', async e => {
   e.target.disabled = true;
   try {
     if (act === 'answer') {
-      await B.adminAnswer(inq, box.querySelector('textarea').value, sec?.key);
+      await B.adminAnswer(inq, box.querySelector('.eAnswer').value, sec?.key);
       toast('답변을 저장했습니다. 문의 게시판에 바로 보입니다.');
+    } else if (act === 'edit') {
+      await B.adminEditInquiry(inq, { title: box.querySelector('.eTitle').value.trim(), content: box.querySelector('.eContent').value }, sec?.key);
+      toast('수정했습니다. 문의 게시판에 바로 보입니다.');
     } else if (act === 'del') {
       if (!confirm('이 문의를 삭제할까요? 되돌릴 수 없습니다.')) { e.target.disabled = false; return; }
       await B.adminDeleteInquiry(inq, sec?.key);
@@ -242,7 +314,10 @@ function renderRev() {
   const f = $('fRevStatus').value, fb = $('fRevBrand').value;
   const pend = REV.filter(r => r.status === 'pending').length;
   $('cntRev').hidden = !pend; $('cntRev').textContent = pend;
-  const list = REV.filter(r => (f === 'all' || r.status === f) && (fb === 'all' || (fb === 'lunaon') === (r.product === 'lunaon')));
+  const q = $('fRevQ').value.trim().toLowerCase();
+  const fc = $('fRevChan').value;
+  const chanOk = r => fc === 'all' || (fc === '__other' ? !CHANNELS.includes(r.location || '') : (r.location || '') === fc);
+  const list = REV.filter(r => (f === 'all' || r.status === f) && (fb === 'all' || (fb === 'lunaon') === (r.product === 'lunaon')) && chanOk(r) && matchQ(q, r.name, r.text, r.location));
   if (!list.length) { $('revList').innerHTML = '<div class="empty">해당하는 후기가 없습니다.</div>'; return; }
   const LABEL = { pending:'승인 대기', approved:'게시 중', hidden:'숨김' };
   $('revList').innerHTML = list.map(r => `<div class="item" data-id="${esc(r.id)}">
@@ -250,11 +325,24 @@ function renderRev() {
         <span class="tag ${r.status}">${LABEL[r.status] || r.status}</span>
         ${r.product === 'lunaon' ? BRAND_TAG.lunaon : BRAND_TAG.lunacool}
         <span>${esc(PROD[r.product] || r.product)}</span><span>· ${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
-        <span>· ${esc(r.name)}</span><span>· ${esc(fmtDate(r.createdAt))}</span>
+        <span>· ${esc(r.name)}</span>${r.location ? `<span>· ${esc(r.location)}</span>` : ''}<span>· ${esc(dateOf(r))}</span>
+        ${r.legacy ? '<span class="tag legacy">기존 후기</span>' : ''}${r.verified ? '<span class="tag done">구매인증</span>' : ''}
       </div>
       <div class="body">${esc(r.text)}</div>
+      ${(r.photos || []).length ? `<div class="photos">${r.photos.map(p => `<img src="${esc(p)}" alt="후기 사진">`).join('')}</div>` : ''}
       ${r.photoCount ? `<div class="photos" data-photos="${esc(r.id)}">사진 ${r.photoCount}장 불러오는 중…</div>` : ''}
-      <textarea placeholder="판매자 답글 (선택)">${esc(r.reply || '')}</textarea>
+      <details class="edit"><summary>내용 수정</summary>
+        <div class="form-grid">
+          <label>상품<select class="eProduct">${`<option value="lunaon">루나온 그래핀 발열 이불</option><option value="pad">냉감 패드</option><option value="blanket">냉감 차렵이불</option><option value="sofa">냉감 소파패드</option><option value="cushion">냉감 방석</option><option value="pillow">냉감 베개커버</option>`.replace(`value="${r.product}"`, `value="${r.product}" selected`)}</select></label>
+          <label>별점<select class="eRating">${[5,4,3,2,1].map(n => `<option ${n === r.rating ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
+          <label>이름<input class="eName" maxlength="20" value="${esc(r.name)}"></label>
+          <label>구매처${chanSelectHTML(r.location || '')}</label>
+          <label class="full">후기 내용<textarea class="eText" maxlength="2000">${esc(r.text)}</textarea></label>
+          <label class="chk"><input type="checkbox" class="eVerified" ${r.verified ? 'checked' : ''}> 구매인증 표시</label>
+        </div>
+        <div class="acts"><button class="btn btn-line" data-act="edit">수정 저장</button></div>
+      </details>
+      <textarea class="eReply" placeholder="판매자 답글 (선택)">${esc(r.reply || '')}</textarea>
       <div class="acts">
         ${r.status !== 'approved' ? '<button class="btn btn-ok" data-act="approve">승인(게시)</button>' : ''}
         ${r.status !== 'hidden' ? '<button class="btn btn-line" data-act="hide">숨김</button>' : ''}
@@ -274,6 +362,46 @@ async function loadRevPhotos() {
 }
 $('fRevStatus').onchange = () => { renderRev(); loadRevPhotos(); };
 $('fRevBrand').onchange = () => { renderRev(); loadRevPhotos(); };
+$('fRevQ').oninput = () => { renderRev(); loadRevPhotos(); };
+$('fRevChan').onchange = () => { renderRev(); loadRevPhotos(); };
+// 후기 직접 추가
+$('btnAddRev').onclick = async () => {
+  const name = $('aName').value.trim(), text = $('aText').value.trim();
+  if (!name || !text) { toast('이름과 후기 내용을 입력하세요.'); return; }
+  const btn = $('btnAddRev'); btn.disabled = true;
+  try {
+    const photos = [];
+    for (const f of [...$('aFiles').files].slice(0, 3)) photos.push(await B.shrinkPhoto(f));
+    await B.adminCreateReview({ product: $('aProduct').value, rating: Number($('aRating').value), name, location: chanValue($('btnAddRev').closest('.add-box')),
+      text, reply: $('aReply').value.trim(), verified: $('aVerified').checked, photos });
+    ['aName','aText','aReply'].forEach(k => $(k).value = ''); $('aFiles').value = '';
+    toast('후기를 추가했습니다. 후기 페이지에 바로 보입니다.');
+    $('fRevStatus').value = 'all'; await loadRev();
+  } catch (e) { console.error(e); toast('추가하지 못했습니다.'); }
+  btn.disabled = false;
+};
+
+// ── 기존 데이터 옮기기 ──
+async function checkMig() {
+  const seedR = (typeof DEFAULT_REVIEWS !== 'undefined') ? DEFAULT_REVIEWS : [];
+  const seedQ = (typeof DEFAULT_INQUIRIES !== 'undefined') ? DEFAULT_INQUIRIES : [];
+  const legR = REV.filter(r => r.legacy).length, legQ = INQ.filter(i => i.legacy).length;
+  $('migStatus').innerHTML = `파일에 있는 기존 데이터: 후기 <b>${seedR.length}</b>건 · 문의 <b>${seedQ.length}</b>건<br>
+    Firebase에 옮겨진 기존 데이터: 후기 <b>${legR}</b>건 · 문의 <b>${legQ}</b>건 ${legR >= seedR.length && legQ >= seedQ.length && seedR.length ? '✅ 이전 완료' : ''}`;
+}
+$('btnMigrate').onclick = async () => {
+  const seedR = (typeof DEFAULT_REVIEWS !== 'undefined') ? DEFAULT_REVIEWS : [];
+  const seedQ = (typeof DEFAULT_INQUIRIES !== 'undefined') ? DEFAULT_INQUIRIES : [];
+  if (!confirm(`후기 ${seedR.length}건, 문의 ${seedQ.length}건을 Firebase로 옮길까요?`)) return;
+  const btn = $('btnMigrate'); btn.disabled = true;
+  try {
+    const res = await B.adminMigrateLegacy(seedR, seedQ, (done, total) => { $('migStatus').textContent = `옮기는 중… ${done} / ${total}`; });
+    await Promise.all([loadInq(), loadRev()]);
+    await checkMig();
+    toast(`옮기기 완료: 후기 ${res.reviews}건 · 문의 ${res.inquiries}건`);
+  } catch (e) { console.error(e); $('migStatus').textContent = '옮기지 못했습니다: ' + (e.code || e.message); }
+  btn.disabled = false;
+};
 $('btnReloadRev').onclick = loadRev;
 $('revList').addEventListener('click', async e => {
   const act = e.target.dataset.act; if (!act) return;
@@ -282,7 +410,14 @@ $('revList').addEventListener('click', async e => {
   try {
     if (act === 'approve') { await B.adminSetReview(id, { status: 'approved' }); toast('게시했습니다.'); }
     if (act === 'hide') { await B.adminSetReview(id, { status: 'hidden' }); toast('숨겼습니다.'); }
-    if (act === 'reply') { await B.adminSetReview(id, { reply: box.querySelector('textarea').value }); toast('답글을 저장했습니다.'); }
+    if (act === 'reply') { await B.adminSetReview(id, { reply: box.querySelector('.eReply').value }); toast('답글을 저장했습니다.'); }
+    if (act === 'edit') {
+      const text = box.querySelector('.eText').value.trim(), name = box.querySelector('.eName').value.trim();
+      if (!name || !text) { toast('이름과 내용을 입력하세요.'); e.target.disabled = false; return; }
+      await B.adminSetReview(id, { product: box.querySelector('.eProduct').value, rating: Number(box.querySelector('.eRating').value),
+        name, location: chanValue(box), text, verified: box.querySelector('.eVerified').checked });
+      toast('수정했습니다. 후기 페이지에 바로 보입니다.');
+    }
     if (act === 'del') {
       if (!confirm('이 후기를 삭제할까요? 되돌릴 수 없습니다.')) { e.target.disabled = false; return; }
       await B.adminDeleteReview(id, (REV.find(x => x.id === id) || {}).photoCount || 0); toast('삭제했습니다.');

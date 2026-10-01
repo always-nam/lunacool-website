@@ -216,6 +216,7 @@
   <nav>
     <a href="products.html" class="nav-lc">루나쿨</a>
     <a href="lunaon.html" class="nav-lo">루나온</a>
+    <a href="videos.html">영상</a>
     <a href="reviews.html" aria-current="page">구매후기</a>
     <a href="inquiry.html">상품문의</a>
     <a href="about.html">브랜드</a>
@@ -228,6 +229,7 @@
   <a href="index.html">홈</a>
   <a href="products.html" class="nav-lc">루나쿨</a>
   <a href="lunaon.html" class="nav-lo">루나온</a>
+  <a href="videos.html">영상</a>
   <a href="reviews.html" aria-current="page">구매후기</a>
   <a href="inquiry.html">상품문의</a>
   <a href="about.html">브랜드</a>
@@ -302,6 +304,14 @@
         <select id="rwRating">
           <option value="5">★★★★★ 5점</option><option value="4">★★★★☆ 4점</option>
           <option value="3">★★★☆☆ 3점</option><option value="2">★★☆☆☆ 2점</option><option value="1">★☆☆☆☆ 1점</option>
+        </select>
+      </label>
+      <label>구매처
+        <select id="rwChan">
+          <option value="스마트스토어 구매">스마트스토어에서 구매</option>
+          <option value="쿠팡 구매">쿠팡에서 구매</option>
+          <option value="카카오메이커스 구매">카카오메이커스에서 구매</option>
+          <option value="홈페이지 작성">기타 / 선택 안 함</option>
         </select>
       </label>
       <label>이름 <span class="req">*</span>
@@ -401,6 +411,8 @@ function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;',
 function getReviews() {
   const stored = localStorage.getItem('lunacool_reviews');
   // 기본 후기 데이터 (DEFAULT_REVIEWS는 reviews-data.js에서 로드)
+  // 기존 후기가 Firebase로 옮겨진 뒤에는 Firebase만 사용 (중복 방지)
+  if (LIVE_REVIEWS.some(r => r.legacy)) return LIVE_REVIEWS;
   const base = stored ? JSON.parse(stored) : (typeof DEFAULT_REVIEWS !== 'undefined' ? DEFAULT_REVIEWS : []);
   return LIVE_REVIEWS.concat(base);
 }
@@ -413,8 +425,16 @@ async function loadLiveReviews() {
   if (!B || !B.enabled) return;
   try {
     const rows = await B.listApprovedReviews();
-    LIVE_REVIEWS = rows.map(r => ({ id: 'L-' + r.id, liveId: r.id, photoCount: r.photoCount || 0, product: r.product, name: r.name, location: '홈페이지 작성',
-      rating: r.rating, verified: false, text: r.text, date: fmtTs(r.createdAt), photos: [], reply: r.reply || '' }));
+    // 사이트 안 이미지 경로만 허용 (기존 후기 사진)
+    const safePath = p => typeof p === 'string' && /^[^"'<>()\\]+\.(jpe?g|png|webp)$/i.test(p) && !/^[a-z]+:/i.test(p);
+    const mapped = rows.map(r => ({ id: 'L-' + r.id, liveId: r.id, legacy: !!r.legacy, order: r.order || 0,
+      photoCount: r.photoCount || 0, product: r.product, name: r.name,
+      location: r.location || (r.legacy || r.byAdmin ? '' : '홈페이지 작성'),
+      rating: r.rating, verified: r.legacy || r.byAdmin ? r.verified !== false : false, text: r.text,
+      date: r.legacy ? (r.date || fmtTs(r.createdAt)) : fmtTs(r.createdAt),
+      photos: (r.photos || []).filter(safePath), reply: r.reply || '' }));
+    // 새 후기(최신순) → 기존 후기(원래 순서)
+    LIVE_REVIEWS = mapped.filter(r => !r.legacy).concat(mapped.filter(r => r.legacy).sort((a, b) => a.order - b.order));
     renderRatingSummary(getReviews());
     renderReviews(currentFilter);
     // 사진은 글을 먼저 보여준 뒤 불러옴
@@ -468,7 +488,7 @@ async function submitReview() {
   const btn = document.getElementById('rwSubmit');
   btn.disabled = true; btn.textContent = '등록 중…';
   try {
-    await window.LunaBoard.createReview({ product, name, rating, text, photos: RW_PHOTOS });
+    await window.LunaBoard.createReview({ product, name, rating, text, photos: RW_PHOTOS, location: document.getElementById('rwChan').value });
     closeReviewModal();
     rwToast('후기가 접수되었습니다. 관리자 확인 후 게시됩니다.');
   } catch (e) {
@@ -611,6 +631,7 @@ function renderCard(r) {
           <div>
             <div class="rv-name">${esc(r.name)}님 ${verifiedBadge}</div>
             <div class="rv-loc">${esc(r.location || '')}</div>
+            ${/체험단/.test(r.location || '') ? '<div class="rv-loc" style="color:#C2521F">제품을 제공받아 작성한 후기입니다</div>' : ''}
           </div>
         </div>
         <div class="rv-stars" style="color:#F0A500">${stars}</div>

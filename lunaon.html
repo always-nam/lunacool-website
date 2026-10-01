@@ -89,7 +89,9 @@
     .lo-video-wrap { background: #3E4146; color: #fff; padding: clamp(56px, 7vw, 96px) var(--gutter); margin-top: clamp(64px, 8vw, 104px); }
     .lo-video-wrap[hidden] { display: none; }
     .lo-video-grid { display: grid; grid-template-columns: 1fr 1.4fr; gap: clamp(28px, 5vw, 72px); align-items: center; }
-    .lo-video-wrap h2 { font-size: clamp(26px, 3vw, 38px); margin-bottom: 14px; }
+    .lo-video-wrap h2 { font-size: clamp(26px, 3vw, 38px); }
+    .lo-vhd { display: flex; justify-content: space-between; align-items: end; gap: 16px; margin-bottom: 20px; }
+    .lo-vhd a { color: rgba(255,255,255,.8); font-weight: 600; font-size: 14.5px; white-space: nowrap; }
     .lo-video-wrap p { color: rgba(255,255,255,.75); margin-bottom: 24px; }
     .lo-video-thumb { position: relative; display: block; width: 100%; border: 0; padding: 0; border-radius: 12px; overflow: hidden; cursor: pointer; background: #000; }
     .lo-video-thumb img { width: 100%; aspect-ratio: 16/9; object-fit: cover; opacity: .9; }
@@ -135,6 +137,7 @@
   <nav>
     <a href="products.html" class="nav-lc">루나쿨</a>
     <a href="lunaon.html" class="nav-lo" aria-current="page">루나온</a>
+    <a href="videos.html">영상</a>
     <a href="reviews.html">구매후기</a>
     <a href="inquiry.html">상품문의</a>
     <a href="about.html">브랜드</a>
@@ -147,6 +150,7 @@
   <a href="index.html">홈</a>
   <a href="products.html" class="nav-lc">루나쿨</a>
   <a href="lunaon.html" class="nav-lo" aria-current="page">루나온</a>
+  <a href="videos.html">영상</a>
   <a href="reviews.html">구매후기</a>
   <a href="inquiry.html">상품문의</a>
   <a href="about.html">브랜드</a>
@@ -255,17 +259,10 @@
   </div>
 </section>
 
-<section class="lo-video-wrap" data-lo-video>
-  <div class="wrap lo-video-grid">
-    <div>
-      <h2>영상으로 보는 루나온</h2>
-      <p>양면 색감과 두께를 영상으로 확인해 보세요.</p>
-      <button type="button" class="btn btn-warm" onclick="openVideoModal(event, 'lunaon')">영상 보기</button>
-    </div>
-    <button type="button" class="lo-video-thumb" onclick="openVideoModal(event, 'lunaon')" aria-label="루나온 영상 재생">
-      <img data-yt-thumb src="assets/lunaon/video/lunaon-test-poster.jpg" alt="" loading="lazy">
-      <span class="lo-play" aria-hidden="true">▶</span>
-    </button>
+<section class="lo-video-wrap">
+  <div class="wrap">
+    <div class="lo-vhd"><h2>영상으로 보는 루나온</h2><a href="videos.html#lunaon">영상 전체 보기</a></div>
+    <div data-video-gallery="lunaon"></div>
   </div>
 </section>
 
@@ -355,21 +352,10 @@
 <script src="script.js"></script>
 <script src="firebase-config.js"></script>
 <script type="module" src="board.js"></script>
-<script>
-  // 홍보 영상 주소: 실시간 관리(admin-live.html)에서 저장한 유튜브 주소 사용
-  window.addEventListener('lunaboard:ready', async function () {
-    if (!window.LunaBoard.enabled) return;
-    try {
-      var s = await window.LunaBoard.getSettings();
-      if (s.videoUrl) window.LIVE_VIDEO_URL = s.videoUrl;
-      var lo = (s.videoUrlLunaon || '').trim();
-      if (lo) {
-        window.LIVE_VIDEO_URL_LUNAON = lo;
-        var id = ytIdFrom(lo);
-        if (id) document.querySelectorAll('[data-lo-video] [data-yt-thumb]').forEach(function (img) { img.src = 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg'; });
-      }
-    } catch (e) {}
-  });
+<script type="module">
+  // 영상 목록: 관리자 「홍보 영상」에 등록한 순서대로 (없으면 기본 영상)
+  import { mountGalleries } from './video-gallery.js';
+  mountGalleries();
 </script>
 </body>
 </html>

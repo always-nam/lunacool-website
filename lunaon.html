@@ -255,7 +255,7 @@
   </div>
 </section>
 
-<section class="lo-video-wrap" data-lo-video hidden>
+<section class="lo-video-wrap" data-lo-video>
   <div class="wrap lo-video-grid">
     <div>
       <h2>영상으로 보는 루나온</h2>
@@ -263,7 +263,7 @@
       <button type="button" class="btn btn-warm" onclick="openVideoModal(event, 'lunaon')">영상 보기</button>
     </div>
     <button type="button" class="lo-video-thumb" onclick="openVideoModal(event, 'lunaon')" aria-label="루나온 영상 재생">
-      <img data-yt-thumb src="assets/lunaon/photo/lo-9403.jpg" alt="" loading="lazy">
+      <img data-yt-thumb src="assets/lunaon/video/lunaon-test-poster.jpg" alt="" loading="lazy">
       <span class="lo-play" aria-hidden="true">▶</span>
     </button>
   </div>
@@ -362,14 +362,11 @@
     try {
       var s = await window.LunaBoard.getSettings();
       if (s.videoUrl) window.LIVE_VIDEO_URL = s.videoUrl;
-      var id = ytIdFrom(s.videoUrlLunaon || '');
-      if (id) {
-        window.LIVE_VIDEO_URL_LUNAON = s.videoUrlLunaon;
-        document.querySelectorAll('[data-lo-video]').forEach(function (sec) {
-          var img = sec.querySelector('[data-yt-thumb]');
-          if (img) img.src = 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg';
-          sec.hidden = false;
-        });
+      var lo = (s.videoUrlLunaon || '').trim();
+      if (lo) {
+        window.LIVE_VIDEO_URL_LUNAON = lo;
+        var id = ytIdFrom(lo);
+        if (id) document.querySelectorAll('[data-lo-video] [data-yt-thumb]').forEach(function (img) { img.src = 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg'; });
       }
     } catch (e) {}
   });

@@ -123,15 +123,7 @@
     </section>
 
     <section id="tabSet" hidden>
-      <div class="set">
-        <label for="videoUrl"><b>루나쿨 영상 (유튜브 주소)</b></label>
-        <input id="videoUrl" type="url" placeholder="https://youtu.be/영상ID">
-        <p class="hint">여름 메인 화면의 「루나쿨 제품 영상」에 나옵니다. 비우면 기존 기본 영상이 나옵니다.</p>
-        <label for="videoUrlLunaon" style="margin-top:8px"><b>루나온 영상 (유튜브 주소)</b></label>
-        <input id="videoUrlLunaon" type="url" placeholder="https://youtu.be/영상ID 또는 https://youtube.com/shorts/영상ID">
-        <p class="hint">겨울 메인 화면과 루나온 페이지에 나옵니다. 비우면 루나온 영상 칸은 숨겨집니다.</p>
-        <div><button class="btn btn-ink" id="btnSaveVideo">저장</button></div>
-      </div>
+      <div id="videoAdmin">불러오는 중…</div>
     </section>
   </main>
 </div>
@@ -141,6 +133,7 @@
 <script src="firebase-config.js"></script>
 <script type="module">
 import { Board as B, esc, fmtDate } from './board.js';
+import { mountVideoAdmin } from './video-admin.js';
 
 const $ = id => document.getElementById(id);
 const show = id => ['vNotConfigured','vLogin','vApp'].forEach(v => $(v).hidden = v !== id);
@@ -160,7 +153,7 @@ else {
       return;
     }
     show('vApp');
-    loadInq(); loadRev(); loadSet();
+    loadInq(); loadRev(); mountVideoAdmin($('videoAdmin'), toast);
   });
 }
 
@@ -298,18 +291,7 @@ $('revList').addEventListener('click', async e => {
   } catch (err) { console.error(err); toast('처리하지 못했습니다.'); e.target.disabled = false; }
 });
 
-// ── 영상 ──
-async function loadSet() {
-  try { const s = await B.getSettings(); $('videoUrl').value = s.videoUrl || ''; $('videoUrlLunaon').value = s.videoUrlLunaon || ''; } catch (e) { console.error(e); }
-}
-$('btnSaveVideo').onclick = async () => {
-  const url = $('videoUrl').value.trim();
-  const urlLo = $('videoUrlLunaon').value.trim();
-  const isYt = u => !u || /^https:\/\/(www\.|m\.)?(youtube\.com|youtu\.be)\//.test(u);
-  if (!isYt(url) || !isYt(urlLo)) { toast('유튜브 주소(https://youtu.be/… 또는 https://www.youtube.com/…)를 넣어주세요.'); return; }
-  try { await B.adminSaveSettings({ videoUrl: url, videoUrlLunaon: urlLo }); toast('저장했습니다. 방문자 화면에 바로 반영됩니다.'); }
-  catch (e) { console.error(e); toast('저장하지 못했습니다.'); }
-};
+// ── 영상: video-admin.js ──
 </script>
 </body>
 </html>

@@ -22,6 +22,8 @@ document.querySelectorAll('.appear').forEach(el => io.observe(el));
 // Video modal
 // 기본 홍보 영상 (유튜브 — 저장소 용량/대역폭 부담 없음)
 const DEFAULT_VIDEO_ID = 'umttGaTyZMI';
+// 루나온: 관리자 칸이 비었을 때 재생되는 테스트 영상 (video-admin.js와 같은 값)
+const DEFAULT_LUNAON_VIDEO = 'assets/lunaon/video/lunaon-test.mp4';
 // 유튜브 임베드 URL 생성 (이탈 최소화: 관련영상 숨김 + 로고 축소 + 쿠키리스)
 function ytEmbed(id) {
   return `<iframe width="100%" height="100%" src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&playsinline=1" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius:8px;"></iframe>`;
@@ -36,7 +38,7 @@ function openVideoModal(e, brand) {
   // 루나온 영상: 실시간 관리에서 저장한 루나온 주소만 사용
   // 루나쿨 영상: 실시간 관리 주소 → 이 브라우저에 저장된 주소 → 기본 영상
   const videoUrl = brand === 'lunaon'
-    ? (window.LIVE_VIDEO_URL_LUNAON || '')
+    ? (window.LIVE_VIDEO_URL_LUNAON || DEFAULT_LUNAON_VIDEO)
     : (window.LIVE_VIDEO_URL || localStorage.getItem('lunacool_video_url') || '');
   const player = document.getElementById('vmPlayer');
   if (player) {

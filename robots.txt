@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /admin.html
+Disallow: /admin-live.html
 
 Sitemap: https://always-nam.github.io/lunacool-website/sitemap.xml

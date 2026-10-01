@@ -948,3 +948,10 @@ body .pcard-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 body .pcard-btns .pcard-view { grid-column: 1 / -1; }
 body .pcard-btns a { min-width: 0; white-space: nowrap; }
 @media (max-width: 560px) { body .pcard-btns { grid-template-columns: 1fr; } body .pcard-btns a { padding-left: 2px; padding-right: 2px; } }
+
+/* 머리글 로고 = 브랜드 바로가기 (스크롤해도 머리글은 고정) */
+.brand-pair a { display: flex; align-items: center; border-radius: 6px; transition: opacity .3s; }
+.brand-pair a:hover { opacity: .8; }
+html[data-season="summer"] .brand-pair .bp-lo,
+html[data-season="winter"] .brand-pair .bp-lc { opacity: .45; }
+html[data-season] .brand-pair a:hover { opacity: 1; }

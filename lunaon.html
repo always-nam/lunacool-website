@@ -31,6 +31,26 @@
     .moon-window { justify-self: end; width: min(100%, 500px); }
     .moon-window img { width: 100%; aspect-ratio: 4/5; object-fit: cover; border-radius: 999px 999px 10px 10px; }
 
+    /* 그래핀 25% + 시험 결과 */
+    .gr { padding: clamp(72px, 10vw, 128px) var(--gutter) clamp(56px, 7vw, 88px); }
+    .gr .wrap { display: grid; grid-template-columns: auto 1fr; gap: clamp(28px, 6vw, 96px); align-items: center; }
+    .gr-num { font-family: var(--serif); font-weight: 300; font-size: clamp(120px, 18vw, 240px); line-height: .85; letter-spacing: -0.05em;
+      background: var(--warm-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .gr-num small { font-size: .38em; letter-spacing: 0; }
+    .gr h2 { font-size: clamp(26px, 3vw, 40px); line-height: 1.35; margin-bottom: 18px; }
+    .gr p { line-height: 1.8; max-width: 32em; }
+    .gr p + p { margin-top: 10px; }
+    .gr .note { font-size: 13.5px; opacity: .75; }
+    .tests { padding: 0 var(--gutter) clamp(72px, 9vw, 112px); }
+    .tests h3.t-hd { font-size: 15px; font-weight: 700; margin-bottom: 14px; }
+    .test-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .test { background: #fff; color: var(--dark); border-radius: 12px; padding: 22px 22px 20px; display: flex; flex-direction: column; gap: 8px; border: 1px solid var(--line); }
+    .test b { font-size: 17px; }
+    .test span { font-size: 14px; color: var(--mid); line-height: 1.6; }
+    .test a { margin-top: auto; font-size: 14px; font-weight: 600; color: var(--warm-ink); border-bottom: 1.5px solid currentColor; align-self: flex-start; padding-bottom: 1px; }
+    @media (max-width: 900px) { .gr .wrap { grid-template-columns: 1fr; } .test-grid { grid-template-columns: 1fr; } }
+
+    .gr { background: #fff; }
     /* ── 양면 ── */
     .reverse { padding: clamp(72px, 10vw, 128px) var(--gutter); }
     .reverse .wrap { display: grid; grid-template-columns: 7fr 5fr; gap: clamp(32px, 6vw, 96px); align-items: center; }
@@ -107,11 +127,11 @@
 <body>
 
 <header id="hdr" class="solid">
-  <a href="index.html" class="brand-pair" aria-label="루나쿨 루나온 홈">
-    <img class="lc" src="assets/lunacool/lunacool-logo-h.png" alt="루나쿨">
+  <div class="brand-pair">
+    <a href="index.html#lunacool" class="bp-lc" aria-label="루나쿨 보기"><img class="lc" src="assets/lunacool/lunacool-logo-h.png" alt="루나쿨"></a>
     <i aria-hidden="true"></i>
-    <img class="lo" src="assets/lunaon/lunaon-logo.svg" alt="루나온">
-  </a>
+    <a href="index.html#lunaon" class="bp-lo" aria-label="루나온 보기"><img class="lo" src="assets/lunaon/lunaon-logo.svg" alt="루나온"></a>
+  </div>
   <nav>
     <a href="products.html" class="nav-lc">루나쿨</a>
     <a href="lunaon.html" class="nav-lo" aria-current="page">루나온</a>
@@ -151,6 +171,30 @@
     </figure>
   </div>
 </section>
+
+  <!-- 그래핀 25% -->
+  <section class="gr ">
+    <div class="wrap">
+      <div class="gr-num" aria-hidden="true">25<small>%</small></div>
+      <div>
+        <h2>그래핀 이불이라고<br>다 같은 이불이 아닙니다</h2>
+        <p>루나온은 충전재의 <b>25%</b>를 그래핀으로 채웠습니다. 이름에만 그래핀을 붙이지 않고, 들어간 양을 숫자로 밝힙니다.</p>
+        <p class="note">그래핀 함량: 제조 공장 시험 확인 기준</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 시험 결과 (KATRI 시험연구원) -->
+  <section class="tests ">
+    <div class="wrap">
+      <h3 class="t-hd">KATRI 시험연구원 시험 결과</h3>
+      <div class="test-grid">
+        <div class="test"><b>집먼지진드기 통과 0마리</b><span>KS K ISO 21326 통과법, 3회 시험 모두 시험 원단을 통과한 진드기가 없었습니다.</span><a href="assets/lunaon/cert/katri-mite-SAAA26-00037484.pdf" target="_blank" rel="noopener">성적서 보기</a></div>
+        <div class="test"><b>유해물질 안전기준 적합</b><span>가정용 섬유제품 안전기준 시험에서 폼알데하이드 불검출, 유기주석·아릴아민 기준 이하.</span><a href="assets/lunaon/cert/katri-safety-SAAA26-00037947.pdf" target="_blank" rel="noopener">성적서 보기</a></div>
+        <div class="test"><b>보온율 시험</b><span>KS K 0560 방법으로 그래핀솜 이불과 일반솜 이불을 함께 시험했습니다.</span><a href="assets/lunaon/cert/katri-warmth-SAAA26-00037483.pdf" target="_blank" rel="noopener">성적서 보기</a></div>
+      </div>
+    </div>
+  </section>
 
 <section class="reverse">
   <div class="wrap">

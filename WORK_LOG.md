@@ -265,3 +265,20 @@
   - 유튜브 주소 해석 개선: watch?v= / youtu.be / shorts / embed / live 모두 지원 (script.js)
 - 테스트: 가짜 저장소 흐름 29/29 통과, master 대비 회귀 15/15 동일
 - Firebase 프로젝트 생성됨: `luna-home-b3450` (2026-10-01, 대표님) → 웹 앱 연결 정보·Firestore·규칙·관리자 등록 대기
+
+---
+
+## 2026-10-01 (5) — Firebase 실제 연결 (luna-home-b3450)
+
+- `firebase-config.js`에 웹 앱 연결 정보 입력 (measurementId는 미사용이라 제외)
+- 콘솔 작업 (대표님 요청으로 Claude가 Chrome에서 진행)
+  - Firestore 데이터베이스 생성: Standard, `asia-northeast3 (Seoul)`, 프로덕션 모드, 예약 백업 없음(유료 기능)
+  - 보안 규칙 게시: firestore.rules 그대로 (문법 오류 없이 게시됨)
+  - Authentication: 이메일/비밀번호 로그인 사용 설정
+- 실제 규칙 테스트 (비로그인 방문자 입장) 20/20 통과
+  - 허용: 공개·비밀 문의 등록, 목록 읽기, 맞는 비밀번호로 비밀글 열기, 사진 후기 등록, 설정 읽기
+  - 차단: 비밀글 목록, 승인 전 후기·사진 읽기, 답변완료 위조, 남의 글 수정·삭제, 비밀글 끼워넣기, 자작 승인 후기, 사진 끼워넣기·형식 위반, 설정 변경, 관리자 명단 추가
+- 실제 크기 사진(69KB·55KB) 후기 업로드 성공
+- ⚠ Firestore 연결 후 페이지가 계속 연결을 유지하므로 자동 테스트는 `networkidle` 대신 `load` 기준으로 변경
+- 남은 일: 관리자 계정 추가(대표님이 비밀번호 직접 입력) → UID를 admins 컬렉션에 등록 → 관리자 기능 실제 테스트 → 테스트 글 3건 삭제
+  - 테스트 글 ID: 문의 h4uQJxBtsX9pks4Uu5rS(공개)·dGzmOxrT0Sj9tu7807NU(비밀), 후기 QFY1FYDMhsFGYpq7Hn5P + 사진 후기 1건

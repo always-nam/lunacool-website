@@ -5,10 +5,10 @@
 //  비어 있으면: 실시간 문의·후기 기능이 꺼지고, 기존(샘플) 내용만 보입니다.
 // ─────────────────────────────────────────
 window.LUNA_FIREBASE_CONFIG = {
-  apiKey: '',
-  authDomain: '',
-  projectId: '',
-  storageBucket: '',
-  messagingSenderId: '',
-  appId: ''
+  apiKey: 'AIzaSyDgnnoAGbiaAJ2ad6HEZkwBfwLPIWjUlRw',
+  authDomain: 'luna-home-b3450.firebaseapp.com',
+  projectId: 'luna-home-b3450',
+  storageBucket: 'luna-home-b3450.firebasestorage.app',
+  messagingSenderId: '397898494475',
+  appId: '1:397898494475:web:8bf941ba22729870e4cd0e'
 };

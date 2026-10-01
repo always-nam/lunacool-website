@@ -293,3 +293,11 @@
   - 콘솔 규칙과 로컬 firestore.rules는 주석 1줄만 다름(기능 동일)
 - Authentication 승인된 도메인에 `always-nam.github.io` 추가 (실사이트에서 관리자 로그인 가능하게)
 - 방문자 쪽 차단 재확인: 비밀글 목록·설정 변경·후기 전체 목록 모두 차단, 방문자 관리자 판별 false
+
+---
+
+## 2026-10-01 (7) — 실사이트 반영
+
+- 대표님 지시로 `renewal/lunaon-brand-family`를 master에 fast-forward 병합 → `git push origin master` (d50ba14 → 4eee5d0), 브랜치도 원격에 올림
+- GitHub Pages 빌드 완료 확인, 실사이트(모바일 390px) 6개 페이지 200·가로넘침 없음·오류 없음, 실사이트에서 Firebase 문의 102건(기존 100 + 테스트 2)·후기 111건 표시
+- ⚠ 테스트 문의 2건·테스트 후기가 실사이트에 보이는 상태 → 관리자 화면에서 삭제 필요

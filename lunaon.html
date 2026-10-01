@@ -77,17 +77,10 @@
     .care li::before { content: ""; position: absolute; left: 2px; top: 20px; width: 6px; height: 6px; border-radius: 50%; background: var(--warm-2); }
 
     /* ── 형제 브랜드 ── */
-    .sibling { margin: 0 var(--gutter) clamp(72px, 9vw, 112px); }
-    .sibling .wrap { border-radius: 14px; overflow: hidden; display: grid; grid-template-columns: 1.1fr 1fr; background: #EEF4FB; }
-    .sibling .wrap > img { width: 100%; height: 100%; min-height: 260px; object-fit: cover; }
-    .sibling .txt { padding: clamp(28px, 4vw, 52px); align-self: center; }
-    .sibling .txt img { height: 24px; width: auto; margin-bottom: 18px; }
-    .sibling h2 { font-size: 26px; line-height: 1.4; margin-bottom: 12px; }
-    .sibling p { color: var(--mid); margin-bottom: 22px; line-height: 1.7; }
 
     @media (max-width: 900px) {
       .lo-hero { margin-top: 60px; }
-      .lo-hero .wrap, .reverse .wrap, .info .wrap, .sibling .wrap { grid-template-columns: 1fr; }
+      .lo-hero .wrap, .reverse .wrap, .info .wrap { grid-template-columns: 1fr; }
       .moon-window { justify-self: stretch; width: 100%; }
       .moon-window img { aspect-ratio: 1/1; }
       .size-row { grid-template-columns: 1fr; }
@@ -109,7 +102,7 @@
     <img class="lo" src="assets/lunaon/lunaon-logo.svg" alt="루나온">
   </a>
   <nav>
-    <a href="products.html">전체 상품</a>
+    <a href="products.html" class="nav-lc">루나쿨</a>
     <a href="lunaon.html" class="nav-lo" aria-current="page">루나온</a>
     <a href="reviews.html">구매후기</a>
     <a href="inquiry.html">상품문의</a>
@@ -121,7 +114,7 @@
 </header>
 <div class="m-nav" id="mNav">
   <a href="index.html">홈</a>
-  <a href="products.html">전체 상품</a>
+  <a href="products.html" class="nav-lc">루나쿨</a>
   <a href="lunaon.html" class="nav-lo" aria-current="page">루나온</a>
   <a href="reviews.html">구매후기</a>
   <a href="inquiry.html">상품문의</a>
@@ -237,17 +230,6 @@
   </div>
 </section>
 
-<section class="sibling">
-  <div class="wrap">
-    <img src="루나쿨 상품 이미지/냉감 시리즈 3.jpg" alt="루나쿨 냉감 침구를 깐 밝은 침실" loading="lazy">
-    <div class="txt">
-      <img src="assets/lunacool/lunacool-logo-h.png" alt="루나쿨">
-      <h2>더운 밤에는 루나쿨</h2>
-      <p>루나온의 여름 형제 브랜드. 냉감 패드부터 베개커버까지 다섯 가지 침구가 있습니다.</p>
-      <a href="products.html" class="btn btn-ink">루나쿨 상품 보기</a>
-    </div>
-  </div>
-</section>
 
 <footer class="site-ftr">
   <div class="in">

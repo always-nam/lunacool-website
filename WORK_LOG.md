@@ -206,3 +206,22 @@
   - 쿠팡 버튼 위치: 머리글, 모바일 메뉴, 바닥글, 상품 카드, 상세페이지 하단, 루나온 크기 카드·히어로, 브랜드/인증/상품/후기 페이지 하단 CTA
   - 상품 카드 버튼: 상세보기(한 줄) + 스마트스토어 | 쿠팡, 모바일은 세로 3단
 - 회귀 테스트 다시 실행: 후기·문의·관리자·영상 모달·모바일 메뉴 master와 동일, 링크 깨짐 없음, 콘솔 오류 없음
+
+---
+
+## 2026-10-01 (2) — 브랜드 분리
+
+- 메인 히어로 왼쪽(루나쿨) 클릭 → `products.html`(루나쿨 전용), 오른쪽(루나온) 클릭 → `lunaon.html`(루나온 전용)
+- `products.html`: 루나온 칸·브랜드 바로가기 제거, 히어로를 루나쿨 전용(로고 + 「여름을 바꾸는 냉감 침구 라인업」)으로 → 상품 카드 8개, master와 동일
+- `lunaon.html`: 하단 루나쿨 안내 블록 제거
+- `about.html`: 하단 루나온 안내 블록 제거 (style.css `.family-note` 규칙도 삭제)
+- 메뉴 「전체 상품」 → 「루나쿨」(products.html)
+- 메인 아래 본문: 스위치 계절에 따라 **한 브랜드만** 표시 (겨울 = 루나온 이야기·크기 / 여름 = 루나쿨 특징·상품·후기·영상)
+- 공통 머리글 로고 2개, 바닥글 브랜드별 링크는 사이트 전체 안내라 유지
+- 회귀 테스트: 후기·문의·관리자·영상·모바일 메뉴·상품 카드 모두 master와 동일, 링크 깨짐 없음
+
+### 도메인 조회 (2026-10-01, RDAP 레지스트리 조회 — 최종 확인은 등록업체에서)
+- 등록됨(사용 불가): lunacool.com, lunaon.com, lunaon.co.kr(2026-05-11 등록), lunasleep.co.kr, lunabedding.com, lunafamily.com
+- 미등록으로 조회됨: lunacool.co.kr, lunacool.kr, lunaon.kr, lunabed.co.kr, lunanight.co.kr, lunafamily.co.kr
+- GitHub Pages 연결: Settings > Pages > Custom domain 먼저 입력 → DNS A 185.199.108~111.153 / www CNAME always-nam.github.io → Enforce HTTPS
+- ⚠ CNAME 파일은 DNS 준비 전에 넣지 말 것 (github.io 주소가 새 도메인으로 넘어가 사이트가 안 보일 수 있음)

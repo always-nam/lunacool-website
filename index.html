@@ -100,20 +100,14 @@
     html[data-season="summer"] .season-switch .thumb { background: var(--dark); }
     html[data-season="winter"] .season-switch .thumb { background: var(--warm-grad); transform: translateX(100%); }
 
-    /* ═══ 본문: 계절에 따라 순서와 색만 바뀜 ═══ */
+    /* ═══ 본문: 계절(브랜드)별로 완전히 분리 — 겨울엔 루나온만, 여름엔 루나쿨만 ═══ */
     .flow { display: flex; flex-direction: column; }
-    html[data-season="winter"] .o-lo-story { order: 1; }
-    html[data-season="winter"] .o-lo-sizes { order: 2; }
-    html[data-season="winter"] .o-lc-goods { order: 3; }
-    html[data-season="winter"] .o-lc-points { order: 4; }
-    html[data-season="winter"] .o-reviews { order: 5; }
-    html[data-season="winter"] .o-video { order: 6; }
-    html[data-season="summer"] .o-lc-points { order: 1; }
-    html[data-season="summer"] .o-lc-goods { order: 2; }
-    html[data-season="summer"] .o-reviews { order: 3; }
-    html[data-season="summer"] .o-video { order: 4; }
-    html[data-season="summer"] .o-lo-story { order: 5; }
-    html[data-season="summer"] .o-lo-sizes { order: 6; }
+    html[data-season="winter"] .o-lc-points,
+    html[data-season="winter"] .o-lc-goods,
+    html[data-season="winter"] .o-reviews,
+    html[data-season="winter"] .o-video,
+    html[data-season="summer"] .o-lo-story,
+    html[data-season="summer"] .o-lo-sizes { display: none !important; }
 
     .wrap { max-width: var(--maxw); margin: 0 auto; }
 
@@ -144,8 +138,6 @@
     .lc-points h3::before { content: ""; position: absolute; top: 0; left: 0; width: 36px; height: 3px; border-radius: 2px; background: var(--cool-grad); }
     .lc-points p { color: var(--s-mid); font-size: 15.5px; line-height: 1.75; }
     .lc-points p a { color: var(--blue); border-bottom: 1px solid currentColor; }
-    html[data-season="winter"] .o-lc-points { padding-top: 0; padding-bottom: clamp(64px, 8vw, 104px); }
-    html[data-season="winter"] .o-lc-points .brand { display: none; }
 
     .lc-goods { background: var(--s-bg); color: var(--s-fg); padding: clamp(64px, 8vw, 104px) var(--gutter) clamp(56px, 7vw, 88px); }
     .lc-goods .hd { display: flex; justify-content: space-between; align-items: end; gap: 16px; margin-bottom: 24px; }
@@ -202,7 +194,7 @@
     <img class="lo" src="assets/lunaon/lunaon-logo.svg" alt="루나온">
   </a>
   <nav>
-    <a href="products.html">전체 상품</a>
+    <a href="products.html" class="nav-lc">루나쿨</a>
     <a href="lunaon.html" class="nav-lo">루나온</a>
     <a href="reviews.html">구매후기</a>
     <a href="inquiry.html">상품문의</a>
@@ -214,7 +206,7 @@
 </header>
 <div class="m-nav" id="mNav">
   <a href="index.html" aria-current="page">홈</a>
-  <a href="products.html">전체 상품</a>
+  <a href="products.html" class="nav-lc">루나쿨</a>
   <a href="lunaon.html" class="nav-lo">루나온</a>
   <a href="reviews.html">구매후기</a>
   <a href="inquiry.html">상품문의</a>

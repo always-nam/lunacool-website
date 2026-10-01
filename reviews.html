@@ -172,6 +172,29 @@
       .rating-wrap { padding-inline: 20px; }
       .reviews-grid { grid-template-columns: 1fr; }
     }
+    /* 후기 쓰기 (2026-10-01) */
+    .btn-write-review { display: inline-flex; margin: 0 6px 12px; padding: 14px 32px; border-radius: 999px; border: 0; cursor: pointer; background: var(--dark); color: #fff; font: inherit; font-size: 14.5px; font-weight: 700; }
+    .rw-bg { display: none; position: fixed; inset: 0; z-index: 400; background: rgba(20,24,30,.55); align-items: center; justify-content: center; padding: 16px; }
+    .rw-bg.open { display: flex; }
+    .rw-modal { background: #fff; border-radius: 14px; width: min(100%, 520px); max-height: 92vh; overflow: auto; }
+    .rw-head { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid var(--border); }
+    .rw-head h3 { font-size: 18px; }
+    .rw-head button { border: 0; background: none; font-size: 18px; cursor: pointer; color: var(--mid); }
+    .rw-body { padding: 20px 24px; display: grid; gap: 14px; }
+    .rw-body label { display: grid; gap: 6px; font-size: 14px; font-weight: 600; }
+    .rw-body select, .rw-body input[type=text], .rw-body textarea { font: inherit; font-weight: 400; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 8px; width: 100%; }
+    .rw-body textarea { min-height: 130px; resize: vertical; }
+    .rw-body .req { color: #E5484D; }
+    .rw-body .rw-check { display: block; font-weight: 500; font-size: 13.5px; }
+    .rw-body .rw-check small { color: var(--mid); font-weight: 400; }
+    .rw-note { font-size: 13px; color: var(--mid); }
+    .rw-foot { display: flex; gap: 8px; justify-content: flex-end; padding: 16px 24px 22px; }
+    .rw-foot button { padding: 11px 22px; border-radius: 999px; font: inherit; font-weight: 600; cursor: pointer; }
+    .rw-cancel { background: #fff; border: 1.5px solid var(--border); }
+    .rw-submit { background: var(--dark); color: #fff; border: 0; }
+    .rw-submit:disabled { opacity: .6; cursor: default; }
+    .rw-toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 500; background: var(--dark); color: #fff; padding: 12px 20px; border-radius: 999px; font-size: 14px; opacity: 0; pointer-events: none; transition: opacity .25s; }
+    .rw-toast.show { opacity: 1; }
   </style>
 </head>
 <body>
@@ -231,14 +254,16 @@
   <button class="ftab" onclick="filterByProduct('sofa', this)">소파패드</button>
   <button class="ftab" onclick="filterByProduct('cushion', this)">방석</button>
   <button class="ftab" onclick="filterByProduct('pillow', this)">베개커버</button>
+  <button class="ftab" onclick="filterByProduct('lunaon', this)">루나온 이불</button>
 </div>
 
 <!-- 후기 목록 -->
 <div class="product-review-section" id="reviewsContainer"></div>
 
 <div class="review-cta">
-  <h3>루나쿨을 경험하셨나요?</h3>
-  <p>네이버 스마트스토어에서 구매 후 후기를 남겨주세요.</p>
+  <h3>루나쿨 · 루나온을 써 보셨나요?</h3>
+  <p>홈페이지에 바로 후기를 남기거나, 구매하신 스토어에 후기를 남겨주세요.</p>
+  <button type="button" class="btn-write-review" onclick="openReviewModal()">홈페이지에 후기 쓰기</button>
   <a href="https://smartstore.naver.com/terran/products/13431840534" data-store="smartstore" target="_blank" class="btn-solid"
      style="display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:white;padding:14px 36px;border-radius:3px;font-size:14px;font-weight:700;transition:background 0.2s;"
      onmouseover="this.style.background='var(--blue-dk)'" onmouseout="this.style.background='var(--blue)'">
@@ -248,6 +273,45 @@
      style="display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:white;padding:14px 36px;border-radius:3px;font-size:14px;font-weight:700;transition:background 0.2s;"
      onmouseover="this.style.background='var(--blue-dk)'" onmouseout="this.style.background='var(--blue)'">쿠팡 후기 작성하기 →</a>
 </div>
+
+
+<!-- 후기 쓰기 모달 (2026-10-01) -->
+<div class="rw-bg" id="reviewModal" onclick="if(event.target===this) closeReviewModal()">
+  <div class="rw-modal" role="dialog" aria-labelledby="rwTitle">
+    <div class="rw-head"><h3 id="rwTitle">후기 쓰기</h3><button type="button" onclick="closeReviewModal()" aria-label="닫기">✕</button></div>
+    <div class="rw-body">
+      <label>상품 <span class="req">*</span>
+        <select id="rwProduct">
+          <option value="lunaon">루나온 그래핀 발열 이불</option>
+          <option value="pad">루나쿨 냉감 패드</option>
+          <option value="blanket">루나쿨 냉감 차렵이불</option>
+          <option value="sofa">루나쿨 냉감 소파패드</option>
+          <option value="cushion">루나쿨 냉감 방석</option>
+          <option value="pillow">루나쿨 냉감 베개커버</option>
+        </select>
+      </label>
+      <label>별점 <span class="req">*</span>
+        <select id="rwRating">
+          <option value="5">★★★★★ 5점</option><option value="4">★★★★☆ 4점</option>
+          <option value="3">★★★☆☆ 3점</option><option value="2">★★☆☆☆ 2점</option><option value="1">★☆☆☆☆ 1점</option>
+        </select>
+      </label>
+      <label>이름 <span class="req">*</span>
+        <input id="rwName" type="text" maxlength="20" placeholder="홍길동 (홈페이지엔 홍** 로 표시)">
+      </label>
+      <label>후기 <span class="req">*</span>
+        <textarea id="rwText" maxlength="2000" placeholder="10자 이상 적어주세요"></textarea>
+      </label>
+      <label class="rw-check"><input type="checkbox" id="rwAgree"> 개인정보(이름) 수집·이용에 동의합니다 <small>— 후기 게시 목적, 삭제 요청 시까지 보관</small></label>
+      <p class="rw-note">남겨주신 후기는 관리자 확인 후 게시됩니다.</p>
+    </div>
+    <div class="rw-foot">
+      <button type="button" class="rw-cancel" onclick="closeReviewModal()">취소</button>
+      <button type="button" class="rw-submit" id="rwSubmit" onclick="submitReview()">후기 등록</button>
+    </div>
+  </div>
+</div>
+<div class="rw-toast" id="rwToast"></div>
 
 <!-- 라이트박스 -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
@@ -302,6 +366,8 @@
 <script src="script.js"></script>
 <script src="reviews-data.js"></script>
 <script src="review-generator.js"></script>
+<script src="firebase-config.js"></script>
+<script type="module" src="board.js"></script>
 <script>
 // ── 후기 렌더링 ──
 const PRODUCT_META = {
@@ -309,16 +375,73 @@ const PRODUCT_META = {
   blanket: { name: '냉감 차렵이불', thumb: '루나쿨 상품 이미지/냉감 차렵이불 퀸 5.jpg' },
   sofa:    { name: '냉감 소파패드', thumb: '루나쿨 상품 이미지/냉감 소파패드 6.jpg' },
   cushion: { name: '냉감 방석',    thumb: '루나쿨 상품 이미지/냉감 방석 2.jpg' },
+  lunaon:  { name: '루나온 그래핀 발열 이불', thumb: 'assets/lunaon/photo/lo-9528.jpg' },
   pillow:  { name: '냉감 베개커버', thumb: '루나쿨 상품 이미지/냉감 베개커버.jpg' },
 };
 
 let currentFilter = 'all';
 
+// 실시간 후기(Firebase, 관리자 승인분) + 기존 후기(reviews-data.js)
+let LIVE_REVIEWS = [];
+function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function getReviews() {
   const stored = localStorage.getItem('lunacool_reviews');
-  if (stored) return JSON.parse(stored);
   // 기본 후기 데이터 (DEFAULT_REVIEWS는 reviews-data.js에서 로드)
-  return typeof DEFAULT_REVIEWS !== 'undefined' ? DEFAULT_REVIEWS : [];
+  const base = stored ? JSON.parse(stored) : (typeof DEFAULT_REVIEWS !== 'undefined' ? DEFAULT_REVIEWS : []);
+  return LIVE_REVIEWS.concat(base);
+}
+function fmtTs(ts) {
+  const t = ts && ts.toDate ? ts.toDate() : null;
+  return t ? `${t.getFullYear()}.${String(t.getMonth()+1).padStart(2,'0')}.${String(t.getDate()).padStart(2,'0')}` : '';
+}
+async function loadLiveReviews() {
+  const B = window.LunaBoard;
+  if (!B || !B.enabled) return;
+  try {
+    const rows = await B.listApprovedReviews();
+    LIVE_REVIEWS = rows.map(r => ({ id: 'L-' + r.id, product: r.product, name: r.name, location: '홈페이지 작성',
+      rating: r.rating, verified: false, text: r.text, date: fmtTs(r.createdAt), photos: [], reply: r.reply || '' }));
+    renderRatingSummary(getReviews());
+    renderReviews(currentFilter);
+  } catch (e) { console.error('후기 불러오기 실패', e); }
+}
+if (window.LunaBoard) loadLiveReviews(); else window.addEventListener('lunaboard:ready', loadLiveReviews);
+
+function rwToast(msg) {
+  const t = document.getElementById('rwToast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 3200);
+}
+function openReviewModal() {
+  if (!window.LunaBoard || !window.LunaBoard.enabled) { rwToast('후기 쓰기 연결을 준비 중입니다.'); return; }
+  ['rwName','rwText'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('rwAgree').checked = false;
+  document.getElementById('reviewModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeReviewModal() {
+  document.getElementById('reviewModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+async function submitReview() {
+  const product = document.getElementById('rwProduct').value;
+  const rating = parseInt(document.getElementById('rwRating').value, 10);
+  const name = document.getElementById('rwName').value.trim();
+  const text = document.getElementById('rwText').value.trim();
+  if (!name) { rwToast('이름을 적어주세요.'); return; }
+  if (text.length < 10) { rwToast('후기는 10자 이상 적어주세요.'); return; }
+  if (!document.getElementById('rwAgree').checked) { rwToast('개인정보 수집·이용에 동의해 주세요.'); return; }
+  const btn = document.getElementById('rwSubmit');
+  btn.disabled = true; btn.textContent = '등록 중…';
+  try {
+    await window.LunaBoard.createReview({ product, name, rating, text });
+    closeReviewModal();
+    rwToast('후기가 접수되었습니다. 관리자 확인 후 게시됩니다.');
+  } catch (e) {
+    console.error(e);
+    rwToast('등록하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+  }
+  btn.disabled = false; btn.textContent = '후기 등록';
 }
 
 function renderRatingSummary(reviews) {
@@ -355,7 +478,7 @@ function renderReviews(filter) {
 
   // 상품별 그룹화
   const groups = {};
-  const PROD_ORDER = ['pad','blanket','sofa','cushion','pillow'];
+  const PROD_ORDER = ['lunaon','pad','blanket','sofa','cushion','pillow'];
   filtered.forEach(r => {
     if (!groups[r.product]) groups[r.product] = [];
     groups[r.product].push(r);
@@ -450,19 +573,19 @@ function renderCard(r) {
       <div class="rev-body">
         ${!hasPhotos ? '<div class="text-quote">"</div>' : ''}
         <div class="rv-top">
-          <div class="rv-av">${r.name[0]}</div>
+          <div class="rv-av">${esc((r.name || '?')[0])}</div>
           <div>
-            <div class="rv-name">${r.name}님 ${verifiedBadge}</div>
-            <div class="rv-loc">${r.location || ''}</div>
+            <div class="rv-name">${esc(r.name)}님 ${verifiedBadge}</div>
+            <div class="rv-loc">${esc(r.location || '')}</div>
           </div>
         </div>
         <div class="rv-stars" style="color:#F0A500">${stars}</div>
-        <div class="rv-text">${r.text}</div>
-        <div class="rv-date">${r.date}</div>
+        <div class="rv-text">${esc(r.text)}</div>
+        <div class="rv-date">${esc(r.date)}</div>
         ${r.reply ? `
         <div class="rv-reply">
-          <div class="rv-reply-head">🌙 루나쿨 답변</div>
-          <div class="rv-reply-text">${r.reply}</div>
+          <div class="rv-reply-head">🌙 ${r.product === 'lunaon' ? '루나온' : '루나쿨'} 답변</div>
+          <div class="rv-reply-text">${esc(r.reply)}</div>
         </div>` : ''}
       </div>
     </div>`;
@@ -484,7 +607,7 @@ function closeLightbox() {
   document.getElementById('lightbox').classList.remove('open');
   document.body.style.overflow = '';
 }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeLightbox(); closeReviewModal(); } });
 
 // 초기 렌더
 const allReviews = getReviews();

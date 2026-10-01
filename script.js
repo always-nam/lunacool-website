@@ -29,7 +29,8 @@ function ytEmbed(id) {
 function openVideoModal(e) {
   if (e) e.preventDefault();
   // localStorage에 등록된 영상이 있으면 우선 사용, 없으면 기본 영상
-  const videoUrl = localStorage.getItem('lunacool_video_url') || '';
+  // 실시간 관리(admin-live.html)에서 저장한 주소 → 없으면 이 브라우저에 저장된 주소 → 없으면 기본 영상
+  const videoUrl = window.LIVE_VIDEO_URL || localStorage.getItem('lunacool_video_url') || '';
   const player = document.getElementById('vmPlayer');
   if (player) {
     if (!videoUrl) {

@@ -1,0 +1,78 @@
+rules_version = '2';
+// ─────────────────────────────────────────
+//  루나쿨 · 루나온 Firestore 보안 규칙
+//  Firebase 콘솔 > Firestore Database > 규칙 탭에 이 파일 내용을 그대로 붙여넣고 「게시」
+// ─────────────────────────────────────────
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+    function okStr(v, minLen, maxLen) {
+      return v is string && v.size() >= minLen && v.size() <= maxLen;
+    }
+
+    // 관리자 명단: 콘솔에서만 추가 (admins/{관리자 UID} 문서 하나 만들기)
+    match /admins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    // ── 상품문의 (목록) ──
+    // 비밀글은 여기에 제목·내용을 저장하지 않음
+    match /inquiries/{id} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(['cat','product','name','secret','title','content','status','createdAt'])
+        && request.resource.data.cat in ['product','delivery','exchange','etc']
+        && okStr(request.resource.data.product, 0, 60)
+        && okStr(request.resource.data.name, 1, 20)
+        && request.resource.data.secret is bool
+        && request.resource.data.status == 'wait'
+        && request.resource.data.createdAt == request.time
+        && (request.resource.data.secret
+              ? (request.resource.data.title == '' && request.resource.data.content == '')
+              : (okStr(request.resource.data.title, 1, 100) && okStr(request.resource.data.content, 1, 3000)));
+      allow update, delete: if isAdmin();
+    }
+
+    // ── 비밀글 내용 ──
+    // 문서 이름 = 문의번호 + 비밀번호로 만든 암호화 값 → 비밀번호를 알아야 「한 건 읽기(get)」 가능
+    // 「목록 보기(list)」는 관리자만
+    match /inquiry_secrets/{key} {
+      allow get: if true;
+      allow list: if isAdmin();
+      // 비밀글 목록 문서와 「같은 묶음」으로 처음 만들 때만 허용 (남의 비밀글에 끼워 넣기 방지)
+      allow create: if key.size() == 64
+        && request.resource.data.keys().hasOnly(['inquiryId','title','content','name','createdAt'])
+        && !exists(/databases/$(database)/documents/inquiries/$(request.resource.data.inquiryId))
+        && getAfter(/databases/$(database)/documents/inquiries/$(request.resource.data.inquiryId)).data.secret == true
+        && okStr(request.resource.data.title, 1, 100)
+        && okStr(request.resource.data.content, 1, 3000)
+        && okStr(request.resource.data.name, 1, 20)
+        && request.resource.data.createdAt == request.time;
+      allow update, delete: if isAdmin();
+    }
+
+    // ── 후기: 누구나 작성, 관리자 승인 후 공개 ──
+    match /reviews/{id} {
+      allow read: if resource.data.status == 'approved' || isAdmin();
+      allow create: if request.resource.data.keys().hasOnly(['product','name','rating','text','status','createdAt'])
+        && request.resource.data.product in ['pad','blanket','sofa','cushion','pillow','lunaon']
+        && okStr(request.resource.data.name, 1, 20)
+        && request.resource.data.rating is int
+        && request.resource.data.rating >= 1 && request.resource.data.rating <= 5
+        && okStr(request.resource.data.text, 10, 2000)
+        && request.resource.data.status == 'pending'
+        && request.resource.data.createdAt == request.time;
+      allow update, delete: if isAdmin();
+    }
+
+    // ── 사이트 설정 (홍보 영상 주소 등) ──
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}

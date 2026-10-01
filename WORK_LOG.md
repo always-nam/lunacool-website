@@ -225,3 +225,27 @@
 - 미등록으로 조회됨: lunacool.co.kr, lunacool.kr, lunaon.kr, lunabed.co.kr, lunanight.co.kr, lunafamily.co.kr
 - GitHub Pages 연결: Settings > Pages > Custom domain 먼저 입력 → DNS A 185.199.108~111.153 / www CNAME always-nam.github.io → Enforce HTTPS
 - ⚠ CNAME 파일은 DNS 준비 전에 넣지 말 것 (github.io 주소가 새 도메인으로 넘어가 사이트가 안 보일 수 있음)
+
+---
+
+## 2026-10-01 (3) — 실시간 문의·후기 (Firebase 연결 코드, 프로젝트 연결 대기)
+
+- 이유: GitHub Pages는 정적 호스팅이라 문의·답변·후기가 각자 브라우저(localStorage)에만 저장되고 있었음 → 고객 글이 관리자에게 안 보이고, 답변도 고객에게 안 감
+- 방식: 화면은 GitHub Pages 그대로, 저장은 Firebase Firestore(무료 Spark). 보안은 `firestore.rules`
+- 새 파일
+  - `firebase-config.js` — 연결 정보 (비어 있으면 실시간 기능 꺼짐 → 기존처럼 샘플만 표시)
+  - `board.js` — 문의/비밀글/후기/설정/관리자 함수 (Firebase JS SDK 11.0.2, gstatic CDN)
+  - `firestore.rules` — 보안 규칙 (콘솔에 붙여넣기)
+  - `admin-live.html` — 실시간 관리: 문의 답변·삭제, 후기 승인·숨김·답글·삭제, 홍보 영상 주소 (Firebase 로그인 + admins 명단)
+  - `FIREBASE_설정안내.md` — 대표님 설정 순서
+- 수정
+  - `inquiry.html`: 「문의 글쓰기」 버튼 복원, 실시간 글 + 기존 100건 함께 표시, 비밀글(작성자 비밀번호 4자 이상), 개인정보 동의, 이름 가림(홍**), 출력 이스케이프(XSS 방지), 관련 상품에 루나온·슈퍼싱글 반영
+  - `reviews.html`: 「홈페이지에 후기 쓰기」(관리자 승인 후 공개), 「루나온 이불」 분류 추가, 출력 이스케이프
+  - `index.html` + `script.js`(1줄): 홍보 영상 주소를 실시간 설정값 우선 사용
+  - `admin.html`: 상단에 실시간 관리 링크 1줄 추가 (기존 기능 그대로)
+- 비밀글 구조: 목록 문서엔 제목·내용 없음 / 내용은 `inquiry_secrets/{PBKDF2(문의번호+비밀번호)}` 문서 → 비밀번호를 알아야 찾음, 목록 조회는 관리자만
+- 테스트
+  - 연결 전 상태: master 대비 회귀 15항목 동일, 실제 board.js 로드 오류 없음
+  - 가짜 저장소로 흐름 21항목 통과 (공개글/비밀글/틀린·맞는 비밀번호/관리자 답변 노출/후기 승인 전후/XSS/영상 설정)
+  - ⚠ 실제 Firebase + 보안 규칙은 프로젝트 생성 후 테스트 필요 (이 PC에 Node·Java가 없어 에뮬레이터 불가)
+- ⚠ 남은 위험: 기존 `admin.html`의 아이디·비밀번호가 공개 코드에 그대로 있음 (그 페이지는 관리자 브라우저 데이터만 다뤄 실害는 적지만, 같은 비밀번호를 다른 곳에 쓰고 있다면 바꿔야 함)

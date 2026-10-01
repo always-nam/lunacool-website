@@ -228,6 +228,7 @@
     textarea.form-control { min-height: 120px; resize: vertical; }
     select.form-control { cursor: pointer; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-note { font-size: 12.5px; color: var(--mid); line-height: 1.7; margin: 8px 0 12px; }
     .secret-toggle {
       display: flex; align-items: center; gap: 8px;
       font-size: 13px; color: var(--mid); cursor: pointer; user-select: none;
@@ -334,7 +335,7 @@
 <div class="page-hero">
   <div class="pk">Customer Inquiry</div>
   <h1>상품 문의</h1>
-  <p>궁금한 점은 채널로 문의해 주세요 · 아래에서 자주 묻는 질문도 확인하실 수 있습니다</p>
+  <p>문의 글을 남기시면 영업일 1~2일 안에 답변드립니다. 개인적인 내용은 비밀글로 남겨주세요</p>
 </div>
 
 <div class="inq-wrap">
@@ -367,7 +368,8 @@
 
   <!-- ── 자주 묻는 질문(FAQ) ── -->
   <div class="inq-topbar">
-    <div class="inq-count">자주 묻는 질문 <strong id="totalCount">0</strong>건</div>
+    <div class="inq-count">문의 게시판 <strong id="totalCount">0</strong>건</div>
+    <button class="btn-write" id="btnWrite" onclick="openWriteModal()">문의 글쓰기</button>
   </div>
 
   <!-- 카테고리 필터 -->
@@ -420,37 +422,50 @@
           <label>관련 상품 <span class="opt">(선택)</span></label>
           <select class="form-control" id="fProduct">
             <option value="">선택 안함</option>
-            <option value="냉감 패드 (퀸)">냉감 패드 (퀸)</option>
-            <option value="냉감 패드 (싱글)">냉감 패드 (싱글)</option>
-            <option value="냉감 차렵이불 (퀸)">냉감 차렵이불 (퀸)</option>
-            <option value="냉감 차렵이불 (싱글)">냉감 차렵이불 (싱글)</option>
-            <option value="냉감 소파패드">냉감 소파패드</option>
-            <option value="냉감 방석">냉감 방석</option>
-            <option value="냉감 베개커버">냉감 베개커버</option>
+            <optgroup label="루나온">
+              <option value="루나온 그래핀 발열 이불 (퀸)">루나온 그래핀 발열 이불 (퀸)</option>
+              <option value="루나온 그래핀 발열 이불 (슈퍼싱글)">루나온 그래핀 발열 이불 (슈퍼싱글)</option>
+            </optgroup>
+            <optgroup label="루나쿨">
+              <option value="냉감 패드 (퀸)">냉감 패드 (퀸)</option>
+              <option value="냉감 패드 (슈퍼싱글)">냉감 패드 (슈퍼싱글)</option>
+              <option value="냉감 차렵이불 (퀸)">냉감 차렵이불 (퀸)</option>
+              <option value="냉감 차렵이불 (슈퍼싱글)">냉감 차렵이불 (슈퍼싱글)</option>
+              <option value="냉감 소파패드">냉감 소파패드</option>
+              <option value="냉감 방석">냉감 방석</option>
+              <option value="냉감 베개커버">냉감 베개커버</option>
+            </optgroup>
           </select>
         </div>
       </div>
       <div class="form-group">
         <label>제목 <span class="req">*</span></label>
-        <input class="form-control" type="text" id="fTitle" placeholder="문의 제목을 입력해주세요">
+        <input class="form-control" type="text" id="fTitle" placeholder="문의 제목을 입력해주세요" maxlength="100">
       </div>
       <div class="form-row">
         <div class="form-group">
           <label>이름 <span class="req">*</span></label>
-          <input class="form-control" type="text" id="fName" placeholder="홍**">
+          <input class="form-control" type="text" id="fName" placeholder="홍길동 (게시판엔 홍** 로 표시)" maxlength="20">
         </div>
         <div class="form-group">
           <label>비밀번호 <span class="opt">(비밀글 설정)</span></label>
-          <input class="form-control" type="password" id="fPw" placeholder="비밀번호 입력 시 비밀글">
+          <input class="form-control" type="password" id="fPw" placeholder="비밀글 체크 후 4자 이상" maxlength="40" autocomplete="new-password">
         </div>
       </div>
       <div class="form-group">
         <label>문의 내용 <span class="req">*</span></label>
-        <textarea class="form-control" id="fContent" placeholder="문의 내용을 상세히 입력해주세요.&#10;&#10;예) 냉감 패드 퀸 사이즈 재고 확인 부탁드립니다."></textarea>
+        <textarea class="form-control" id="fContent" maxlength="3000" placeholder="문의 내용을 상세히 입력해주세요.&#10;&#10;예) 냉감 패드 퀸 사이즈 재고 확인 부탁드립니다."></textarea>
       </div>
       <label class="secret-toggle">
         <input type="checkbox" id="fSecret" onchange="document.getElementById('fPw').disabled = !this.checked; if(!this.checked) document.getElementById('fPw').value='';">
         &nbsp;🔒 비밀글로 작성
+      </label>
+      <p class="form-note">비밀글은 작성자(비밀번호)와 관리자만 볼 수 있습니다. 비밀번호를 잊으면 찾을 수 없으니 꼭 기억해 주세요.<br>
+        주민등록번호·카드번호·계좌 비밀번호는 적지 마세요. 연락이 필요하면 전화 070-7717-5231로 문의해 주세요.</p>
+      <label class="secret-toggle">
+        <input type="checkbox" id="fAgree">
+        &nbsp;개인정보(이름) 수집·이용에 동의합니다 <span class="req">*</span>
+        <small style="color:var(--mid);font-weight:400;">— 문의 답변 목적, 답변 완료 후 1년 보관</small>
       </label>
     </div>
     <div class="modal-foot">
@@ -509,6 +524,8 @@
 <script src="links.js"></script>
 <script src="script.js"></script>
 <script src="inquiry-data.js"></script>
+<script src="firebase-config.js"></script>
+<script type="module" src="board.js"></script>
 <script>
 // ── 데이터 ──────────────────────────────────
 const CAT_NAMES = { product:'상품문의', delivery:'배송문의', exchange:'교환/환불', etc:'기타' };
@@ -561,11 +578,32 @@ const SAMPLE_INQUIRIES = [
     answerDate:'2025.05.22' },
 ];
 
+// 실시간 문의(Firebase) + 기존 문의(inquiry-data.js)
+let LIVE_INQUIRIES = [];
+function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function getInquiries() {
   const d = localStorage.getItem('lunacool_inquiries');
-  if (d) return JSON.parse(d);
-  return typeof DEFAULT_INQUIRIES !== 'undefined' ? DEFAULT_INQUIRIES : [];
+  const base = d ? JSON.parse(d) : (typeof DEFAULT_INQUIRIES !== 'undefined' ? DEFAULT_INQUIRIES : []);
+  return LIVE_INQUIRIES.concat(base);
 }
+function fmtTs(ts) {
+  const t = ts && ts.toDate ? ts.toDate() : null;
+  return t ? `${t.getFullYear()}.${String(t.getMonth()+1).padStart(2,'0')}.${String(t.getDate()).padStart(2,'0')}` : '방금';
+}
+async function loadLiveInquiries() {
+  const B = window.LunaBoard;
+  if (!B || !B.enabled) return;
+  try {
+    const rows = await B.listInquiries();
+    LIVE_INQUIRIES = rows.map(r => ({
+      id: 'L-' + r.id, liveId: r.id, live: true, cat: r.cat, product: r.product, title: r.title, name: r.name,
+      secret: r.secret, pw: '', content: r.content, date: fmtTs(r.createdAt), status: r.status,
+      answer: r.answer || '', answerDate: r.answeredAt ? fmtTs(r.answeredAt) : ''
+    }));
+    renderTable();
+  } catch (e) { console.error('문의 불러오기 실패', e); }
+}
+if (window.LunaBoard) loadLiveInquiries(); else window.addEventListener('lunaboard:ready', loadLiveInquiries);
 
 // ── 렌더링 ───────────────────────────────────
 function renderTable() {
@@ -587,15 +625,15 @@ function renderTable() {
   body.innerHTML = sliced.map(item => {
     const catCls = CAT_CLASS[item.cat] || 'etc';
     const catName = CAT_NAMES[item.cat] || item.cat;
-    const titleDisp = item.secret ? `<span class="td-title secret">비밀글입니다</span>` : `<span class="td-title">${item.title}${item.product ? ` <small style="color:var(--mid);font-weight:400;">[${item.product}]</small>` : ''}</span>`;
+    const titleDisp = item.secret ? `<span class="td-title secret">비밀글입니다</span>` : `<span class="td-title">${esc(item.title)}${item.product ? ` <small style="color:var(--mid);font-weight:400;">[${esc(item.product)}]</small>` : ''}</span>`;
     const statusHtml = item.status === 'done'
       ? `<span class="status-badge done">답변완료</span>`
       : `<span class="status-badge wait">답변대기</span>`;
     return `
-      <tr onclick="toggleDetail(${item.id})" id="row-${item.id}">
+      <tr onclick="toggleDetail('${item.id}')" id="row-${item.id}">
         <td><span class="td-cat ${catCls}">${catName}</span></td>
         <td>${titleDisp}</td>
-        <td class="td-author">${item.name}</td>
+        <td class="td-author">${esc(item.name)}</td>
         <td class="td-date">${item.date}</td>
         <td>${statusHtml}</td>
       </tr>
@@ -631,14 +669,14 @@ function filterCat(cat, btn) {
 
 // ── 상세 보기 토글 ──────────────────────────
 function toggleDetail(id) {
-  const item = getInquiries().find(i => i.id === id);
+  const item = getInquiries().find(i => String(i.id) === String(id));
   if (!item) return;
 
   const detailRow = document.getElementById(`detail-${id}`);
   if (!detailRow) return;
 
   // 이미 열려있으면 닫기
-  if (openRowId === id) {
+  if (String(openRowId) === String(id)) {
     detailRow.classList.remove('open');
     openRowId = null;
     return;
@@ -652,7 +690,7 @@ function toggleDetail(id) {
   openRowId = id;
 
   // 비밀글 처리
-  if (item.secret && item.pw) {
+  if (item.secret && (item.pw || item.live)) {
     detailRow.querySelector('td').innerHTML = `
       <div class="detail-inner">
         <div class="secret-lock">
@@ -660,8 +698,8 @@ function toggleDetail(id) {
           <p>비밀글입니다. 비밀번호를 입력해 주세요.</p>
           <div class="secret-input-row">
             <input class="secret-input" type="password" id="unlockPw" placeholder="비밀번호 입력"
-              onkeydown="if(event.key==='Enter') unlockDetail(${id})">
-            <button class="btn-unlock" onclick="unlockDetail(${id})">확인</button>
+              onkeydown="if(event.key==='Enter') unlockDetail('${id}')">
+            <button class="btn-unlock" onclick="unlockDetail('${id}')">확인</button>
           </div>
         </div>
       </div>`;
@@ -671,9 +709,19 @@ function toggleDetail(id) {
   detailRow.classList.add('open');
 }
 
-function unlockDetail(id) {
-  const item = getInquiries().find(i => i.id === id);
-  const pw = document.getElementById('unlockPw')?.value;
+async function unlockDetail(id) {
+  const item = getInquiries().find(i => String(i.id) === String(id));
+  const pw = document.getElementById('unlockPw')?.value || '';
+  if (item.live) {
+    if (!pw) return;
+    showToast('확인 중입니다…');
+    let sec = null;
+    try { sec = await window.LunaBoard.openSecret(item.liveId, pw); } catch (e) { console.error(e); }
+    if (!sec) { showToast('비밀번호가 올바르지 않습니다.'); return; }
+    renderDetailContent(Object.assign({}, item, { title: sec.title, content: sec.content,
+      answer: sec.answer || '', answerDate: sec.answeredAt ? fmtTs(sec.answeredAt) : '' }), document.getElementById(`detail-${id}`));
+    return;
+  }
   if (pw === item.pw) {
     const detailRow = document.getElementById(`detail-${id}`);
     renderDetailContent(item, detailRow);
@@ -684,16 +732,17 @@ function unlockDetail(id) {
 
 function renderDetailContent(item, detailRow) {
   const answerHtml = item.answer
-    ? `<div class="a-label">💬 관리자 답변 <small style="color:var(--mid);font-weight:400;font-size:11px;margin-left:8px;">${item.answerDate}</small></div>
-       <div class="a-text">${item.answer.replace(/\n/g,'<br>')}</div>`
+    ? `<div class="a-label">💬 관리자 답변 <small style="color:var(--mid);font-weight:400;font-size:11px;margin-left:8px;">${esc(item.answerDate)}</small></div>
+       <div class="a-text">${esc(item.answer).replace(/\n/g,'<br>')}</div>`
     : `<div class="no-answer">⏳ 아직 답변이 등록되지 않았습니다. 영업일 1~2일 내 답변 드리겠습니다.</div>`;
 
   detailRow.querySelector('td').innerHTML = `
     <div class="detail-inner">
       <div class="detail-question">
         <div class="q-label">Q. 문의 내용</div>
-        ${item.product ? `<div style="font-size:12px;color:var(--blue);margin-bottom:8px;">📦 ${item.product}</div>` : ''}
-        <div>${item.content.replace(/\n/g,'<br>')}</div>
+        ${item.secret && item.title ? `<div style="font-weight:700;margin-bottom:8px;">${esc(item.title)}</div>` : ''}
+        ${item.product ? `<div style="font-size:12px;color:var(--blue);margin-bottom:8px;">📦 ${esc(item.product)}</div>` : ''}
+        <div>${esc(item.content).replace(/\n/g,'<br>')}</div>
       </div>
       <div class="detail-answer">${answerHtml}</div>
     </div>`;
@@ -701,6 +750,11 @@ function renderDetailContent(item, detailRow) {
 
 // ── 작성 모달 ────────────────────────────────
 function openWriteModal() {
+  if (!window.LunaBoard || !window.LunaBoard.enabled) {
+    showToast('문의 게시판 연결을 준비 중입니다. 전화(070-7717-5231)로 문의해 주세요.');
+    return;
+  }
+  document.getElementById('fAgree').checked = false;
   document.getElementById('fTitle').value = '';
   document.getElementById('fName').value = '';
   document.getElementById('fPw').value = '';
@@ -715,7 +769,7 @@ function closeModal(id) {
   document.body.style.overflow = '';
 }
 
-function submitInquiry() {
+async function submitInquiry() {
   const cat     = document.getElementById('fCat').value;
   const product = document.getElementById('fProduct').value;
   const title   = document.getElementById('fTitle').value.trim();
@@ -733,18 +787,28 @@ function submitInquiry() {
     return;
   }
 
-  const all = getInquiries();
-  const newId = all.length ? Math.max(...all.map(i=>i.id)) + 1 : 1;
-  const today = new Date();
-  const dateStr = `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`;
-
-  all.unshift({ id:newId, cat, product, title, name, pw: secret?pw:'', secret,
-    content, date:dateStr, status:'wait', answer:'', answerDate:'' });
-  localStorage.setItem('lunacool_inquiries', JSON.stringify(all));
-
+  if (secret && pw.length < 4) {
+    showToast('비밀번호는 4자 이상으로 정해주세요.');
+    return;
+  }
+  if (!document.getElementById('fAgree').checked) {
+    showToast('개인정보 수집·이용에 동의해 주세요.');
+    return;
+  }
+  const btn = document.querySelector('#writeMOdal .btn-submit');
+  btn.disabled = true; btn.textContent = '등록 중…';
+  try {
+    await window.LunaBoard.createInquiry({ cat, product, name, title, content, secret, password: pw });
+  } catch (e) {
+    console.error(e);
+    showToast('등록하지 못했습니다. 잠시 후 다시 시도하거나 전화로 문의해 주세요.');
+    btn.disabled = false; btn.textContent = '문의 등록';
+    return;
+  }
+  btn.disabled = false; btn.textContent = '문의 등록';
   closeModal('writeMOdal');
   currentPage = 1;
-  renderTable();
+  await loadLiveInquiries();
   showToast('문의가 등록되었습니다. 1~2 영업일 내 답변 드리겠습니다 😊', 'success');
 }
 

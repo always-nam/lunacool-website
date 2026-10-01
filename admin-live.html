@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>실시간 관리 — 루나쿨 · 루나온</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <style>
+    :root { --ink:#2B333C; --mid:#5C6670; --line:#E3E5E8; --paper:#F4F5F6; --cool:#2F6FD6; --warm:#C2521F; --ok:#2E8B57; --bad:#D64545; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Pretendard', 'Malgun Gothic', sans-serif; color: var(--ink); background: var(--paper); font-size: 15px; line-height: 1.6; word-break: keep-all; }
+    button, input, textarea, select { font: inherit; }
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+    header { background: #fff; border-bottom: 1px solid var(--line); }
+    header .wrap { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 16px; }
+    header strong { font-size: 16px; }
+    header nav { display: flex; gap: 14px; align-items: center; font-size: 14px; }
+    header a { color: var(--mid); text-decoration: none; }
+    .btn { border: 0; border-radius: 999px; padding: 9px 18px; cursor: pointer; font-weight: 600; font-size: 14px; }
+    .btn-ink { background: var(--ink); color: #fff; }
+    .btn-line { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); }
+    .btn-ok { background: var(--ok); color: #fff; }
+    .btn-bad { background: #fff; color: var(--bad); box-shadow: inset 0 0 0 1.5px #F1C6C6; }
+    .btn:disabled { opacity: .5; cursor: default; }
+
+    .login { max-width: 380px; margin: 12vh auto; background: #fff; border-radius: 14px; padding: 32px; display: grid; gap: 12px; }
+    .login h1 { font-size: 20px; margin-bottom: 6px; }
+    .login input { padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 8px; }
+    .login .err { color: var(--bad); font-size: 13.5px; min-height: 20px; }
+    .notice { max-width: 640px; margin: 10vh auto; background: #fff; border-radius: 14px; padding: 32px; line-height: 1.8; }
+    .notice h1 { font-size: 20px; margin-bottom: 12px; }
+    .notice ol { padding-left: 20px; }
+
+    .tabs { display: flex; gap: 6px; margin: 24px 0 16px; flex-wrap: wrap; }
+    .tabs button { border: 0; background: #fff; padding: 10px 18px; border-radius: 999px; cursor: pointer; font-weight: 600; color: var(--mid); }
+    .tabs button[aria-selected="true"] { background: var(--ink); color: #fff; }
+    .tabs .cnt { display: inline-block; min-width: 20px; margin-left: 6px; padding: 0 6px; border-radius: 999px; background: #F1C6C6; color: var(--bad); font-size: 12px; }
+    .filters { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .filters select { padding: 8px 12px; border: 1.5px solid var(--line); border-radius: 8px; background: #fff; }
+
+    .item { background: #fff; border-radius: 12px; padding: 18px 20px; margin-bottom: 10px; }
+    .meta { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; font-size: 13px; color: var(--mid); margin-bottom: 8px; }
+    .tag { padding: 2px 10px; border-radius: 999px; background: var(--paper); font-weight: 600; color: var(--ink); }
+    .tag.wait, .tag.pending { background: #FDECEC; color: var(--bad); }
+    .tag.done, .tag.approved { background: #E7F4EC; color: var(--ok); }
+    .tag.hidden { background: #EEE; color: var(--mid); }
+    .tag.secret { background: #FFF2E6; color: var(--warm); }
+    .item h3 { font-size: 16px; margin-bottom: 6px; }
+    .item .body { white-space: pre-wrap; background: var(--paper); border-radius: 8px; padding: 12px 14px; margin: 8px 0 12px; }
+    .item textarea { width: 100%; min-height: 90px; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 8px; resize: vertical; margin-bottom: 10px; }
+    .item .acts { display: flex; gap: 8px; flex-wrap: wrap; }
+    .empty { text-align: center; color: var(--mid); padding: 48px 0; }
+    .set { background: #fff; border-radius: 12px; padding: 22px; display: grid; gap: 10px; }
+    .set input { padding: 11px 13px; border: 1.5px solid var(--line); border-radius: 8px; }
+    .hint { font-size: 13px; color: var(--mid); }
+    .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 11px 20px; border-radius: 999px; font-size: 14px; opacity: 0; pointer-events: none; transition: opacity .25s; }
+    .toast.show { opacity: 1; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+
+<div id="vNotConfigured" class="notice" hidden>
+  <h1>Firebase 연결 전입니다</h1>
+  <p>실시간 문의·후기를 관리하려면 아래 순서로 연결해 주세요.</p>
+  <ol>
+    <li>Firebase 프로젝트 생성 → 웹 앱 추가 → 연결 정보를 <b>firebase-config.js</b>에 붙여넣기</li>
+    <li>Firestore Database 만들기 → 규칙 탭에 <b>firestore.rules</b> 내용 붙여넣고 게시</li>
+    <li>Authentication → 이메일/비밀번호 사용 설정 → 관리자 계정 추가</li>
+    <li>Firestore에 <b>admins</b> 컬렉션 → 문서 ID를 관리자 계정의 UID로 만들기</li>
+  </ol>
+  <p style="margin-top:12px"><a href="admin.html">기존 관리자 페이지(샘플 데이터 관리)로 가기</a></p>
+</div>
+
+<div id="vLogin" class="login" hidden>
+  <h1>실시간 관리 로그인</h1>
+  <input id="email" type="email" placeholder="관리자 이메일" autocomplete="username">
+  <input id="pw" type="password" placeholder="비밀번호" autocomplete="current-password">
+  <button class="btn btn-ink" id="btnLogin">로그인</button>
+  <div class="err" id="loginErr"></div>
+</div>
+
+<div id="vApp" hidden>
+  <header>
+    <div class="wrap">
+      <strong>루나쿨 · 루나온 실시간 관리</strong>
+      <nav>
+        <a href="inquiry.html" target="_blank">문의 게시판</a>
+        <a href="reviews.html" target="_blank">후기 페이지</a>
+        <a href="admin.html">샘플 데이터 관리</a>
+        <button class="btn btn-line" id="btnLogout">로그아웃</button>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap">
+    <div class="tabs" role="tablist">
+      <button role="tab" data-tab="inq" aria-selected="true">상품문의 <span class="cnt" id="cntInq" hidden></span></button>
+      <button role="tab" data-tab="rev" aria-selected="false">후기 승인 <span class="cnt" id="cntRev" hidden></span></button>
+      <button role="tab" data-tab="set" aria-selected="false">홍보 영상</button>
+    </div>
+
+    <section id="tabInq">
+      <div class="filters">
+        <select id="fInqStatus"><option value="all">전체</option><option value="wait" selected>답변대기</option><option value="done">답변완료</option></select>
+        <button class="btn btn-line" id="btnReloadInq">새로고침</button>
+      </div>
+      <div id="inqList"></div>
+    </section>
+
+    <section id="tabRev" hidden>
+      <div class="filters">
+        <select id="fRevStatus"><option value="all">전체</option><option value="pending" selected>승인 대기</option><option value="approved">게시 중</option><option value="hidden">숨김</option></select>
+        <button class="btn btn-line" id="btnReloadRev">새로고침</button>
+      </div>
+      <div id="revList"></div>
+    </section>
+
+    <section id="tabSet" hidden>
+      <div class="set">
+        <label for="videoUrl"><b>메인 「제품 영상」 주소</b></label>
+        <input id="videoUrl" type="url" placeholder="https://youtu.be/영상ID">
+        <p class="hint">유튜브 주소를 넣으면 모든 방문자에게 이 영상이 재생됩니다. 비우면 기본 영상이 나옵니다.</p>
+        <div><button class="btn btn-ink" id="btnSaveVideo">저장</button></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="firebase-config.js"></script>
+<script type="module">
+import { Board as B, esc, fmtDate } from './board.js';
+
+const $ = id => document.getElementById(id);
+const show = id => ['vNotConfigured','vLogin','vApp'].forEach(v => $(v).hidden = v !== id);
+const toast = m => { const t = $('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2800); };
+const CAT = { product:'상품문의', delivery:'배송문의', exchange:'교환/환불', etc:'기타' };
+const PROD = { lunaon:'루나온 이불', pad:'냉감 패드', blanket:'냉감 차렵이불', sofa:'냉감 소파패드', cushion:'냉감 방석', pillow:'냉감 베개커버' };
+
+let INQ = [], SECRETS = {}, REV = [];
+
+if (!B.enabled) { show('vNotConfigured'); }
+else {
+  B.onAuth(async user => {
+    if (!user) { show('vLogin'); return; }
+    if (!(await B.isAdmin(user.uid))) {
+      show('vLogin');
+      $('loginErr').textContent = `관리자로 등록되지 않은 계정입니다. Firestore admins 컬렉션에 이 UID를 추가하세요: ${user.uid}`;
+      return;
+    }
+    show('vApp');
+    loadInq(); loadRev(); loadSet();
+  });
+}
+
+$('btnLogin').onclick = async () => {
+  $('loginErr').textContent = '';
+  try { await B.login($('email').value.trim(), $('pw').value); }
+  catch (e) { $('loginErr').textContent = '이메일 또는 비밀번호가 올바르지 않습니다.'; }
+};
+$('pw').addEventListener('keydown', e => { if (e.key === 'Enter') $('btnLogin').click(); });
+$('btnLogout').onclick = () => B.logout();
+
+document.querySelectorAll('[role=tab]').forEach(b => b.onclick = () => {
+  document.querySelectorAll('[role=tab]').forEach(x => x.setAttribute('aria-selected', x === b ? 'true' : 'false'));
+  $('tabInq').hidden = b.dataset.tab !== 'inq';
+  $('tabRev').hidden = b.dataset.tab !== 'rev';
+  $('tabSet').hidden = b.dataset.tab !== 'set';
+});
+
+// ── 문의 ──
+async function loadInq() {
+  try {
+    const [rows, secs] = await Promise.all([B.listInquiries(), B.adminListSecrets()]);
+    INQ = rows; SECRETS = {};
+    secs.forEach(s => { SECRETS[s.inquiryId] = s; });
+    renderInq();
+  } catch (e) { console.error(e); toast('문의를 불러오지 못했습니다.'); }
+}
+function renderInq() {
+  const f = $('fInqStatus').value;
+  const wait = INQ.filter(i => i.status === 'wait').length;
+  $('cntInq').hidden = !wait; $('cntInq').textContent = wait;
+  const list = INQ.filter(i => f === 'all' || i.status === f);
+  if (!list.length) { $('inqList').innerHTML = '<div class="empty">해당하는 문의가 없습니다.</div>'; return; }
+  $('inqList').innerHTML = list.map(i => {
+    const sec = i.secret ? SECRETS[i.id] : null;
+    const title = i.secret ? (sec ? sec.title : '(비밀글 내용 없음)') : i.title;
+    const body = i.secret ? (sec ? sec.content : '') : i.content;
+    const ans = i.secret ? (sec?.answer || '') : (i.answer || '');
+    return `<div class="item" data-id="${esc(i.id)}">
+      <div class="meta">
+        <span class="tag ${i.status}">${i.status === 'done' ? '답변완료' : '답변대기'}</span>
+        ${i.secret ? '<span class="tag secret">🔒 비밀글</span>' : ''}
+        <span>${esc(CAT[i.cat] || i.cat)}</span>${i.product ? `<span>· ${esc(i.product)}</span>` : ''}
+        <span>· ${esc(i.name)}</span><span>· ${esc(fmtDate(i.createdAt))}</span>
+      </div>
+      <h3>${esc(title)}</h3>
+      <div class="body">${esc(body)}</div>
+      <textarea placeholder="답변을 입력하세요">${esc(ans)}</textarea>
+      <div class="acts">
+        <button class="btn btn-ink" data-act="answer">답변 저장</button>
+        <button class="btn btn-bad" data-act="del">삭제</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+$('fInqStatus').onchange = renderInq;
+$('btnReloadInq').onclick = loadInq;
+$('inqList').addEventListener('click', async e => {
+  const act = e.target.dataset.act; if (!act) return;
+  const box = e.target.closest('.item'); const inq = INQ.find(i => i.id === box.dataset.id);
+  const sec = inq.secret ? SECRETS[inq.id] : null;
+  e.target.disabled = true;
+  try {
+    if (act === 'answer') {
+      await B.adminAnswer(inq, box.querySelector('textarea').value, sec?.key);
+      toast('답변을 저장했습니다. 문의 게시판에 바로 보입니다.');
+    } else if (act === 'del') {
+      if (!confirm('이 문의를 삭제할까요? 되돌릴 수 없습니다.')) { e.target.disabled = false; return; }
+      await B.adminDeleteInquiry(inq, sec?.key);
+      toast('삭제했습니다.');
+    }
+    await loadInq();
+  } catch (err) { console.error(err); toast('처리하지 못했습니다.'); e.target.disabled = false; }
+});
+
+// ── 후기 ──
+async function loadRev() {
+  try { REV = await B.adminListReviews(); renderRev(); }
+  catch (e) { console.error(e); toast('후기를 불러오지 못했습니다.'); }
+}
+function renderRev() {
+  const f = $('fRevStatus').value;
+  const pend = REV.filter(r => r.status === 'pending').length;
+  $('cntRev').hidden = !pend; $('cntRev').textContent = pend;
+  const list = REV.filter(r => f === 'all' || r.status === f);
+  if (!list.length) { $('revList').innerHTML = '<div class="empty">해당하는 후기가 없습니다.</div>'; return; }
+  const LABEL = { pending:'승인 대기', approved:'게시 중', hidden:'숨김' };
+  $('revList').innerHTML = list.map(r => `<div class="item" data-id="${esc(r.id)}">
+      <div class="meta">
+        <span class="tag ${r.status}">${LABEL[r.status] || r.status}</span>
+        <span>${esc(PROD[r.product] || r.product)}</span><span>· ${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
+        <span>· ${esc(r.name)}</span><span>· ${esc(fmtDate(r.createdAt))}</span>
+      </div>
+      <div class="body">${esc(r.text)}</div>
+      <textarea placeholder="판매자 답글 (선택)">${esc(r.reply || '')}</textarea>
+      <div class="acts">
+        ${r.status !== 'approved' ? '<button class="btn btn-ok" data-act="approve">승인(게시)</button>' : ''}
+        ${r.status !== 'hidden' ? '<button class="btn btn-line" data-act="hide">숨김</button>' : ''}
+        <button class="btn btn-ink" data-act="reply">답글 저장</button>
+        <button class="btn btn-bad" data-act="del">삭제</button>
+      </div>
+    </div>`).join('');
+}
+$('fRevStatus').onchange = renderRev;
+$('btnReloadRev').onclick = loadRev;
+$('revList').addEventListener('click', async e => {
+  const act = e.target.dataset.act; if (!act) return;
+  const box = e.target.closest('.item'); const id = box.dataset.id;
+  e.target.disabled = true;
+  try {
+    if (act === 'approve') { await B.adminSetReview(id, { status: 'approved' }); toast('게시했습니다.'); }
+    if (act === 'hide') { await B.adminSetReview(id, { status: 'hidden' }); toast('숨겼습니다.'); }
+    if (act === 'reply') { await B.adminSetReview(id, { reply: box.querySelector('textarea').value }); toast('답글을 저장했습니다.'); }
+    if (act === 'del') {
+      if (!confirm('이 후기를 삭제할까요? 되돌릴 수 없습니다.')) { e.target.disabled = false; return; }
+      await B.adminDeleteReview(id); toast('삭제했습니다.');
+    }
+    await loadRev();
+  } catch (err) { console.error(err); toast('처리하지 못했습니다.'); e.target.disabled = false; }
+});
+
+// ── 영상 ──
+async function loadSet() {
+  try { const s = await B.getSettings(); $('videoUrl').value = s.videoUrl || ''; } catch (e) { console.error(e); }
+}
+$('btnSaveVideo').onclick = async () => {
+  const url = $('videoUrl').value.trim();
+  if (url && !/^https:\/\//.test(url)) { toast('https:// 로 시작하는 주소를 넣어주세요.'); return; }
+  try { await B.adminSaveSettings({ videoUrl: url }); toast('저장했습니다. 메인 영상에 바로 반영됩니다.'); }
+  catch (e) { console.error(e); toast('저장하지 못했습니다.'); }
+};
+</script>
+</body>
+</html>

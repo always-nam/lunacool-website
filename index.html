@@ -443,6 +443,15 @@
 
 <script src="links.js"></script>
 <script src="script.js"></script>
+<script src="firebase-config.js"></script>
+<script type="module" src="board.js"></script>
+<script>
+  // 홍보 영상 주소: 실시간 관리에서 저장한 값이 있으면 사용
+  window.addEventListener('lunaboard:ready', async function () {
+    if (!window.LunaBoard.enabled) return;
+    try { var s = await window.LunaBoard.getSettings(); if (s.videoUrl) window.LIVE_VIDEO_URL = s.videoUrl; } catch (e) {}
+  });
+</script>
 <script>
   function syncSwitch() {
     var s = document.documentElement.dataset.season;

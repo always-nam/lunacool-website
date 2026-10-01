@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
   <script>
-    // 첫 화면 주연 브랜드: 10~3월 루나온, 4~9월 루나쿨. 방문자가 스위치로 고르면 기억.
+    // 계절: 10~3월 겨울(루나온), 4~9월 여름(루나쿨). 방문자가 스위치로 고르면 기억.
     (function () {
       var s = null;
       try { s = localStorage.getItem('lunafamily_season'); } catch (e) {}
@@ -21,150 +21,171 @@
     })();
   </script>
   <style>
-    html[data-season="summer"] .only-winter,
-    html[data-season="winter"] .only-summer { display: none !important; }
+    /* ═══ 계절 분위기 토큰 — 스위치 하나로 페이지 전체가 바뀜 ═══ */
+    html[data-season="summer"] {
+      --s-bg: #FFFFFF; --s-soft: #F3F7FC; --s-fg: #2B333C; --s-mid: #5C6670;
+      --s-band: #EAF2FD; --s-band-fg: #2B333C; --s-band-mid: #5C6670;
+      --s-accent: var(--cool-grad); --s-line: var(--cool-1);
+      --hdr-bg: rgba(255,255,255,.95); --hdr-fg: #2B333C; --hdr-line: #E3E5E8;
+    }
+    html[data-season="winter"] {
+      --s-bg: #F7F3EF; --s-soft: #EFE8E1; --s-fg: #2B333C; --s-mid: #6B625B;
+      --s-band: #3E4146; --s-band-fg: #FFFFFF; --s-band-mid: rgba(255,255,255,.74);
+      --s-accent: var(--warm-grad); --s-line: var(--warm-2);
+      --hdr-bg: rgba(46,48,52,.96); --hdr-fg: #FFFFFF; --hdr-line: rgba(255,255,255,.08);
+    }
+    body { background: var(--s-bg); transition: background-color .6s; }
+    .flow > section, .reviews { transition: background-color .6s, color .6s; }
 
-    /* ── 커버: 주연 브랜드 크게 + 조연 브랜드 옆 레일 ── */
-    .cover { display: grid; grid-template-columns: 1fr 320px; margin-top: 68px; height: calc(100svh - 68px); min-height: 600px; max-height: 920px; }
-    .lead { position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; }
-    .lead > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-    .lead::after { content: ""; position: absolute; inset: 0; pointer-events: none; }
-    .lead.warm { color: #fff; }
-    .lead.warm > img { object-position: 50% 60%; }
-    .lead.warm::after { background: linear-gradient(to top, rgba(38,34,38,.9) 0%, rgba(38,34,38,.45) 40%, rgba(38,34,38,0) 68%); }
-    .lead.cool { color: var(--dark); }
-    .lead.cool::after { background: linear-gradient(to top, rgba(255,255,255,.95) 0%, rgba(255,255,255,.7) 40%, rgba(255,255,255,0) 70%); }
+    /* 머리글도 계절 따라 */
+    header#hdr { background: var(--hdr-bg); border-bottom-color: var(--hdr-line); transition: background-color .6s; }
+    header#hdr nav a { color: var(--hdr-fg); }
+    header#hdr nav a:hover { color: var(--hdr-fg); opacity: .75; }
+    header#hdr .burger span { background: var(--hdr-fg); }
+    html[data-season="winter"] header#hdr nav .hdr-cta:not(.hdr-cp) { background: var(--warm-grad); color: #3a2414 !important; }
+    html[data-season="winter"] header#hdr nav .hdr-cp { color: #fff !important; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.7); }
+    html[data-season="winter"] header#hdr nav .hdr-cp:hover { background: rgba(255,255,255,.08); }
 
-    .lead-top { position: relative; z-index: 3; padding: 24px clamp(24px, 5vw, 72px) 0; }
-    .lead-copy { position: relative; z-index: 2; padding: 0 clamp(24px, 5vw, 72px) clamp(40px, 7vh, 80px); display: grid; grid-template-columns: auto minmax(260px, 1fr); gap: 26px 56px; align-items: end; }
-    .lead-copy .brand-logo { grid-column: 1 / -1; height: 40px; width: auto; }
-    .lead.cool .lead-copy .brand-logo { height: 32px; }
-    .lead-copy h1 { font-weight: 300 !important; font-size: clamp(44px, 7vw, 100px); line-height: 1.08; letter-spacing: -0.025em !important; }
-    .lead-copy .side { max-width: 23em; padding-bottom: 10px; }
-    .lead.cool .lead-copy h1 { font-size: clamp(40px, 5.2vw, 76px); }
-    .lead-copy p { margin-bottom: 22px; line-height: 1.7; }
-    .lead.warm p { color: rgba(255,255,255,.82); }
-    .lead.cool p { color: var(--mid); }
-    .lead .acts { display: flex; flex-wrap: wrap; gap: 10px; }
-    .lead.warm .btn-ghost { color: #fff; }
+    /* ═══ 히어로: 좌우 분할 + 마우스 올리면 넓어짐 + 제철 쪽이 기본으로 넓음 ═══ */
+    .duo { position: relative; display: flex; margin-top: 68px; height: calc(100svh - 68px); min-height: 600px; max-height: 920px; background: #2B2E32; }
+    .side {
+      position: relative; flex: 1 1 0; min-width: 0; overflow: hidden;
+      display: flex; align-items: flex-end;
+      container-type: inline-size;
+      transition: flex-grow .7s cubic-bezier(.2,.7,.2,1);
+    }
+    html[data-season="summer"] .side.cool,
+    html[data-season="winter"] .side.warm { flex-grow: 1.7; }
+    @media (hover: hover) and (min-width: 1001px) {
+      html[data-season] .duo:hover .side { flex-grow: .8; }
+      html[data-season] .duo .side:hover { flex-grow: 1.7; }
+      .side:hover > img { transform: scale(1.03); }
+    }
+    .side > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s ease, filter .7s; }
+    .side.warm > img { object-position: 50% 60%; }
+    .side::after { content: ""; position: absolute; inset: 0; pointer-events: none; }
+    .side.cool { color: var(--dark); }
+    .side.cool::after { background: linear-gradient(to top, rgba(255,255,255,.95) 0%, rgba(255,255,255,.72) 34%, rgba(255,255,255,0) 64%); }
+    .side.warm { color: #fff; }
+    .side.warm::after { background: linear-gradient(to top, rgba(38,34,38,.92) 0%, rgba(38,34,38,.55) 36%, rgba(38,34,38,0) 66%); }
+    /* 제철이 아닌 쪽은 살짝 가라앉게 */
+    html[data-season="winter"] .side.cool > img { filter: saturate(.75) brightness(.9); }
+    html[data-season="summer"] .side.warm > img { filter: saturate(.8) brightness(.85); }
 
-    /* 계절 스위치 */
-    .season-switch { display: inline-grid; grid-template-columns: 1fr 1fr; position: relative; padding: 4px; border-radius: 999px; }
-    .lead.warm .season-switch { background: rgba(30,28,32,.55); border: 1px solid rgba(160,160,160,.5); backdrop-filter: blur(6px); }
-    .lead.cool .season-switch { background: rgba(255,255,255,.85); border: 1px solid var(--border); backdrop-filter: blur(6px); }
-    .season-switch button { position: relative; z-index: 1; border: 0; background: none; cursor: pointer; font: inherit; font-size: 14.5px; font-weight: 600; padding: 9px 20px; border-radius: 999px; white-space: nowrap; }
-    .lead.warm .season-switch button { color: rgba(255,255,255,.78); }
-    .lead.cool .season-switch button { color: var(--mid); }
-    .season-switch button[aria-pressed="true"] { color: #3a2414 !important; }
-    .lead.cool .season-switch button[aria-pressed="true"] { color: #fff !important; }
-    .season-switch .thumb { position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px); border-radius: 999px; transition: transform .45s cubic-bezier(.3,.7,.2,1); }
-    .lead.warm .season-switch .thumb { background: var(--warm-grad); transform: translateX(100%); }
-    .lead.cool .season-switch .thumb { background: var(--dark); }
+    .side-copy { position: relative; z-index: 2; width: 100%; padding: 0 clamp(22px, 6cqi, 72px) clamp(36px, 7vh, 76px); }
+    .side-copy .brand-logo { height: clamp(26px, 4cqi, 40px); width: auto; margin-bottom: 22px; }
+    .side-copy h1 { font-weight: 300 !important; font-size: clamp(30px, 8.4cqi, 92px); line-height: 1.1; letter-spacing: -0.025em !important; margin-bottom: 18px; }
+    .side-copy p { font-size: 16px; line-height: 1.7; max-width: 26em; margin-bottom: 24px; }
+    .side.cool .side-copy p { color: var(--mid); }
+    .side.warm .side-copy p { color: rgba(255,255,255,.82); }
+    .side .go { display: inline-flex; align-items: center; padding: 13px 22px; border-radius: 999px; font-weight: 600; font-size: 15px; }
+    .side.cool .go { background: var(--dark); color: #fff; }
+    .side.warm .go { background: var(--warm-grad); color: #3a2414; }
+    @container (max-width: 470px) { .side-copy p { display: none; } }
 
-    .rail { display: flex; flex-direction: column; }
-    .rail > img { width: 100%; flex: 1 1 auto; min-height: 220px; object-fit: cover; }
-    .rail .txt { padding: 26px 28px 30px; }
-    .rail .txt img { width: auto; margin-bottom: 14px; }
-    .rail h2 { font-size: 21px; line-height: 1.4; margin-bottom: 8px; }
-    .rail p { font-size: 14.5px; margin-bottom: 18px; line-height: 1.6; }
-    .rail .more { font-weight: 600; font-size: 14.5px; padding-bottom: 2px; background: none; border: 0; border-bottom: 1.5px solid; cursor: pointer; font-family: inherit; color: inherit; }
-    .rail.cool { background: #EEF4FB; color: var(--dark); }
-    .rail.cool p { color: var(--mid); }
-    .rail.cool .txt img { height: 22px; }
-    .rail.cool .more { border-color: var(--cool-1); }
-    .rail.warm { background: #3E4146; color: #fff; }
-    .rail.warm p { color: rgba(255,255,255,.75); }
-    .rail.warm .txt img { height: 30px; }
-    .rail.warm .more { border-color: var(--warm-2); }
+    /* 계절 스위치 — 분할선 위 가운데 */
+    .season-switch {
+      position: absolute; z-index: 5; top: 22px; left: 50%; transform: translateX(-50%);
+      display: grid; grid-template-columns: 1fr 1fr; padding: 4px; border-radius: 999px;
+      backdrop-filter: blur(8px); transition: background-color .6s, border-color .6s;
+    }
+    html[data-season="summer"] .season-switch { background: rgba(255,255,255,.88); border: 1px solid #E3E5E8; }
+    html[data-season="winter"] .season-switch { background: rgba(30,28,32,.6); border: 1px solid rgba(160,160,160,.45); }
+    .season-switch button { position: relative; z-index: 1; border: 0; background: none; cursor: pointer; font: inherit; font-size: 14.5px; font-weight: 600; padding: 9px 20px; border-radius: 999px; white-space: nowrap; transition: color .4s; }
+    html[data-season="summer"] .season-switch button { color: var(--mid); }
+    html[data-season="winter"] .season-switch button { color: rgba(255,255,255,.78); }
+    html[data-season="summer"] .season-switch button[aria-pressed="true"] { color: #fff; }
+    html[data-season="winter"] .season-switch button[aria-pressed="true"] { color: #3a2414; }
+    .season-switch .thumb { position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px); border-radius: 999px; transition: transform .5s cubic-bezier(.3,.7,.2,1), background .5s; }
+    html[data-season="summer"] .season-switch .thumb { background: var(--dark); }
+    html[data-season="winter"] .season-switch .thumb { background: var(--warm-grad); transform: translateX(100%); }
 
-    .swap-in { animation: swapIn .55s cubic-bezier(.2,.7,.2,1); }
-    @keyframes swapIn { from { opacity: 0; } to { opacity: 1; } }
-
-    /* ── 본문 흐름: 계절에 따라 순서만 바뀜 ── */
+    /* ═══ 본문: 계절에 따라 순서와 색만 바뀜 ═══ */
     .flow { display: flex; flex-direction: column; }
     html[data-season="winter"] .o-lo-story { order: 1; }
     html[data-season="winter"] .o-lo-sizes { order: 2; }
     html[data-season="winter"] .o-lc-goods { order: 3; }
     html[data-season="winter"] .o-lc-points { order: 4; }
-    html[data-season="winter"] .o-video { order: 5; }
+    html[data-season="winter"] .o-reviews { order: 5; }
+    html[data-season="winter"] .o-video { order: 6; }
     html[data-season="summer"] .o-lc-points { order: 1; }
     html[data-season="summer"] .o-lc-goods { order: 2; }
-    html[data-season="summer"] .o-video { order: 3; }
-    html[data-season="summer"] .o-lo-story { order: 4; }
-    html[data-season="summer"] .o-lo-sizes { order: 5; }
+    html[data-season="summer"] .o-reviews { order: 3; }
+    html[data-season="summer"] .o-video { order: 4; }
+    html[data-season="summer"] .o-lo-story { order: 5; }
+    html[data-season="summer"] .o-lo-sizes { order: 6; }
 
     .wrap { max-width: var(--maxw); margin: 0 auto; }
 
-    /* 루나온 이야기 */
-    .lo-story { padding: clamp(72px, 10vw, 128px) var(--gutter); }
+    .lo-story { background: var(--s-bg); color: var(--s-fg); padding: clamp(72px, 10vw, 128px) var(--gutter); }
     .lo-story .wrap { display: grid; grid-template-columns: 5fr 7fr; gap: clamp(32px, 6vw, 96px); align-items: center; }
     .lo-story .brand { height: 30px; width: auto; margin-bottom: 22px; }
     .lo-story h2 { font-size: clamp(28px, 3.2vw, 42px); line-height: 1.35; margin-bottom: 22px; }
-    .lo-story p { color: var(--mid); max-width: 30em; line-height: 1.8; }
+    .lo-story p { color: var(--s-mid); max-width: 30em; line-height: 1.8; }
     .lo-story p + p { margin-top: 14px; }
     .lo-story .pics { display: grid; grid-template-columns: 1.3fr 1fr; grid-template-rows: 1fr 1fr; gap: 14px; height: clamp(360px, 42vw, 560px); }
     .lo-story .pics img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
     .lo-story .pics img:first-child { grid-row: span 2; }
 
-    /* 루나온 크기 */
-    .lo-sizes { background: var(--light); padding: clamp(64px, 8vw, 104px) var(--gutter); }
+    .lo-sizes { background: var(--s-band); color: var(--s-band-fg); padding: clamp(64px, 8vw, 104px) var(--gutter); }
     .lo-sizes h2 { font-size: clamp(24px, 2.6vw, 32px); margin-bottom: 28px; }
     .size-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    .size { background: #fff; border-radius: 12px; padding: 28px; display: grid; grid-template-columns: 120px 1fr; gap: 24px; align-items: center; }
+    .size { background: #fff; color: var(--dark); border-radius: 12px; padding: 28px; display: grid; grid-template-columns: 120px 1fr; gap: 24px; align-items: center; }
     .size .shape { justify-self: center; background: var(--warm-grad); border-radius: 4px; }
     .size h3 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
     .size dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; font-size: 14.5px; margin: 10px 0 18px; }
     .size dt { color: var(--mid); }
     .size a { font-weight: 600; font-size: 14.5px; border-bottom: 1.5px solid var(--warm-2); padding-bottom: 2px; }
 
-    /* 루나쿨 특징 */
-    .lc-points { padding: clamp(64px, 9vw, 112px) var(--gutter) 24px; }
-    .lc-points .brand { height: 26px; width: auto; margin-bottom: 36px; }
+    .lc-points { background: var(--s-bg); color: var(--s-fg); padding: clamp(64px, 9vw, 112px) var(--gutter) 24px; }
+    .lc-points .brand { height: 30px; width: auto; margin-bottom: 36px; }
     .lc-points .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
     .lc-points h3 { font-family: var(--serif); font-weight: 500; font-size: 21px; margin-bottom: 10px; padding-top: 18px; position: relative; }
     .lc-points h3::before { content: ""; position: absolute; top: 0; left: 0; width: 36px; height: 3px; border-radius: 2px; background: var(--cool-grad); }
-    .lc-points p { color: var(--mid); font-size: 15.5px; line-height: 1.75; }
+    .lc-points p { color: var(--s-mid); font-size: 15.5px; line-height: 1.75; }
     .lc-points p a { color: var(--blue); border-bottom: 1px solid currentColor; }
+    html[data-season="winter"] .o-lc-points { padding-top: 0; padding-bottom: clamp(64px, 8vw, 104px); }
+    html[data-season="winter"] .o-lc-points .brand { display: none; }
 
-    /* 루나쿨 상품 */
-    .lc-goods { padding: clamp(64px, 8vw, 104px) var(--gutter) clamp(56px, 7vw, 88px); }
+    .lc-goods { background: var(--s-bg); color: var(--s-fg); padding: clamp(64px, 8vw, 104px) var(--gutter) clamp(56px, 7vw, 88px); }
     .lc-goods .hd { display: flex; justify-content: space-between; align-items: end; gap: 16px; margin-bottom: 24px; }
-    .lc-goods .hd img { height: 24px; width: auto; margin-bottom: 12px; }
+    .lc-goods .hd img { height: 30px; width: auto; margin-bottom: 14px; }
+    html[data-season="summer"] .o-lc-goods .hd img { display: none; }
     .lc-goods h2 { font-size: clamp(24px, 2.6vw, 32px); }
-    .lc-goods .hd a { font-weight: 600; font-size: 14.5px; color: var(--mid); white-space: nowrap; }
-    .lc-goods .hd a:hover { color: var(--dark); }
+    .lc-goods .hd a { font-weight: 600; font-size: 14.5px; color: var(--s-mid); white-space: nowrap; }
     .row5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
     .row5 img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 8px; background: var(--light); }
     .row5 h3 { font-size: 15px; font-weight: 600; margin-top: 10px; }
-    .row5 span { font-size: 13.5px; color: var(--mid); }
+    .row5 span { font-size: 13.5px; color: var(--s-mid); }
     .row5 a:hover h3 { text-decoration: underline; text-underline-offset: 3px; }
-    html[data-season="winter"] .o-lc-points { padding-top: 0; padding-bottom: clamp(64px, 8vw, 104px); }
-    html[data-season="winter"] .o-lc-points .brand { display: none; }
-    html[data-season="summer"] .o-lc-goods .hd img { display: none; }
 
-    /* 영상 (기존 기능 유지, 모양만 정리) */
-    .video-section { background: #EEF4FB; padding: clamp(64px, 8vw, 104px) var(--gutter); }
+    /* 후기 (원래 내용 그대로, 모양만 계절 톤) */
+    .reviews { background: var(--s-soft); padding: clamp(64px, 8vw, 104px) var(--gutter); }
+    .reviews .rev-header h2 { color: var(--s-fg); }
+    .reviews .rev-card { background: #fff; }
+    .reviews .rev-card:hover { transform: none; box-shadow: none; }
+    html[data-season="winter"] .reviews .rev-score .snum { color: var(--warm-ink); }
+
+    .video-section { background: var(--s-band); padding: clamp(64px, 8vw, 104px) var(--gutter); }
     .video-section-inner { max-width: var(--maxw); margin: 0 auto; }
-    .video-text h2 { color: var(--dark); }
-    .video-text p { color: var(--mid); }
+    .video-text h2 { color: var(--s-band-fg); }
+    .video-text p { color: var(--s-band-mid); }
     .video-player-wrap { border-radius: 10px; overflow: hidden; }
+    html[data-season="winter"] .video-text .btn-ink { background: #fff; color: var(--dark); }
 
     @media (max-width: 1000px) {
-      .cover { grid-template-columns: 1fr; height: auto; max-height: none; }
-      .lead { min-height: 82svh; }
-      .lead-copy { grid-template-columns: 1fr; gap: 18px; }
-      .rail { flex-direction: row; }
-      .rail > img { width: 42%; min-height: 0; }
+      .duo { flex-direction: column; height: auto; max-height: none; }
+      .side { flex: none; min-height: 44svh; }
+      html[data-season="summer"] .side.cool, html[data-season="winter"] .side.warm { order: -1; min-height: 74svh; }
+      .season-switch { top: 16px; }
       .lo-story .wrap { grid-template-columns: 1fr; }
       .size-row { grid-template-columns: 1fr; }
       .lc-points .grid { grid-template-columns: 1fr; gap: 28px; }
     }
-    @media (max-width: 768px) { .cover { margin-top: 60px; } }
+    @media (max-width: 768px) { .duo { margin-top: 60px; } }
     @media (max-width: 640px) {
-      .season-switch { display: grid; width: 100%; }
+      .season-switch { left: 16px; right: 16px; transform: none; }
       .season-switch button { padding: 9px 6px; font-size: 14px; }
-      .rail { flex-direction: column; }
-      .rail > img { width: 100%; height: 200px; }
       .row5 { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 62%; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 8px; }
       .row5 a { scroll-snap-align: start; }
       .size { grid-template-columns: 84px 1fr; padding: 22px; }
@@ -176,7 +197,7 @@
 
 <header id="hdr" class="solid">
   <a href="index.html" class="brand-pair" aria-label="루나쿨 루나온 홈">
-    <img class="lc" src="assets/lunacool/lunacool-word.png" alt="루나쿨">
+    <img class="lc" src="assets/lunacool/lunacool-logo-h.png" alt="루나쿨">
     <i aria-hidden="true"></i>
     <img class="lo" src="assets/lunaon/lunaon-logo.svg" alt="루나온">
   </a>
@@ -186,7 +207,8 @@
     <a href="reviews.html">구매후기</a>
     <a href="inquiry.html">상품문의</a>
     <a href="about.html">브랜드</a>
-    <a href="https://smartstore.naver.com" target="_blank" rel="noopener" class="hdr-cta">스마트스토어 구매</a>
+    <a href="https://smartstore.naver.com/terran/products/13431840534" data-store="smartstore" target="_blank" rel="noopener" class="hdr-cta">스마트스토어 구매</a>
+    <a href="https://www.coupang.com/" data-store="coupang" target="_blank" rel="noopener" class="hdr-cta hdr-cp">쿠팡 구매</a>
   </nav>
   <div class="burger" onclick="toggleMenu()" role="button" tabindex="0" aria-label="메뉴 열기"><span></span><span></span><span></span></div>
 </header>
@@ -197,84 +219,42 @@
   <a href="reviews.html">구매후기</a>
   <a href="inquiry.html">상품문의</a>
   <a href="about.html">브랜드</a>
-  <a href="https://smartstore.naver.com" target="_blank" rel="noopener" class="hdr-cta">스마트스토어 구매</a>
+  <a href="https://smartstore.naver.com/terran/products/13431840534" data-store="smartstore" target="_blank" rel="noopener" class="hdr-cta">스마트스토어 구매</a>
+    <a href="https://www.coupang.com/" data-store="coupang" target="_blank" rel="noopener" class="hdr-cta hdr-cp">쿠팡 구매</a>
 </div>
 
-<!-- ── 커버 (겨울: 루나온 주연) ── -->
-<section class="cover only-winter" data-swap>
-  <div class="lead warm">
-    <img src="assets/lunaon/photo/lo-9435.jpg" alt="스탠드 조명이 켜진 침실, 라이트그레이 면이 위로 오게 덮은 루나온 이불">
-    <div class="lead-top">
-      <div class="season-switch" role="group" aria-label="계절 선택">
-        <span class="thumb" aria-hidden="true"></span>
-        <button type="button" data-set="summer">여름밤, 루나쿨</button>
-        <button type="button" data-set="winter">겨울밤, 루나온</button>
-      </div>
+<section class="duo" aria-label="루나쿨과 루나온">
+  <div class="season-switch" role="group" aria-label="계절 선택">
+    <span class="thumb" aria-hidden="true"></span>
+    <button type="button" data-set="summer">여름밤, 루나쿨</button>
+    <button type="button" data-set="winter">겨울밤, 루나온</button>
+  </div>
+  <a class="side cool" href="products.html">
+    <img src="루나쿨 상품 이미지/냉감 시리즈 5.jpg" alt="흰 냉감 이불과 패드가 깔린 밝은 여름 침실">
+    <div class="side-copy">
+      <img class="brand-logo" src="assets/lunacool/lunacool-logo-h.png" alt="루나쿨">
+      <h1>닿는 순간,<br>시원함이 시작됩니다</h1>
+      <p>QMAX 550G 냉감 원단으로 만든 패드, 차렵이불, 소파패드, 방석, 베개커버.</p>
+      <span class="go">루나쿨 상품 보기</span>
     </div>
-    <div class="lead-copy">
+  </a>
+  <a class="side warm" href="lunaon.html">
+    <img src="assets/lunaon/photo/lo-9435.jpg" alt="스탠드 조명이 켜진 침실, 루나온 이불">
+    <div class="side-copy">
       <img class="brand-logo" src="assets/lunaon/lunaon-logo.svg" alt="루나온">
       <h1>겨울밤,<br>온기를 켜다</h1>
-      <div class="side">
-        <p>그래핀 충전재를 넣은 양면 이불. 퀸과 슈퍼싱글 두 가지 크기가 있습니다.</p>
-        <div class="acts">
-          <a href="lunaon.html" class="btn btn-warm">루나온 둘러보기</a>
-          <a href="https://smartstore.naver.com" target="_blank" rel="noopener" class="btn btn-ghost">스마트스토어에서 구매</a>
-        </div>
-      </div>
+      <p>그래핀 충전재를 넣은 양면 이불. 퀸과 슈퍼싱글 두 가지 크기가 있습니다.</p>
+      <span class="go">루나온 둘러보기</span>
     </div>
-  </div>
-  <aside class="rail cool">
-    <img src="루나쿨 상품 이미지/냉감 시리즈 3.jpg" alt="루나쿨 냉감 침구를 깐 밝은 침실">
-    <div class="txt">
-      <img src="assets/lunacool/lunacool-word.png" alt="루나쿨">
-      <h2>여름 침구는 루나쿨</h2>
-      <p>냉감 패드, 이불, 소파패드, 방석, 베개커버</p>
-      <button type="button" class="more" onclick="setSeason('summer', true)">루나쿨 보기</button>
-    </div>
-  </aside>
-</section>
-
-<!-- ── 커버 (여름: 루나쿨 주연) ── -->
-<section class="cover only-summer" data-swap>
-  <div class="lead cool">
-    <img src="루나쿨 상품 이미지/냉감 시리즈 5.jpg" alt="흰 냉감 이불과 패드가 깔린 밝은 여름 침실">
-    <div class="lead-top">
-      <div class="season-switch" role="group" aria-label="계절 선택">
-        <span class="thumb" aria-hidden="true"></span>
-        <button type="button" data-set="summer">여름밤, 루나쿨</button>
-        <button type="button" data-set="winter">겨울밤, 루나온</button>
-      </div>
-    </div>
-    <div class="lead-copy">
-      <img class="brand-logo" src="assets/lunacool/lunacool-word.png" alt="루나쿨">
-      <h1>닿는 순간,<br>시원함이 시작됩니다</h1>
-      <div class="side">
-        <p>QMAX 550G 냉감 원단으로 만든 패드, 차렵이불, 소파패드, 방석, 베개커버.</p>
-        <div class="acts">
-          <a href="products.html" class="btn btn-ink">루나쿨 상품 보기</a>
-          <a href="https://smartstore.naver.com" target="_blank" rel="noopener" class="btn btn-ghost">스마트스토어에서 구매</a>
-        </div>
-      </div>
-    </div>
-  </div>
-  <aside class="rail warm">
-    <img src="assets/lunaon/photo/lo-9403.jpg" alt="스탠드 조명 아래 루나온 이불이 덮인 겨울 침실">
-    <div class="txt">
-      <img src="assets/lunaon/lunaon-logo.svg" alt="루나온">
-      <h2>겨울 이불은 루나온</h2>
-      <p>그래핀 충전재를 넣은 양면 이불, 퀸과 슈퍼싱글</p>
-      <button type="button" class="more" onclick="setSeason('winter', true)">루나온 보기</button>
-    </div>
-  </aside>
+  </a>
 </section>
 
 <div class="flow">
 
-  <!-- 루나온 이야기 -->
   <section class="lo-story o-lo-story" id="lo">
     <div class="wrap">
       <div>
-        <img class="brand only-summer" src="assets/lunaon/lunaon-logo.svg" alt="루나온">
+        <img class="brand" src="assets/lunaon/lunaon-logo.svg" alt="루나온">
         <h2>한쪽은 차콜,<br>한쪽은 라이트그레이</h2>
         <p>루나온은 뒤집어 덮는 양면 이불입니다. 방 분위기나 그날 기분에 맞춰 위로 올 면을 고르세요.</p>
         <p>겉감은 폴리에스테르 100%, 안쪽 충전재에는 그래핀솜을 넣었습니다.</p>
@@ -287,7 +267,6 @@
     </div>
   </section>
 
-  <!-- 루나온 크기 -->
   <section class="lo-sizes o-lo-sizes">
     <div class="wrap">
       <h2>루나온, 크기를 골라주세요</h2>
@@ -312,10 +291,9 @@
     </div>
   </section>
 
-  <!-- 루나쿨 특징 -->
   <section class="lc-points o-lc-points">
     <div class="wrap">
-      <img class="brand" src="assets/lunacool/lunacool-word.png" alt="루나쿨">
+      <img class="brand" src="assets/lunacool/lunacool-logo-h.png" alt="루나쿨">
       <div class="grid">
         <div><h3>QMAX 550G 냉감 원단</h3><p>피부에 닿는 순간 열을 빠르게 흡수하는 QMAX 550G 등급 냉감 원단을 썼습니다.</p></div>
         <div><h3>OEKO-TEX 인증 소재</h3><p>OEKO-TEX Standard 100 인증을 받은 소재입니다. 인증서 원본은 <a href="cert.html">인증 현황</a>에서 볼 수 있습니다.</p></div>
@@ -324,12 +302,11 @@
     </div>
   </section>
 
-  <!-- 루나쿨 상품 -->
   <section class="lc-goods o-lc-goods" id="lc">
     <div class="wrap">
       <div class="hd">
         <div>
-          <img src="assets/lunacool/lunacool-word.png" alt="루나쿨">
+          <img src="assets/lunacool/lunacool-logo-h.png" alt="루나쿨">
           <h2>더운 밤을 위한 냉감 침구</h2>
         </div>
         <a href="products.html">전체 상품 보기</a>
@@ -344,7 +321,60 @@
     </div>
   </section>
 
-  <!-- 영상 (관리자 페이지에서 등록한 영상 재생 — 기존 기능 그대로) -->
+<!-- 후기 (2026-09-30 master 버전 그대로 복원, 대표님 판단 대기) -->
+<section class="reviews o-reviews">
+  <div class="rev-header appear">
+    <div class="kicker">Customer Reviews</div>
+    <h2>직접 경험한 분들의 이야기</h2>
+    <div class="rev-score">
+      <span class="snum">4.9</span>
+      <div class="scol">
+        <div class="stars">★★★★★</div>
+        <div class="stxt">127개 리뷰 기준</div>
+      </div>
+    </div>
+  </div>
+  <div class="rev-grid">
+
+    <div class="rev-card appear">
+      <div class="rv-top">
+        <div class="rv-av">김</div>
+        <div><div class="rv-name">김**님</div><div class="rv-loc">서울 강남구</div></div>
+      </div>
+      <div class="rv-stars">★★★★★</div>
+      <div class="rv-tag">냉감 패드 퀸 QMAX 550G</div>
+      <p>진짜 신기할 정도로 차갑네요. 여름에 이불 없이 자도 발이 닿으면 시원한 느낌이 나요. 다른 냉감 패드랑 비교가 안 돼요. 세탁 후에도 냉감이 그대로 유지됩니다.</p>
+      <div class="rv-date">2025.06.01</div>
+    </div>
+
+    <div class="rev-card appear d1">
+      <div class="rv-top">
+        <div class="rv-av">이</div>
+        <div><div class="rv-name">이**님</div><div class="rv-loc">경기 수원시</div></div>
+      </div>
+      <div class="rv-stars">★★★★★</div>
+      <div class="rv-tag">냉감 차렵이불 싱글</div>
+      <p>아이가 너무 더워서 잠을 못 잤는데 이 이불 쓰고 훨씬 잘 자요. OEKO-TEX 인증이라 아이한테 써도 안심되고 촉감도 정말 부드러워요. 강력 추천!</p>
+      <div class="rv-date">2025.05.28</div>
+    </div>
+
+    <div class="rev-card appear d2">
+      <div class="rv-top">
+        <div class="rv-av">윤</div>
+        <div><div class="rv-name">윤**님</div><div class="rv-loc">서울 마포구</div></div>
+      </div>
+      <div class="rv-stars">★★★★★</div>
+      <div class="rv-tag">냉감 패드 퀸 QMAX 550G</div>
+      <p>냉감 제품 여러 개 써봤는데 이게 제일 오래 시원함이 유지돼요. 에어컨 없이 자기 어려운 날에도 이 패드 하나면 훨씬 수월해요. 배송도 빠르고 포장도 꼼꼼해요!</p>
+      <div class="rv-date">2025.05.15</div>
+    </div>
+
+  </div>
+  <div style="text-align:center;margin-top:44px;" class="appear">
+    <a href="reviews.html" style="display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:var(--blue);border-bottom:1.5px solid var(--blue);padding-bottom:4px;transition:gap 0.2s;" onmouseover="this.style.gap='14px'" onmouseout="this.style.gap='8px'">후기 전체 보기 →</a>
+  </div>
+</section>
+
   <section class="video-section o-video">
     <div class="video-section-inner">
       <div class="video-text">
@@ -380,7 +410,7 @@
   <div class="in">
     <div>
       <div class="ft-pair">
-        <img src="assets/lunacool/lunacool-word.png" alt="루나쿨"><i aria-hidden="true"></i><img class="lo" src="assets/lunaon/lunaon-logo.svg" alt="루나온">
+        <img src="assets/lunacool/lunacool-logo-h.png" alt="루나쿨"><i aria-hidden="true"></i><img class="lo" src="assets/lunaon/lunaon-logo.svg" alt="루나온">
       </div>
       <strong>(주)테란</strong> | 대표자 남대현<br>
       사업자등록번호 517-87-0057<br>
@@ -411,13 +441,15 @@
         <li><a href="reviews.html">구매후기</a></li>
         <li><a href="inquiry.html">상품문의</a></li>
         <li><a href="cert.html">루나쿨 인증 현황</a></li>
-        <li><a href="https://smartstore.naver.com" target="_blank" rel="noopener">스마트스토어</a></li>
+        <li><a href="https://smartstore.naver.com/terran/products/13431840534" data-store="smartstore" target="_blank" rel="noopener">스마트스토어</a></li>
+        <li><a href="https://www.coupang.com/" data-store="coupang" target="_blank" rel="noopener">쿠팡</a></li>
       </ul>
     </div>
   </div>
   <p class="copy">© 2026 (주)테란. 루나쿨(LUNA COOL) · 루나온(LUNA ON)</p>
 </footer>
 
+<script src="links.js"></script>
 <script src="script.js"></script>
 <script>
   function syncSwitch() {
@@ -426,14 +458,11 @@
       b.setAttribute('aria-pressed', b.dataset.set === s ? 'true' : 'false');
     });
   }
-  function setSeason(s, toTop) {
+  function setSeason(s) {
     if (document.documentElement.dataset.season === s) return;
     document.documentElement.dataset.season = s;
     try { localStorage.setItem('lunafamily_season', s); } catch (e) {}
     syncSwitch();
-    var cover = document.querySelector(s === 'winter' ? '.cover.only-winter' : '.cover.only-summer');
-    if (cover) { cover.classList.remove('swap-in'); void cover.offsetWidth; cover.classList.add('swap-in'); }
-    if (toTop) window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   document.querySelectorAll('.season-switch button').forEach(function (b) {
     b.addEventListener('click', function () { setSeason(b.dataset.set); });

@@ -56,11 +56,10 @@
     }
     html[data-season="summer"] .side.cool,
     html[data-season="winter"] .side.warm { flex-grow: 1.7; }
-    @media (hover: hover) and (min-width: 1001px) {
-      html[data-season] .duo:hover .side { flex-grow: .8; }
-      html[data-season] .duo .side:hover { flex-grow: 1.7; }
-      .side:hover > img { transform: scale(1.03); }
-    }
+    /* PC·휴대폰 모두: 스위치로 고른 브랜드 하나만 보임 */
+    html[data-season="summer"] .side.warm,
+    html[data-season="winter"] .side.cool { display: none; }
+    .side-copy { max-width: 980px; }
     .side > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s ease, filter .7s; }
     .side.warm > img { object-position: 50% 60%; }
     .side::after { content: ""; position: absolute; inset: 0; pointer-events: none; }
@@ -81,8 +80,6 @@
     .side .go { display: inline-flex; align-items: center; padding: 13px 22px; border-radius: 999px; font-weight: 600; font-size: 15px; }
     .side.cool .go { background: var(--dark); color: #fff; }
     .side.warm .go { background: var(--warm-grad); color: #3a2414; }
-    /* PC에서 좁아진 쪽만 서브 문구 숨김 (휴대폰은 항상 보임) */
-    @media (min-width: 1001px) { @container (max-width: 470px) { .side-copy p { display: none; } } }
 
     /* 계절 스위치 — 분할선 위 가운데 */
     .season-switch {
@@ -109,7 +106,8 @@
     html[data-season="winter"] .o-video,
     html[data-season="summer"] .o-lo-video,
     html[data-season="summer"] .o-lo-story,
-    html[data-season="summer"] .o-lo-sizes { display: none !important; }
+    html[data-season="summer"] .o-lo-sizes,
+    html[data-season="summer"] .o-lo-reviews { display: none !important; }
 
     .wrap { max-width: var(--maxw); margin: 0 auto; }
 
@@ -169,11 +167,37 @@
     .lo-video-logo { height: 30px; width: auto; margin-bottom: 18px; }
     .video-section[hidden] { display: none !important; }
 
+
+    /* 루나온 후기 (실시간) */
+    .lo-reviews { background: var(--s-soft); padding: clamp(64px, 8vw, 104px) var(--gutter); }
+    .lo-reviews .hd { display: flex; justify-content: space-between; align-items: end; gap: 16px; margin-bottom: 24px; }
+    .lo-reviews h2 { font-size: clamp(24px, 2.6vw, 32px); }
+    .lo-reviews .hd a { font-weight: 600; font-size: 14.5px; color: var(--s-mid); white-space: nowrap; }
+    .lo-rev-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .lo-rev { background: #fff; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+    .lo-rev img { width: 100%; aspect-ratio: 4/3; object-fit: cover; }
+    .lo-rev .b { padding: 18px 20px 20px; }
+    .lo-rev .st { color: #E8A23A; letter-spacing: 1px; font-size: 14px; }
+    .lo-rev p { margin: 8px 0 12px; line-height: 1.7; font-size: 15px; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+    .lo-rev .who { font-size: 13px; color: var(--mid); }
+    .lo-rev-empty { background: #fff; border-radius: 12px; padding: 36px 28px; display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .lo-rev-empty p { color: var(--mid); }
+
+    /* 문의 안내 (두 브랜드 공통) */
+    .help { background: var(--s-band); color: var(--s-band-fg); padding: clamp(56px, 7vw, 88px) var(--gutter); }
+    .help .wrap { display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; }
+    .help h2 { font-size: clamp(24px, 2.6vw, 32px); margin-bottom: 8px; }
+    .help p { color: var(--s-band-mid); }
+    .help .acts { display: flex; gap: 10px; flex-wrap: wrap; }
+    html[data-season="summer"] .help { background: var(--s-bg); border-top: 1px solid var(--line); }
+    html[data-season="winter"] .help .btn-help { background: var(--warm-grad); color: #3a2414; }
+    html[data-season="summer"] .help .btn-help { background: var(--dark); color: #fff; }
+    .help .btn-ghost { color: var(--s-band-fg); }
+    @media (max-width: 1000px) { .lo-rev-grid { grid-template-columns: 1fr; } }
+
     @media (max-width: 1000px) {
       .duo { flex-direction: column; height: auto; max-height: none; }
       .side { flex: none; min-height: 78svh; }
-      /* 휴대폰: 스위치로 고른 브랜드 하나만 보임 */
-      html[data-season="summer"] .side.warm, html[data-season="winter"] .side.cool { display: none; }
       .season-switch { top: 16px; }
       .lo-story .wrap { grid-template-columns: 1fr; }
       .size-row { grid-template-columns: 1fr; }
@@ -284,6 +308,16 @@
             <a href="lunaon.html#ss">슈퍼싱글 상세 보기</a>
           </div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 루나온 후기 (실시간, 관리자 승인분) -->
+  <section class="lo-reviews o-lo-reviews">
+    <div class="wrap">
+      <div class="hd"><h2>루나온을 덮어 본 분들의 이야기</h2><a href="reviews.html">후기 전체 보기</a></div>
+      <div id="loReviewList">
+        <div class="lo-rev-empty"><p>루나온의 첫 후기를 기다리고 있습니다.</p><a href="reviews.html" class="btn btn-warm">후기 쓰러 가기</a></div>
       </div>
     </div>
   </section>
@@ -411,6 +445,20 @@
     </div>
   </section>
 
+  <!-- 문의 안내 (두 브랜드 공통) -->
+  <section class="help o-help">
+    <div class="wrap">
+      <div>
+        <h2>궁금한 점이 있으신가요?</h2>
+        <p>문의 게시판에 남겨주시면 영업일 1~2일 안에 답변드립니다. 개인적인 내용은 비밀글로 남겨주세요.</p>
+      </div>
+      <div class="acts">
+        <a href="inquiry.html" class="btn btn-help">문의 남기기</a>
+        <a href="tel:070-7717-5231" class="btn btn-ghost">전화 070-7717-5231</a>
+      </div>
+    </div>
+  </section>
+
 </div>
 
 <!-- 영상 모달 -->
@@ -470,6 +518,21 @@
 <script src="firebase-config.js"></script>
 <script type="module" src="board.js"></script>
 <script>
+  // 루나온 후기: 승인된 후기 중 최신 3건
+  window.addEventListener('lunaboard:ready', async function () {
+    var B = window.LunaBoard; if (!B.enabled) return;
+    try {
+      var list = (await B.listApprovedReviews()).filter(function (r) { return r.product === 'lunaon'; }).slice(0, 3);
+      if (!list.length) return;
+      var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+      var cards = await Promise.all(list.map(async function (r) {
+        var photos = r.photoCount ? await B.getReviewPhotos(r.id, 1) : [];
+        var img = photos[0] && B.isSafePhoto(photos[0]) ? '<img src="' + photos[0] + '" alt="고객 후기 사진" loading="lazy">' : '';
+        return '<div class="lo-rev">' + img + '<div class="b"><div class="st">' + '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating) + '</div><p>' + esc(r.text) + '</p><div class="who">' + esc(r.name) + '님 · 홈페이지 후기</div></div></div>';
+      }));
+      document.getElementById('loReviewList').innerHTML = '<div class="lo-rev-grid">' + cards.join('') + '</div>';
+    } catch (e) {}
+  });
   // 홍보 영상 주소: 실시간 관리(admin-live.html)에서 저장한 유튜브 주소 사용
   window.addEventListener('lunaboard:ready', async function () {
     if (!window.LunaBoard.enabled) return;

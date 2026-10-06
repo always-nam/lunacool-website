@@ -404,3 +404,11 @@
 - 대표님 요청: 로그인 없이 보는 공개 링크 → `lunaon-detail-v9/` (원본 HTML·이미지 15장 그대로, noindex + robots 제외, 메뉴 미연결)
 - 원본: `\192.168.0.250\이미지\★제품DB\★루나온_발열이불★\루나온_V9_GIF버전\GIF 버전\상세페이지_로컬.html`
 - ⚠ 검수 메모(대표님 판단 대기): 로고 SELF-WARMING 태그라인, 열화상 45°C·원적외선 37°C 온도 표기, 판매원 (주)온누리유통 vs (주)테란, 「싱글·퀸」 vs 슈퍼싱글
+
+---
+
+## 2026-10-06 — 루나온 판매형 페이지 시안 미리보기
+
+- `preview-lunaon-sale.html` (noindex + robots 제외, 메뉴 미연결) — 시안 원본은 `_draft-lunaon-sale.html`(git 제외)
+- 대표사진 9장 `assets/lunaon/gallery/lo-01~09-*.jpg` (원본: 제품DB 대표이미지 01~09 png → 1100px jpg)
+- 상세정보: `lunaon-detail-v9/images` 15장 재사용, 가격·배송·판매원은 「미정」

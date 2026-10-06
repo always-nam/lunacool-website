@@ -3,5 +3,6 @@ Allow: /
 Disallow: /admin.html
 Disallow: /admin-live.html
 Disallow: /lunaon-detail-v9/
+Disallow: /preview-lunaon-sale.html
 
 Sitemap: https://always-nam.github.io/lunacool-website/sitemap.xml

@@ -417,3 +417,8 @@
 - 대표님 요청: 제안서에 넣을 영상 URL → `lunaon-cf-v5/` (10/6 제작 CF roughcut v5, 14.8초, 1470x630, 6MB) + poster.jpg
 - noindex + robots 제외, 메뉴 미연결 (lunaon-detail-v9와 같은 방식)
 - 주소: https://always-nam.github.io/lunacool-website/lunaon-cf-v5/ (영상 파일 직접: .../lunaon-cf-v5/lunaon-cf.mp4)
+
+## 2026-10-08 — 루나온 CF 영상 v8 공유용 공개 주소
+- 대표님 요청: 최신 홍보영상 URL → `lunaon-cf-v8/` (roughcut v8b: 01컷 아늑한 아파트 안방, 부드러운 수면 사운드, 14.8초, 1470x630)
+- noindex + robots 제외, 메뉴 미연결 (lunaon-cf-v5와 같은 방식)
+- 주소: https://always-nam.github.io/lunacool-website/lunaon-cf-v8/ (영상 파일 직접: .../lunaon-cf-v8/lunaon-cf.mp4)

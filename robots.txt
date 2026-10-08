@@ -4,5 +4,6 @@ Disallow: /admin.html
 Disallow: /admin-live.html
 Disallow: /lunaon-detail-v9/
 Disallow: /preview-lunaon-sale.html
+Disallow: /lunaon-cf-v5/
 
 Sitemap: https://always-nam.github.io/lunacool-website/sitemap.xml

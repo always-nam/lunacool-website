@@ -412,3 +412,8 @@
 - `preview-lunaon-sale.html` (noindex + robots 제외, 메뉴 미연결) — 시안 원본은 `_draft-lunaon-sale.html`(git 제외)
 - 대표사진 9장 `assets/lunaon/gallery/lo-01~09-*.jpg` (원본: 제품DB 대표이미지 01~09 png → 1100px jpg)
 - 상세정보: `lunaon-detail-v9/images` 15장 재사용, 가격·배송·판매원은 「미정」
+
+## 2026-10-08 — 루나온 CF 영상 공유용 공개 주소
+- 대표님 요청: 제안서에 넣을 영상 URL → `lunaon-cf-v5/` (10/6 제작 CF roughcut v5, 14.8초, 1470x630, 6MB) + poster.jpg
+- noindex + robots 제외, 메뉴 미연결 (lunaon-detail-v9와 같은 방식)
+- 주소: https://always-nam.github.io/lunacool-website/lunaon-cf-v5/ (영상 파일 직접: .../lunaon-cf-v5/lunaon-cf.mp4)

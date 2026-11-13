@@ -298,7 +298,7 @@
       <div class="stage-card active" onclick="setStageFilter('ALL')" id="stCard_ALL">
         <div class="st-title">📋 전체 타겟 (필터링 완료)</div>
         <div class="st-count" id="cnt_ALL">0</div>
-        <div class="st-sub">신규발굴 12 + 기존검증 2,481</div>
+        <div class="st-sub">신규발굴(그립·클릭메이트) 315 + 기존검증 2,481</div>
       </div>
       <div class="stage-card" onclick="setStageFilter('1_1차제안메일')" id="stCard_1_1차제안메일">
         <div class="st-title">1️⃣ 1차 제안메일 발송</div>
@@ -338,8 +338,8 @@
         <button class="tab-btn" onclick="setChannelFilter('KAKAO_ONLY')" id="tab_KAKAO_ONLY" style="background:#fef9c3;border-color:#fde047;color:#854d0e;">💬 살아있는 오픈채팅(직원 상담용 248명)</button>
       </div>
       <div class="search-group">
-        <button class="source-btn active" onclick="setSourceFilter('ALL')" id="src_ALL">전체 출처</button>
-        <button class="source-btn" onclick="setSourceFilter('🆕 신규발굴')" id="src_NEW">🆕 신규발굴(12곳)</button>
+        <button class="source-btn active" onclick="setSourceFilter('ALL')" id="src_ALL">전체 출처(2,796)</button>
+        <button class="source-btn" onclick="setSourceFilter('🆕 신규발굴')" id="src_NEW">🆕 신규발굴·크롤링(315곳)</button>
         <button class="source-btn" onclick="setSourceFilter('📂 기존DB간추림')" id="src_OLD">📂 기존DB간추림(2,481명)</button>
         <input type="text" class="search-input" id="searchInput" placeholder="셀러명, 아이디, 이메일, 카테고리 검색..." oninput="renderTable()" />
         <select id="pageSizeSelect" class="stage-select" onchange="renderTable()">
@@ -630,7 +630,7 @@
     }
 
     function getProposalText(displayName) {
-      return `안녕하세요 ${displayName}님! 😊\n기능성 침구 브랜드 '루나온(LUNA ON)' 본사 (주)테란 담당자입니다.\n\n이번 겨울 시즌 일반 온라인 판매용과 완전히 분리된 [SNS 공구·라이브 전용] '루나온 그래핀 50% 자가발열 이불' 공동구매 제안차 연락드렸습니다!\n\n✅ 핵심 스펙: 충전재 중 그래핀 50% 함유 / KATRI 보온율 90.1% / 진드기 통과 0마리 / 양면 투톤(차콜·라이트그레이)\n✅ 확정 공급가(VAT포함):\n  - 슈퍼싱글(SS, 150x200): 정가 99,000원 ➔ 공급가 29,000원 (마진율 70.7%)\n  - 퀸(Q, 200x230): 정가 129,000원 ➔ 공급가 39,000원 (마진율 69.8%)\n  - 택배비: 3,000원 별도 (롯데택배, 16시 마감 파주 물류 당일출고)\n✅ 상세페이지(GIF): https://always-nam.github.io/lunacool-website/lunaon-detail-v9/\n✅ 15초 홍보영상: https://always-nam.github.io/lunacool-website/lunaon-cf-v8/\n\n직접 덮어보시면 보온력과 가벼움에 바로 만족하실 제품이라, 희망하시면 테스트용 샘플과 제안서 먼저 보내드리고 싶은데 괜찮으실까요? 🙌\n(회신메일: akrrntn1@gmail.com)`;
+      return `안녕하세요, ${displayName}님!\n프리미엄 기능성 침구 브랜드 '루나온(LUNA ON)' 본사 공급원 (주)테란 담당자입니다.\n\n평소 ${displayName}님의 채널과 팔로워분들의 높은 소통 반응을 눈여겨보며, 이번 겨울 한파 시즌 팔로워분들께 폭발적인 구매 전환과 높은 셀러 수익(마진율 약 70%)을 드릴 수 있는 '루나온 그래핀 50% 자가발열 이불' 공동구매를 제안드리고자 메일 드렸습니다.\n\n💡 일반 온라인 판매용 모델과 브랜드를 완전히 분리하여, 오직 SNS 공구 및 라이브 셀러분들의 가격 경쟁력과 마진을 철저히 보호하는 [공구 전용 모델]입니다.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 루나온 그래핀 발열이불 핵심 포인트 및 공급 조건\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n1. 공인기관(KATRI·한국의류시험연구원) 시험성적서 6종 완비\n   • 무늬만 그래핀 코팅이 아닌 [충전재의 50%가 그래핀 웜솜] (체온 반사 자가발열)\n   • KATRI 보온율 90.1% / 집먼지진드기 통과 0마리(3회 시험 모두) / 폼알데하이드 불검출\n   • 전기선·전자파 걱정 제로, 세탁기 통세탁 가능, 차콜 & 라이트그레이 양면 투톤 컬러\n\n2. 셀러 마진 극대화 공급 단가 (파주 본사 물류 위탁 출고 완벽 지원)\n   • 슈퍼싱글 (SS, 150x200cm): 정가 99,000원 ➔ 공급가 29,000원 (VAT포함) [마진율 70.7%]\n   • 퀸 (Q, 200x230cm): 정가 129,000원 ➔ 공급가 39,000원 (VAT포함) [마진율 69.8%]\n   • 택배비: 3,000원 별도 (롯데택배 / 제주·도서산간 +3,000원 / 합포장 4개 기준)\n   • 출고 마감: 평일 오후 4시(16시) 발주 마감 시 파주 물류센터 당일 칼출고\n\n3. 릴스·스토리·상세페이지용 고화질 GIF & 15초 홍보영상 즉시 제공\n   • 상세페이지 (GIF 버전): https://always-nam.github.io/lunacool-website/lunaon-detail-v9/\n   • 홍보 영상 (15초 CF): https://always-nam.github.io/lunacool-website/lunaon-cf-v8/\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n첨부해 드린 [루나온 그래핀이불 상품제안서(Excel)]를 확인해 보시고,\n관심 있으시면 본 메일(akrrntn1@gmail.com)로 편하게 회신 부탁드립니다.\n감사합니다.\n\n(주)테란 루나온 공구제안팀 드림\n• 공급사: 테란2 (온누리유통)\n• 대표번호: 070-8858-5231\n• 담당자: 남대현 010-4527-8781 (담당자)\n• 회신 이메일: akrrntn1@gmail.com`;
     }
 
     function copyKakaoScript(sellerId, displayName) {

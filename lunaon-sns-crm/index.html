@@ -296,19 +296,19 @@
     <!-- 6단계 진행 파이프라인 -->
     <div class="pipeline-grid">
       <div class="stage-card active" onclick="setStageFilter('ALL')" id="stCard_ALL">
-        <div class="st-title">📋 전체 타겟 (필터링 완료)</div>
+        <div class="st-title">📋 전체 검증 타겟 (주소오류 자동제거)</div>
         <div class="st-count" id="cnt_ALL">0</div>
-        <div class="st-sub">신규발굴(그립·클릭메이트) 315 + 기존검증 2,481</div>
+        <div class="st-sub" id="sub_ALL">브랜드커넥트 VIP·인스타·라이브 검증 DB</div>
       </div>
       <div class="stage-card" onclick="setStageFilter('1_1차제안메일')" id="stCard_1_1차제안메일">
-        <div class="st-title">1️⃣ 1차 제안메일 발송</div>
+        <div class="st-title">1️⃣ 1차 제안메일 (정상도달)</div>
         <div class="st-count" id="cnt_1_1차제안메일">0</div>
-        <div class="st-sub">제안서(29,000/39,000) 발송</div>
+        <div class="st-sub" id="sub_1_1차제안메일">주소오류/반송분 자동 삭제 완료</div>
       </div>
-      <div class="stage-card" onclick="setStageFilter('2_2차회신도착')" id="stCard_2_2차회신도착">
-        <div class="st-title">2️⃣ 2차 회신 도착</div>
-        <div class="st-count" id="cnt_2_2차회신도착">0</div>
-        <div class="st-sub">akrrntn1@gmail.com 답장</div>
+      <div class="stage-card" onclick="setStageFilter('2_2차회신도착')" id="stCard_2_2차회신도착" style="border-left: 4px solid #2563eb;">
+        <div class="st-title">2️⃣ 📩 2차 회신 도착 (답장)</div>
+        <div class="st-count" id="cnt_2_2차회신도착" style="color:#2563eb;">0</div>
+        <div class="st-sub">클릭 시 답장 온 셀러만 즉시 필터</div>
       </div>
       <div class="stage-card" onclick="setStageFilter('3_3차재진행조율')" id="stCard_3_3차재진행조율">
         <div class="st-title">3️⃣ 3차 재진행·샘플발송</div>
@@ -327,6 +327,15 @@
       </div>
     </div>
 
+    <!-- 실시간 2차 회신(답장) 도착 하이라이트 보드 -->
+    <div id="replyHighlightBox" style="background:#ffffff;border-radius:12px;padding:16px 20px;box-shadow:0 1px 4px rgba(0,0,0,0.06);margin-bottom:14px;border-left:6px solid #16a34a;display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+        <h3 style="font-size:15px;font-weight:800;color:#0f172a;">📩 실시간 2차 회신(답장) 도착 셀러 현황 — 클릭 시 바로 회신/협의 가능</h3>
+        <span id="replySummaryBadge" style="font-size:12px;font-weight:700;color:#15803d;background:#dcfce7;padding:4px 10px;border-radius:6px;"></span>
+      </div>
+      <div id="replyCardsGrid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(340px, 1fr));gap:10px;"></div>
+    </div>
+
     <!-- 채널 분류 탭 & 데이터 출처 필터 -->
     <div class="filter-bar">
       <div class="channel-tabs">
@@ -335,13 +344,13 @@
         <button class="tab-btn" onclick="setChannelFilter('라이브쇼핑')" id="tab_라이브쇼핑">📡 라이브쇼핑(그립·클릭메이트·MCN)</button>
         <button class="tab-btn" onclick="setChannelFilter('유튜브')" id="tab_유튜브">🎥 유튜브</button>
         <button class="tab-btn" onclick="setChannelFilter('틱톡')" id="tab_틱톡">🎵 틱톡</button>
-        <button class="tab-btn" onclick="setChannelFilter('KAKAO_ONLY')" id="tab_KAKAO_ONLY" style="background:#fef9c3;border-color:#fde047;color:#854d0e;">💬 살아있는 오픈채팅(직원 상담용 248명)</button>
+        <button class="tab-btn" onclick="setChannelFilter('KAKAO_ONLY')" id="tab_KAKAO_ONLY" style="background:#fef9c3;border-color:#fde047;color:#854d0e;">💬 살아있는 오픈채팅 보유 셀러</button>
       </div>
       <div class="search-group">
-        <button class="source-btn active" onclick="setSourceFilter('ALL')" id="src_ALL">전체 출처(2,796)</button>
-        <button class="source-btn" onclick="setSourceFilter('🆕 신규발굴')" id="src_NEW">🆕 신규발굴·크롤링(315곳)</button>
-        <button class="source-btn" onclick="setSourceFilter('📂 기존DB간추림')" id="src_OLD">📂 기존DB간추림(2,481명)</button>
-        <input type="text" class="search-input" id="searchInput" placeholder="셀러명, 아이디, 이메일, 카테고리 검색..." oninput="renderTable()" />
+        <button class="source-btn active" onclick="setSourceFilter('ALL')" id="src_ALL">전체 출처</button>
+        <button class="source-btn" onclick="setSourceFilter('VIP')" id="src_NEW">🌟 브랜드커넥트 VIP·공구검증</button>
+        <button class="source-btn" onclick="setSourceFilter('OLD')" id="src_OLD">📂 인스타·유튜브 크리에이터DB</button>
+        <input type="text" class="search-input" id="searchInput" placeholder="셀러명, 아이디, 이메일, 회신내용 검색..." oninput="renderTable()" />
         <select id="pageSizeSelect" class="stage-select" onchange="renderTable()">
           <option value="50">50개씩 보기</option>
           <option value="100" selected>100개씩 보기</option>
@@ -458,7 +467,14 @@
         document.getElementById('modeBadge').textContent = '🌐 외부 웹/모바일 접속 모드';
         const rawSellers = window.LUNAON_CRM_INITIAL_DATA.sellers || [];
         const ov = getLocalOverrides();
-        allSellers = rawSellers.map(s => ov[s.id] ? { ...s, ...ov[s.id] } : s);
+        const STAGE_RANK = {'0_발송대기':0, '1_1차제안메일':1, '2_2차회신도착':2, '3_3차재진행조율':3, '4_직원오픈채팅이관':4, '5_공구확정':5};
+        allSellers = rawSellers.map(s => {
+          if (!ov[s.id]) return s;
+          const localSt = ov[s.id].stage || s.stage;
+          const bestStage = (STAGE_RANK[s.stage] || 0) >= (STAGE_RANK[localSt] || 0) ? s.stage : localSt;
+          const bestMemo = (s.memo && s.memo.length >= (ov[s.id].memo || '').length) ? s.memo : (ov[s.id].memo || s.memo);
+          return { ...s, ...ov[s.id], stage: bestStage, memo: bestMemo };
+        });
         updateCounts();
         renderTable();
       }
@@ -466,6 +482,10 @@
 
     function updateCounts() {
       document.getElementById('cnt_ALL').textContent = allSellers.length.toLocaleString();
+      const validEmailsCnt = allSellers.filter(s => s.email && s.email.includes('@')).length;
+      const subAll = document.getElementById('sub_ALL');
+      if (subAll) subAll.textContent = `유효 이메일 보유 ${validEmailsCnt.toLocaleString()}명 (반송/오류 삭제 완료)`;
+
       const stages = ['1_1차제안메일', '2_2차회신도착', '3_3차재진행조율', '4_직원오픈채팅이관', '5_공구확정'];
       stages.forEach(st => {
         const c = allSellers.filter(s => s.stage === st).length;
@@ -475,10 +495,45 @@
 
       const confirmed = allSellers.filter(s => s.stage === '5_공구확정').length;
       const activePipe = allSellers.filter(s => ['2_2차회신도착', '3_3차재진행조율', '4_직원오픈채팅이관'].includes(s.stage)).length;
+      const sentCnt = allSellers.filter(s => s.stage === '1_1차제안메일').length;
       const pct = Math.min(100, Math.round((confirmed / 100) * 100));
       document.getElementById('goalProgressFill').style.width = pct + '%';
       document.getElementById('goalProgressText').textContent = `${confirmed} / 100명 (${pct}%)`;
-      document.getElementById('goalSummaryText').textContent = `현재 공구확정 ${confirmed}명 | 상담 가시화(2차~4차) ${activePipe}명 진행 중`;
+      document.getElementById('goalSummaryText').textContent = `현재 공구확정 ${confirmed}명 | 2차 회신(답장) 도착 ${activePipe}명 | 1차 제안 정상도달 ${sentCnt.toLocaleString()}명`;
+
+      // 실시간 2차 회신 하이라이트 보드 렌더링
+      const repliedSellers = allSellers.filter(s => ['2_2차회신도착', '3_3차재진행조율', '4_직원오픈채팅이관', '5_공구확정'].includes(s.stage));
+      const box = document.getElementById('replyHighlightBox');
+      const grid = document.getElementById('replyCardsGrid');
+      const badge = document.getElementById('replySummaryBadge');
+      if (box && grid && repliedSellers.length > 0) {
+        box.style.display = 'block';
+        badge.textContent = `총 ${repliedSellers.length}건 회신 도착 (유효 발송 ${sentCnt + repliedSellers.length}명 기준)`;
+        grid.innerHTML = repliedSellers.map(s => {
+          const safeName = (s.display_name || s.seller_id).replace(/'/g, "");
+          const replySubj = encodeURIComponent(`Re: [공동구매 제안] 루나온 그래핀 50% 자가발열 이불 상세 조건 및 샘플 안내 (${safeName}님)`);
+          return `
+            <div style="border:1px solid #cbd5e1;border-radius:10px;padding:12px 14px;background:#f8fafc;display:flex;flex-direction:column;justify-content:space-between;gap:6px;">
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
+                  <span style="font-weight:800;font-size:14px;color:#0f172a;">${s.display_name || s.seller_id} <a href="${s.profile_url}" target="_blank" class="link-a" style="font-size:12px;">(@${s.seller_id})</a></span>
+                  <span class="badge" style="background:#dbeafe;color:#1d4ed8;">${STAGE_LABELS[s.stage] || s.stage}</span>
+                </div>
+                <div style="font-size:12px;color:#475569;margin-top:3px;">📧 <strong>${s.email || ''}</strong> · 팔로워 ${Number(s.followers || 0).toLocaleString()}명</div>
+                <div style="font-size:12px;color:#0f172a;background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:7px 9px;margin-top:6px;line-height:1.45;">
+                  ${s.memo || '회신 도착'}
+                </div>
+              </div>
+              <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;">
+                <a href="https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(s.email || '')}&su=${replySubj}" target="_blank" class="btn btn-primary" style="padding:5px 10px;font-size:11px;">✉️ 2차 회신메일 작성</a>
+                <button class="btn btn-outline" style="padding:5px 10px;font-size:11px;" onclick="setStageFilter('2_2차회신도착')">🔍 아래 표에서 보기</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } else if (box) {
+        box.style.display = 'none';
+      }
     }
 
     function setChannelFilter(ch) {
@@ -493,7 +548,7 @@
       currentSource = src;
       document.querySelectorAll('.source-btn').forEach(b => b.classList.remove('active'));
       if (src === 'ALL') document.getElementById('src_ALL').classList.add('active');
-      else if (src.includes('신규')) document.getElementById('src_NEW').classList.add('active');
+      else if (src === 'VIP') document.getElementById('src_NEW').classList.add('active');
       else document.getElementById('src_OLD').classList.add('active');
       renderTable();
     }
@@ -512,7 +567,7 @@
       else if (ch === '유튜브') chBadge = '<span class="badge b-yt">🎥 유튜브</span>';
       else if (ch === '틱톡') chBadge = '<span class="badge b-tk">🎵 틱톡</span>';
 
-      const srcClass = (src || '').includes('신규') ? 'b-src-new' : 'b-src-old';
+      const srcClass = (src || '').includes('VIP') || (src || '').includes('신규') ? 'b-src-new' : 'b-src-old';
       const srcLabel = src || '📂 기존DB간추림';
       return `${chBadge}<div style="margin-top:4px;"><span class="badge ${srcClass}">${srcLabel}</span></div>`;
     }
@@ -521,16 +576,34 @@
       const q = (document.getElementById('searchInput').value || '').toLowerCase().trim();
       const limit = parseInt(document.getElementById('pageSizeSelect').value || '100', 10);
 
+      const STAGE_SORT_ORDER = {
+        '5_공구확정': 0,
+        '4_직원오픈채팅이관': 1,
+        '3_3차재진행조율': 2,
+        '2_2차회신도착': 3,
+        '1_1차제안메일': 4,
+        '0_발송대기': 5
+      };
+
       const filtered = allSellers.filter(s => {
         if (currentChannel === 'KAKAO_ONLY' && !s.kakao_url) return false;
         if (currentChannel !== 'ALL' && currentChannel !== 'KAKAO_ONLY' && s.channel !== currentChannel) return false;
-        if (currentSource !== 'ALL' && (s.source || '📂 기존DB간추림') !== currentSource) return false;
+        if (currentSource === 'VIP' && !(s.source || '').includes('VIP') && !(s.source || '').includes('공구')) return false;
+        if (currentSource === 'OLD' && ((s.source || '').includes('VIP'))) return false;
         if (currentStage !== 'ALL' && s.stage !== currentStage) return false;
         if (q) {
           const hay = `${s.seller_id} ${s.display_name} ${s.email} ${s.category} ${s.kakao_title} ${s.memo}`.toLowerCase();
           if (!hay.includes(q)) return false;
         }
         return true;
+      });
+
+      // 진행 단계 우선순위 정렬 (2차 회신도착 -> 1차 제안메일 발송 -> 발송대기 순으로 최상단 노출)
+      filtered.sort((a, b) => {
+        const sa = STAGE_SORT_ORDER[a.stage] !== undefined ? STAGE_SORT_ORDER[a.stage] : 9;
+        const sb = STAGE_SORT_ORDER[b.stage] !== undefined ? STAGE_SORT_ORDER[b.stage] : 9;
+        if (sa !== sb) return sa - sb;
+        return (Number(b.followers) || 0) - (Number(a.followers) || 0);
       });
 
       const tbody = document.getElementById('sellerTbody');

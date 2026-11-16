@@ -897,9 +897,10 @@
               <div id="inlineReplyBox_${s.id}" style="display:none;margin-top:8px;padding-top:10px;border-top:2px dashed #cbd5e1;background:#ffffff;padding:10px;border-radius:8px;">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex-wrap:wrap;gap:4px;">
                   <span style="font-size:11px;font-weight:700;color:#1d4ed8;">📤 2차 답장 받는사람: ${s.email || ''} (${safeName}님)</span>
-                  <div style="display:flex;gap:4px;">
-                    <button class="btn btn-outline" style="padding:2px 8px;font-size:10px;background:#fefce8;color:#854d0e;border-color:#fde047;" onclick="fillSecondTemplate('${s.id}', '${safeName}')">📋 2차 기본안내문 불러오기 (필요시 클릭)</button>
-                    <button class="btn btn-outline" style="padding:2px 7px;font-size:10px;color:#1d4ed8;" onclick="toggleFirstMail('${s.id}')">📤 1차 보낸메일 다시확인</button>
+                  <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                    <button class="btn btn-primary" style="padding:3px 9px;font-size:11px;background:#7c3aed;" onclick="fillGoniCustomDraft('${s.id}', '${safeName}')">🤖 고니(AI) 셀러맞춤 답변 자동작성</button>
+                    <button class="btn btn-outline" style="padding:2px 8px;font-size:10px;background:#fefce8;color:#854d0e;border-color:#fde047;" onclick="fillSecondTemplate('${s.id}', '${safeName}')">📋 기본 2차안내문만 넣기</button>
+                    <button class="btn btn-outline" style="padding:2px 7px;font-size:10px;color:#1d4ed8;" onclick="toggleFirstMail('${s.id}')">📤 1차 보낸메일 확인</button>
                   </div>
                 </div>
                 <input type="text" id="replySubj_${s.id}" class="inline-input" style="margin-bottom:6px;font-weight:700;font-size:12px;" value="${defaultSubj.replace(/"/g, '&quot;')}" />
@@ -1128,6 +1129,19 @@
         el.value = tpl;
       }
       el.focus();
+    }
+
+    function fillGoniCustomDraft(id, displayName) {
+      const el = document.getElementById('replyBody_' + id);
+      if (!el) return;
+      const s = allSellers.find(x => x.id === id);
+      if (s && s.ai_reply_draft) {
+        el.value = s.ai_reply_draft;
+      } else {
+        el.value = getSecondReplyText(displayName);
+      }
+      el.focus();
+      showToast(`🤖 고니가 [${displayName}]님의 답장 질문을 분석해 1:1 맞춤 답변을 작성했습니다! 확인 후 발송하세요.`);
     }
 
     function getSecondReplyText(displayName) {

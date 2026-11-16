@@ -415,6 +415,22 @@
         <pre id="masterFirstMailPre" style="background:#ffffff;border:1px solid #cbd5e1;border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.5;white-space:pre-wrap;color:#334155;max-height:240px;overflow-y:auto;"></pre>
       </div>
 
+      <!-- 정렬 기준 선택 바 (상단 단계 카드 클릭 연동) -->
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:8px 12px;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span style="font-size:12px;font-weight:800;color:#0f172a;">🔃 정렬 기준:</span>
+          <button class="source-btn active" id="sortBtn_FIRST_REPLY" onclick="setReplySortMode('FIRST_REPLY')">⏳ 제일 먼저 답변한 셀러부터 (선착순 기본)</button>
+          <button class="source-btn" id="sortBtn_LATEST_REPLY" onclick="setReplySortMode('LATEST_REPLY')">⚡ 최근 답변/처리 순</button>
+          <button class="source-btn" id="sortBtn_FOLLOWERS" onclick="setReplySortMode('FOLLOWERS')">👑 팔로워 많은 순</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span id="currentStageSortLabel" style="font-size:12px;font-weight:800;color:#2563eb;background:#eff6ff;padding:4px 10px;border-radius:6px;border:1px solid #bfdbfe;">📌 현재 정렬: 진행단계 높은순(3차➔2차) + 먼저 답변한 순</span>
+          <label style="font-size:12px;font-weight:700;color:#334155;display:flex;align-items:center;gap:4px;cursor:pointer;">
+            <input type="checkbox" id="chkOnlySelectedStage" onchange="updateCounts();renderTable();" /> 선택한 단계만 단독 보기
+          </label>
+        </div>
+      </div>
+
       <div id="replyCardsGrid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(480px, 1fr));gap:12px;"></div>
     </div>
 
@@ -549,6 +565,7 @@
     let currentChannel = 'ALL';
     let currentStage = 'ALL';
     let currentSource = 'ALL';
+    let currentReplySort = 'FIRST_REPLY'; // FIRST_REPLY (제일 먼저 답변한 순), LATEST_REPLY, FOLLOWERS
     let isLocalServer = false;
     const STORAGE_KEY = 'LUNAON_SNS_CRM_OVERRIDES_V1';
 
@@ -670,15 +687,61 @@
       document.getElementById('goalProgressText').textContent = `${confirmed} / 100명 (${pct}%)`;
       document.getElementById('goalSummaryText').textContent = `현재 공구확정 ${confirmed}명 | 2차 회신(답장) 도착 ${activePipe}명 | 1차 제안 정상도달 ${sentCnt.toLocaleString()}명`;
 
-      // 실시간 2차 회신 하이라이트 보드 렌더링
-      const repliedSellers = allSellers.filter(s => ['2_2차회신도착', '3_3차재진행조율', '4_직원오픈채팅이관', '5_공구확정'].includes(s.stage));
+      // 실시간 2차 회신 하이라이트 보드 렌더링 (상단 클릭한 단계 최우선 정렬 + 먼저 답변한 셀러 순 정렬)
+      let repliedSellers = allSellers.filter(s => ['2_2차회신도착', '3_3차재진행조율', '4_직원오픈채팅이관', '5_공구확정'].includes(s.stage));
+      const onlySelected = document.getElementById('chkOnlySelectedStage')?.checked;
+      if (onlySelected && ['2_2차회신도착', '3_3차재진행조율', '4_직원오픈채팅이관', '5_공구확정'].includes(currentStage)) {
+        repliedSellers = repliedSellers.filter(s => s.stage === currentStage);
+      }
+
+      const STAGE_PRIORITY_DEFAULT = {
+        '5_공구확정': 0,
+        '4_직원오픈채팅이관': 1,
+        '3_3차재진행조율': 2,
+        '2_2차회신도착': 3
+      };
+
+      const stageLblEl = document.getElementById('currentStageSortLabel');
+      if (stageLblEl) {
+        const stName = STAGE_LABELS[currentStage] || '전체(확정➔4차➔3차➔2차)';
+        const sortName = currentReplySort === 'FIRST_REPLY' ? '제일 먼저 답변한 순' : (currentReplySort === 'LATEST_REPLY' ? '최근 답변/처리 순' : '팔로워 많은 순');
+        stageLblEl.textContent = `📌 우선순위: [${stName}] 최상단 + [${sortName}]`;
+      }
+
+      repliedSellers.sort((a, b) => {
+        // 1순위: 상단에서 클릭한 단계(currentStage)가 있으면 그 단계를 무조건 맨 위(0순위)로 배치!
+        if (currentStage !== 'ALL') {
+          const aMatch = a.stage === currentStage ? 0 : 1;
+          const bMatch = b.stage === currentStage ? 0 : 1;
+          if (aMatch !== bMatch) return aMatch - bMatch;
+        }
+        // 2순위: 진행단계 높은 순 (5_공구확정 -> 4_직원오픈채팅 -> 3_3차재진행 -> 2_2차회신)
+        const sa = STAGE_PRIORITY_DEFAULT[a.stage] !== undefined ? STAGE_PRIORITY_DEFAULT[a.stage] : 9;
+        const sb = STAGE_PRIORITY_DEFAULT[b.stage] !== undefined ? STAGE_PRIORITY_DEFAULT[b.stage] : 9;
+        if (sa !== sb) return sa - sb;
+
+        // 3순위: 제일 먼저 답변한 셀러부터 (reply_at 오름차순) 또는 선택한 정렬 기준
+        const ta = (a.reply_at || a.updated_at || '9999-99-99').slice(0, 16);
+        const tb = (b.reply_at || b.updated_at || '9999-99-99').slice(0, 16);
+        if (currentReplySort === 'FIRST_REPLY') {
+          if (ta !== tb) return ta.localeCompare(tb);
+        } else if (currentReplySort === 'LATEST_REPLY') {
+          if (ta !== tb) return tb.localeCompare(ta);
+        } else if (currentReplySort === 'FOLLOWERS') {
+          const fa = Number(a.followers) || 0;
+          const fb = Number(b.followers) || 0;
+          if (fa !== fb) return fb - fa;
+        }
+        return (Number(b.followers) || 0) - (Number(a.followers) || 0);
+      });
+
       const box = document.getElementById('replyHighlightBox');
       const grid = document.getElementById('replyCardsGrid');
       const badge = document.getElementById('replySummaryBadge');
-      if (box && grid && repliedSellers.length > 0) {
+      if (box && grid && (repliedSellers.length > 0 || onlySelected)) {
         box.style.display = 'block';
-        badge.textContent = `총 ${repliedSellers.length}건 회신 도착 (유효 발송 ${sentCnt + repliedSellers.length}명 기준)`;
-        grid.innerHTML = repliedSellers.map(s => {
+        badge.textContent = `표시 ${repliedSellers.length}건 (3차 재진행 ${allSellers.filter(x=>x.stage==='3_3차재진행조율').length}명 / 2차 회신대기 ${allSellers.filter(x=>x.stage==='2_2차회신도착').length}명)`;
+        grid.innerHTML = repliedSellers.map((s, orderIdx) => {
           const safeName = (s.display_name || s.seller_id).split('(')[0].trim().replace(/'/g, "");
           const fullLabel = (s.display_name || s.seller_id).replace(/'/g, "");
           const alreadyReplied2nd = Boolean(s.sent_2nd_body) || (s.memo || '').includes('[2차답장 발송완료') || s.stage === '3_3차재진행조율' || s.stage === '5_공구확정';
@@ -731,15 +794,25 @@
           }
           snsContactBtns += `<button class="btn btn-outline" style="padding:4px 8px;font-size:11px;" onclick="toggleContactEdit('${s.id}')">➕ 카톡/연락처 입력</button>`;
 
+          const isTargetStage = (currentStage !== 'ALL' && s.stage === currentStage);
+          const borderStyle = isTargetStage ? '2px solid #2563eb' : `1px solid ${alreadyReplied2nd ? '#86efac' : '#cbd5e1'}`;
+          const replyTimeLabel = (s.reply_at || s.updated_at || '').slice(0, 16);
+
           return `
-            <div id="replyCard_${s.id}" style="border:1px solid ${alreadyReplied2nd ? '#86efac' : '#cbd5e1'};border-radius:10px;padding:13px 15px;background:${alreadyReplied2nd ? '#f0fdf4' : '#f8fafc'};display:flex;flex-direction:column;justify-content:space-between;gap:7px;">
+            <div id="replyCard_${s.id}" style="border:${borderStyle};border-radius:10px;padding:13px 15px;background:${alreadyReplied2nd ? '#f0fdf4' : '#f8fafc'};display:flex;flex-direction:column;justify-content:space-between;gap:7px;">
               <div>
-                <!-- 상단 셀러명 + 진행단계 선택 -->
+                <!-- 상단 순번 + 셀러명 + 답장도착시각 + 진행단계 선택 -->
                 <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;">
-                  <span style="font-weight:800;font-size:14px;color:#0f172a;">${fullLabel} <a href="${igUrl || s.profile_url}" target="_blank" class="link-a" style="font-size:12px;">(@${igHandle || s.seller_id})</a></span>
-                  <select class="stage-select" style="padding:3px 6px;font-size:11px;${statusBadgeStyle}" onchange="updateSeller('${s.id}', {stage: this.value})">
-                    ${cardStageOpts}
-                  </select>
+                  <span style="font-weight:800;font-size:14px;color:#0f172a;">
+                    <span style="display:inline-block;background:#0f172a;color:#fff;font-size:11px;padding:2px 7px;border-radius:99px;margin-right:4px;">#${orderIdx + 1}</span>
+                    ${fullLabel} <a href="${igUrl || s.profile_url}" target="_blank" class="link-a" style="font-size:12px;">(@${igHandle || s.seller_id})</a>
+                  </span>
+                  <div style="display:flex;align-items:center;gap:5px;">
+                    ${replyTimeLabel ? `<span style="font-size:11px;font-weight:700;color:#475569;background:#e2e8f0;padding:3px 7px;border-radius:5px;">⏳ 답장: ${replyTimeLabel.slice(5)}</span>` : ''}
+                    <select class="stage-select" style="padding:3px 6px;font-size:11px;${statusBadgeStyle}" onchange="updateSeller('${s.id}', {stage: this.value})">
+                      ${cardStageOpts}
+                    </select>
+                  </div>
                 </div>
                 <div style="font-size:12px;color:#475569;margin-top:3px;">📧 <strong>${s.email || ''}</strong> · 팔로워 ${Number(s.followers || 0).toLocaleString()}명 ${s.assigned_staff ? `· 담당: <strong>${s.assigned_staff}</strong>` : ''}</div>
                 ${s.seller_traits ? `<div style="font-size:11px;color:#4338ca;background:#eef2ff;border:1px solid #c7d2fe;border-radius:5px;padding:4px 8px;margin-top:4px;font-weight:600;">📊 ${s.seller_traits}</div>` : ''}
@@ -869,6 +942,20 @@
       document.querySelectorAll('.stage-card').forEach(c => c.classList.remove('active'));
       const card = document.getElementById('stCard_' + st);
       if (card) card.classList.add('active');
+      updateCounts();
+      renderTable();
+    }
+
+    function setReplySortMode(mode) {
+      currentReplySort = mode;
+      ['FIRST_REPLY', 'LATEST_REPLY', 'FOLLOWERS'].forEach(m => {
+        const b = document.getElementById('sortBtn_' + m);
+        if (b) {
+          if (m === mode) b.classList.add('active');
+          else b.classList.remove('active');
+        }
+      });
+      updateCounts();
       renderTable();
     }
 
@@ -886,6 +973,7 @@
     function renderTable() {
       const q = (document.getElementById('searchInput').value || '').toLowerCase().trim();
       const limit = parseInt(document.getElementById('pageSizeSelect').value || '100', 10);
+      const onlySelected = document.getElementById('chkOnlySelectedStage')?.checked;
 
       const STAGE_SORT_ORDER = {
         '5_공구확정': 0,
@@ -901,19 +989,31 @@
         if (currentChannel !== 'ALL' && currentChannel !== 'KAKAO_ONLY' && s.channel !== currentChannel) return false;
         if (currentSource === 'VIP' && !(s.source || '').includes('VIP') && !(s.source || '').includes('공구')) return false;
         if (currentSource === 'OLD' && ((s.source || '').includes('VIP'))) return false;
-        if (currentStage !== 'ALL' && s.stage !== currentStage) return false;
+        if (onlySelected && currentStage !== 'ALL' && s.stage !== currentStage) return false;
         if (q) {
-          const hay = `${s.seller_id} ${s.display_name} ${s.email} ${s.category} ${s.kakao_title} ${s.memo}`.toLowerCase();
+          const hay = `${s.seller_id} ${s.display_name} ${s.email} ${s.category} ${s.kakao_title} ${s.memo} ${s.staff_note || ''} ${s.assigned_staff || ''}`.toLowerCase();
           if (!hay.includes(q)) return false;
         }
         return true;
       });
 
-      // 진행 단계 우선순위 정렬 (2차 회신도착 -> 1차 제안메일 발송 -> 발송대기 순으로 최상단 노출)
+      // 상단 클릭한 단계 최우선 정렬 + 제일 먼저 답변한 셀러 순 정렬
       filtered.sort((a, b) => {
+        if (currentStage !== 'ALL') {
+          const aMatch = a.stage === currentStage ? 0 : 1;
+          const bMatch = b.stage === currentStage ? 0 : 1;
+          if (aMatch !== bMatch) return aMatch - bMatch;
+        }
         const sa = STAGE_SORT_ORDER[a.stage] !== undefined ? STAGE_SORT_ORDER[a.stage] : 9;
         const sb = STAGE_SORT_ORDER[b.stage] !== undefined ? STAGE_SORT_ORDER[b.stage] : 9;
         if (sa !== sb) return sa - sb;
+
+        if (sa <= 3) {
+          const ta = (a.reply_at || a.updated_at || '9999-99-99').slice(0, 16);
+          const tb = (b.reply_at || b.updated_at || '9999-99-99').slice(0, 16);
+          if (currentReplySort === 'FIRST_REPLY' && ta !== tb) return ta.localeCompare(tb);
+          if (currentReplySort === 'LATEST_REPLY' && ta !== tb) return tb.localeCompare(ta);
+        }
         return (Number(b.followers) || 0) - (Number(a.followers) || 0);
       });
 

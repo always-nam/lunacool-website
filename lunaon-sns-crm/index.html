@@ -364,15 +364,32 @@
     <div id="replyHighlightBox" style="background:#ffffff;border-radius:12px;padding:16px 20px;box-shadow:0 1px 4px rgba(0,0,0,0.06);margin-bottom:14px;border-left:6px solid #16a34a;display:none;">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
         <div>
-          <h3 style="font-size:15px;font-weight:800;color:#0f172a;">📩 실시간 2차 회신(답장) 도착 셀러 현황 — 대시보드 안에서 답장 보고 바로 메일 발송</h3>
-          <p style="font-size:12px;color:#475569;margin-top:2px;">각 카드의 <strong>[✉️ 여기서 바로 답장쓰기]</strong>를 누르면 새 창이 뜨지 않고 그 자리에서 바로 내용을 수정해 1초 만에 발송됩니다.</p>
+          <h3 style="font-size:15px;font-weight:800;color:#0f172a;">📩 실시간 2차 회신(답장) 도착 셀러 현황 — [1차 발송내용 확인 ➔ 셀러 답장 확인 ➔ 2차 답장 즉시발송]</h3>
+          <p style="font-size:12px;color:#475569;margin-top:2px;">대표님이나 직원분 누구나 각 카드에서 <strong>[📤 보낸 1차 메일 보기]</strong>로 기존 제안 내용을 확인하고, <strong>[✉️ 여기서 바로 답장쓰기]</strong>로 즉시 회신할 수 있습니다.</p>
         </div>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
           <span id="replySummaryBadge" style="font-size:12px;font-weight:700;color:#15803d;background:#dcfce7;padding:5px 10px;border-radius:6px;"></span>
+          <button class="btn btn-outline" style="padding:6px 11px;font-size:12px;background:#eff6ff;color:#1d4ed8;border-color:#93c5fd;" onclick="toggleMasterFirstMailBox()">📤 우리가 보낸 1차 제안메일 원문·조건 보기 (직원공유용)</button>
           <button class="btn btn-outline" style="padding:6px 11px;font-size:12px;" onclick="openTemplateModal()">📝 2차 회신 공통초안 수정</button>
           <button class="btn btn-green" style="padding:6px 11px;font-size:12px;" onclick="sendBulkSecondReplies()">🚀 답장대기 셀러 일괄 2차회신 발송</button>
         </div>
       </div>
+
+      <!-- 상단 1차 제안메일 원문 & 핵심 공급조건 요약 박스 (직원 업무 인계용) -->
+      <div id="masterFirstMailBox" style="display:none;background:#f8fafc;border:2px solid #93c5fd;border-radius:10px;padding:14px 16px;margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px;">
+          <strong style="font-size:13px;color:#1e3a8a;">📤 [직원 업무 참고용] 셀러들에게 발송된 '1차 공동구매 제안 메일' 원문 및 핵심 공급 조건</strong>
+          <button class="btn btn-outline" style="padding:4px 9px;font-size:11px;" onclick="toggleMasterFirstMailBox()">닫기 ✕</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:10px;margin-bottom:8px;font-size:12px;background:#eff6ff;padding:10px 12px;border-radius:8px;color:#1e293b;">
+          <div>• <strong>발송 제목</strong>: [공동구매 제안] 지금 시즌 필수템! 신소재 '그래핀 50% 자가발열 이불' 루나온 공구 제안 ({{셀러명}}님)</div>
+          <div>• <strong>첨부 파일</strong>: <code>루나온_그래핀이불_제안서_v2.xlsx</code> (KATRI 6종 성적서·공급단가표 포함)</div>
+          <div>• <strong>1차 안내 공급가</strong>: SS <strong>29,000원</strong>(정가 9.9만) / Q <strong>39,000원</strong>(정가 12.9만) / 택배비 3,000원 별도 (공구판매가는 2차 협의 시 결정)</div>
+          <div>• <strong>물류/출고 조건</strong>: 파주 본사 물류센터 평일 오후 4시(16시) 마감 당일 칼출고 (위탁출고 완벽 지원)</div>
+        </div>
+        <pre id="masterFirstMailPre" style="background:#ffffff;border:1px solid #cbd5e1;border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.5;white-space:pre-wrap;color:#334155;max-height:240px;overflow-y:auto;"></pre>
+      </div>
+
       <div id="replyCardsGrid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(380px, 1fr));gap:10px;"></div>
     </div>
 
@@ -579,6 +596,9 @@
             cardStageOpts += `<option value="${k}" ${sel}>${STAGE_LABELS[k]}</option>`;
           });
 
+          const firstMailSubj = `[공동구매 제안] 지금 시즌 필수템! 신소재 '그래핀 50% 자가발열 이불' 루나온 공구 제안 (${safeName}님)`;
+          const firstMailBody = getProposalText(safeName);
+
           return `
             <div id="replyCard_${s.id}" style="border:1px solid ${alreadyReplied2nd ? '#86efac' : '#cbd5e1'};border-radius:10px;padding:12px 14px;background:${alreadyReplied2nd ? '#f0fdf4' : '#f8fafc'};display:flex;flex-direction:column;justify-content:space-between;gap:6px;">
               <div>
@@ -589,7 +609,17 @@
                   </select>
                 </div>
                 <div style="font-size:12px;color:#475569;margin-top:3px;">📧 <strong>${s.email || ''}</strong> · 팔로워 ${Number(s.followers || 0).toLocaleString()}명</div>
-                <div style="font-size:12px;color:#0f172a;background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:8px 10px;margin-top:6px;line-height:1.5;max-height:130px;overflow-y:auto;">
+
+                <!-- 1차 발송 메일 원문 토글 영역 (직원 확인용) -->
+                <div id="firstMailBox_${s.id}" style="display:none;margin-top:6px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:8px 10px;font-size:11px;color:#1e3a8a;">
+                  <div style="font-weight:800;margin-bottom:4px;">📤 [우리가 보낸 1차 제안메일 원문] (첨부: 루나온_그래핀이불_제안서_v2.xlsx)</div>
+                  <div style="font-weight:700;margin-bottom:4px;color:#1d4ed8;">제목: ${firstMailSubj}</div>
+                  <pre style="white-space:pre-wrap;font-family:inherit;line-height:1.45;max-height:150px;overflow-y:auto;background:#fff;padding:6px 8px;border-radius:4px;border:1px solid #dbeafe;color:#334155;">${firstMailBody}</pre>
+                </div>
+
+                <!-- 셀러 답장 원문 표시 영역 -->
+                <div style="font-size:12px;color:#0f172a;background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:8px 10px;margin-top:6px;line-height:1.5;max-height:135px;overflow-y:auto;">
+                  <div style="font-size:11px;font-weight:800;color:#15803d;margin-bottom:2px;">📥 [셀러 답장 도착 내용]</div>
                   ${s.memo || '회신 도착'}
                 </div>
               </div>
@@ -597,11 +627,15 @@
                 <button class="btn ${alreadyReplied2nd ? 'btn-green' : 'btn-primary'}" style="padding:6px 11px;font-size:12px;" onclick="toggleInlineReply('${s.id}')">
                   ${alreadyReplied2nd ? '✅ 2차회신 완료 (다시 열기/추가발송)' : '✉️ 여기서 바로 답장쓰기'}
                 </button>
+                <button class="btn btn-outline" style="padding:5px 9px;font-size:11px;color:#1d4ed8;border-color:#bfdbfe;background:#eff6ff;" onclick="toggleFirstMail('${s.id}')">📤 보낸 1차메일 보기</button>
                 <button class="btn btn-outline" style="padding:5px 9px;font-size:11px;" onclick="updateSeller('${s.id}', {stage: '1_1차제안메일', memo: '[거절/보류제외] ' + (allSellers.find(x=>x.id==='${s.id}')?.memo||'')})">❌ 보류/제외</button>
               </div>
               <!-- 인라인 답장 에디터 (새 창 없이 카드 내부에서 즉시 열림) -->
               <div id="inlineReplyBox_${s.id}" style="display:none;margin-top:8px;padding-top:10px;border-top:2px dashed #cbd5e1;background:#ffffff;padding:10px;border-radius:8px;">
-                <div style="font-size:11px;font-weight:700;color:#1d4ed8;margin-bottom:4px;">📤 받는사람: ${s.email || ''} (${safeName}님) — 위 답장 내용을 보면서 바로 수정·발송하세요</div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex-wrap:wrap;gap:4px;">
+                  <span style="font-size:11px;font-weight:700;color:#1d4ed8;">📤 2차 답장 받는사람: ${s.email || ''} (${safeName}님)</span>
+                  <button class="btn btn-outline" style="padding:2px 7px;font-size:10px;color:#1d4ed8;" onclick="toggleFirstMail('${s.id}')">📤 1차 보낸메일 같이보기</button>
+                </div>
                 <input type="text" id="replySubj_${s.id}" class="inline-input" style="margin-bottom:6px;font-weight:700;font-size:12px;" value="${defaultSubj.replace(/"/g, '&quot;')}" />
                 <textarea id="replyBody_${s.id}" style="width:100%;height:210px;padding:8px;font-size:12px;line-height:1.45;border:1px solid #cbd5e1;border-radius:6px;resize:vertical;">${defaultBody}</textarea>
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;flex-wrap:wrap;gap:6px;">
@@ -805,6 +839,22 @@
     function toggleInlineReply(id) {
       const box = document.getElementById('inlineReplyBox_' + id);
       if (!box) return;
+      box.style.display = (box.style.display === 'none' || !box.style.display) ? 'block' : 'none';
+    }
+
+    function toggleFirstMail(id) {
+      const box = document.getElementById('firstMailBox_' + id);
+      if (!box) return;
+      box.style.display = (box.style.display === 'none' || !box.style.display) ? 'block' : 'none';
+    }
+
+    function toggleMasterFirstMailBox() {
+      const box = document.getElementById('masterFirstMailBox');
+      const pre = document.getElementById('masterFirstMailPre');
+      if (!box) return;
+      if (pre && !pre.textContent) {
+        pre.textContent = getProposalText('{{셀러명}}');
+      }
       box.style.display = (box.style.display === 'none' || !box.style.display) ? 'block' : 'none';
     }
 

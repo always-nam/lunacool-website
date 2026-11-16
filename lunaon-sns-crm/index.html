@@ -585,10 +585,10 @@
         grid.innerHTML = repliedSellers.map(s => {
           const safeName = (s.display_name || s.seller_id).split('(')[0].trim().replace(/'/g, "");
           const fullLabel = (s.display_name || s.seller_id).replace(/'/g, "");
-          const alreadyReplied2nd = (s.memo || '').includes('[2차답장 발송완료') || s.stage === '3_3차재진행조율' || s.stage === '5_공구확정';
+          const alreadyReplied2nd = Boolean(s.sent_2nd_body) || (s.memo || '').includes('[2차답장 발송완료') || s.stage === '3_3차재진행조율' || s.stage === '5_공구확정';
           const statusBadgeStyle = alreadyReplied2nd ? 'background:#dcfce7;color:#15803d;' : 'background:#dbeafe;color:#1d4ed8;';
-          const defaultSubj = `Re: [루나온 그래핀 발열이불] ${safeName}님 회신 감사드리며, 공동구매 상세 진행 방식 및 샘플 발송 안내드립니다.`;
-          const defaultBody = getSecondReplyText(safeName);
+          const defaultSubj = s.sent_2nd_subject || `Re: [루나온 그래핀 발열이불] ${safeName}님 회신 감사드리며, 공동구매 상세 진행 방식 및 샘플 발송 안내드립니다.`;
+          const defaultBody = s.sent_2nd_body || getSecondReplyText(safeName);
 
           let cardStageOpts = '';
           Object.keys(STAGE_LABELS).forEach(k => {
@@ -596,45 +596,127 @@
             cardStageOpts += `<option value="${k}" ${sel}>${STAGE_LABELS[k]}</option>`;
           });
 
-          const firstMailSubj = `[공동구매 제안] 지금 시즌 필수템! 신소재 '그래핀 50% 자가발열 이불' 루나온 공구 제안 (${safeName}님)`;
-          const firstMailBody = getProposalText(safeName);
+          const firstMailAt = s.sent_1st_at || '2026-11-15 발송완료';
+          const firstMailSubj = s.sent_1st_subject || `[공동구매 제안] 지금 시즌 필수템! 신소재 '그래핀 50% 자가발열 이불' 루나온 공구 제안 (${safeName}님)`;
+          const firstMailBody = s.sent_1st_body || getProposalText(safeName);
+          const cleanReplyText = s.reply_text || (s.memo || '회신 도착');
+
+          // 인스타그램 DM 및 채널 바로가기 버튼 구성
+          let igHandle = s.insta_id || '';
+          if (!igHandle && (s.profile_url || '').includes('instagram.com/')) {
+            igHandle = s.profile_url.replace(/\/$/, '').split('/').pop().split('?')[0].replace(/^@/, '');
+          }
+          const igUrl = s.insta_url || (igHandle ? `https://www.instagram.com/${igHandle}/` : '');
+          const igDmUrl = igHandle ? `https://ig.me/m/${igHandle}` : '';
+          const blogUrl = s.blog_url || ((s.profile_url || '').includes('blog.naver.com') ? s.profile_url : '');
+
+          let snsContactBtns = '';
+          // 1) 카카오톡 오픈채팅 또는 전화번호(카톡 친구추가) 버튼
+          if (s.kakao_url) {
+            const isUrl = s.kakao_url.startsWith('http');
+            if (isUrl) {
+              snsContactBtns += `<a href="${s.kakao_url}" target="_blank" class="btn btn-kakao" style="padding:5px 9px;font-size:11px;" onclick="copyDmScript('${safeName}', '카톡 오픈채팅')">💬 카카오톡 대화하기</a>`;
+            } else {
+              snsContactBtns += `<button class="btn btn-kakao" style="padding:5px 9px;font-size:11px;" onclick="copyTextWithToast('${s.kakao_url}', '카카오톡 ID [${s.kakao_url}] 복사완료! 카톡에서 ID 검색으로 대화하세요.')">💬 카톡ID: ${s.kakao_url}</button>`;
+            }
+          }
+          if (s.phone) {
+            snsContactBtns += `<button class="btn btn-kakao" style="padding:5px 9px;font-size:11px;background:#fef08a;border:1px solid #eab308;" onclick="copyTextWithToast('${s.phone}', '연락처 [${s.phone}] 복사완료! 카카오톡 연락처 친구추가 또는 문자로 대화하세요.')">📞 ${s.phone} (카톡/전화 복사)</button>`;
+          }
+          // 2) 인스타그램 DM 바로가기 버튼
+          if (igHandle) {
+            snsContactBtns += `<a href="${igDmUrl}" target="_blank" class="btn" style="padding:5px 9px;font-size:11px;background:#fce7f3;color:#be185d;border:1px solid #fbcfe8;" onclick="copyDmScript('${safeName}', '인스타 DM')">📸 인스타 DM (@${igHandle})</a>`;
+          }
+          if (blogUrl) {
+            snsContactBtns += `<a href="${blogUrl}" target="_blank" class="btn btn-outline" style="padding:4px 8px;font-size:11px;color:#15803d;border-color:#bbf7d0;">📗 블로그</a>`;
+          }
+          if (s.linktree_url) {
+            snsContactBtns += `<a href="${s.linktree_url}" target="_blank" class="btn btn-outline" style="padding:4px 8px;font-size:11px;color:#0f766e;border-color:#99f6e4;">🔗 링크모음</a>`;
+          }
+          snsContactBtns += `<button class="btn btn-outline" style="padding:4px 8px;font-size:11px;" onclick="toggleContactEdit('${s.id}')">➕ 카톡/연락처 입력</button>`;
 
           return `
-            <div id="replyCard_${s.id}" style="border:1px solid ${alreadyReplied2nd ? '#86efac' : '#cbd5e1'};border-radius:10px;padding:12px 14px;background:${alreadyReplied2nd ? '#f0fdf4' : '#f8fafc'};display:flex;flex-direction:column;justify-content:space-between;gap:6px;">
+            <div id="replyCard_${s.id}" style="border:1px solid ${alreadyReplied2nd ? '#86efac' : '#cbd5e1'};border-radius:10px;padding:13px 15px;background:${alreadyReplied2nd ? '#f0fdf4' : '#f8fafc'};display:flex;flex-direction:column;justify-content:space-between;gap:7px;">
               <div>
+                <!-- 상단 셀러명 + 진행단계 선택 -->
                 <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;">
-                  <span style="font-weight:800;font-size:14px;color:#0f172a;">${fullLabel} <a href="${s.profile_url}" target="_blank" class="link-a" style="font-size:12px;">(@${s.seller_id})</a></span>
+                  <span style="font-weight:800;font-size:14px;color:#0f172a;">${fullLabel} <a href="${igUrl || s.profile_url}" target="_blank" class="link-a" style="font-size:12px;">(@${igHandle || s.seller_id})</a></span>
                   <select class="stage-select" style="padding:3px 6px;font-size:11px;${statusBadgeStyle}" onchange="updateSeller('${s.id}', {stage: this.value})">
                     ${cardStageOpts}
                   </select>
                 </div>
-                <div style="font-size:12px;color:#475569;margin-top:3px;">📧 <strong>${s.email || ''}</strong> · 팔로워 ${Number(s.followers || 0).toLocaleString()}명</div>
+                <div style="font-size:12px;color:#475569;margin-top:3px;">📧 <strong>${s.email || ''}</strong> · 팔로워 ${Number(s.followers || 0).toLocaleString()}명 ${s.assigned_staff ? `· 담당: <strong>${s.assigned_staff}</strong>` : ''}</div>
 
-                <!-- 1차 발송 메일 원문 토글 영역 (직원 확인용) -->
-                <div id="firstMailBox_${s.id}" style="display:none;margin-top:6px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:8px 10px;font-size:11px;color:#1e3a8a;">
-                  <div style="font-weight:800;margin-bottom:4px;">📤 [우리가 보낸 1차 제안메일 원문] (첨부: 루나온_그래핀이불_제안서_v2.xlsx)</div>
-                  <div style="font-weight:700;margin-bottom:4px;color:#1d4ed8;">제목: ${firstMailSubj}</div>
-                  <pre style="white-space:pre-wrap;font-family:inherit;line-height:1.45;max-height:150px;overflow-y:auto;background:#fff;padding:6px 8px;border-radius:4px;border:1px solid #dbeafe;color:#334155;">${firstMailBody}</pre>
+                <!-- 카카오톡 / 전화번호 / 인스타 DM 직통 액션 바 -->
+                <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-top:6px;padding:6px 8px;background:#ffffff;border:1px solid #e2e8f0;border-radius:7px;">
+                  ${snsContactBtns}
                 </div>
 
-                <!-- 셀러 답장 원문 표시 영역 -->
-                <div style="font-size:12px;color:#0f172a;background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:8px 10px;margin-top:6px;line-height:1.5;max-height:135px;overflow-y:auto;">
-                  <div style="font-size:11px;font-weight:800;color:#15803d;margin-bottom:2px;">📥 [셀러 답장 도착 내용]</div>
-                  ${s.memo || '회신 도착'}
+                <!-- 카톡 링크 / 전화번호 즉석 등록칸 (토글) -->
+                <div id="contactEditBox_${s.id}" style="display:none;margin-top:6px;background:#fefce8;border:1px solid #fde047;border-radius:6px;padding:8px;font-size:11px;">
+                  <div style="font-weight:700;color:#854d0e;margin-bottom:5px;">💬 셀러 카카오톡 오픈채팅 링크(또는 카톡ID) & 전화번호 저장</div>
+                  <div style="display:flex;gap:5px;flex-wrap:wrap;">
+                    <input type="text" id="inpPhone_${s.id}" class="inline-input" style="width:135px;font-size:11px;" placeholder="전화번호 (010-...)" value="${s.phone || ''}" />
+                    <input type="text" id="inpKakao_${s.id}" class="inline-input" style="flex:1;min-width:160px;font-size:11px;" placeholder="오픈채팅 링크(https://open.kakao...) 또는 카톡ID" value="${s.kakao_url || ''}" />
+                    <input type="text" id="inpInsta_${s.id}" class="inline-input" style="width:120px;font-size:11px;" placeholder="인스타 @아이디" value="${igHandle || ''}" />
+                    <button class="btn btn-primary" style="padding:4px 9px;font-size:11px;" onclick="saveCardContacts('${s.id}')">저장</button>
+                  </div>
+                </div>
+
+                <!-- 메일 수발신 히스토리 버튼 바 (1차 보낸메일 / 2차 보낸메일 확인용) -->
+                <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:7px;">
+                  <button class="btn btn-outline" style="padding:4px 9px;font-size:11px;color:#1d4ed8;border-color:#93c5fd;background:#eff6ff;" onclick="toggleFirstMail('${s.id}')">
+                    📤 1차 보낸메일 내용 보기 (${firstMailAt.slice(5,16)})
+                  </button>
+                  ${alreadyReplied2nd ? `
+                    <button class="btn btn-outline" style="padding:4px 9px;font-size:11px;color:#15803d;border-color:#86efac;background:#dcfce7;" onclick="toggleSecondMailView('${s.id}')">
+                      📤 2차 보낸메일 내용 보기 (${(s.sent_2nd_at || '발송완료').slice(5,16)})
+                    </button>
+                  ` : `
+                    <span style="font-size:11px;color:#dc2626;font-weight:700;padding:4px 6px;">⏳ 2차 답변 메일 미발송 (발송 대기)</span>
+                  `}
+                </div>
+
+                <!-- [1단계] 우리가 보낸 1차 제안메일 원문 표시 영역 (클릭 시 펼쳐짐) -->
+                <div id="firstMailBox_${s.id}" style="display:none;margin-top:6px;background:#eff6ff;border:1px solid #93c5fd;border-radius:6px;padding:9px 11px;font-size:11px;color:#1e3a8a;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                    <strong>📤 [1차 보낸 메일 원문] 발송일시: ${firstMailAt} | 첨부: 루나온_그래핀이불_제안서_v2.xlsx</strong>
+                    <button class="btn btn-outline" style="padding:1px 6px;font-size:10px;" onclick="toggleFirstMail('${s.id}')">닫기</button>
+                  </div>
+                  <div style="font-weight:700;margin-bottom:4px;color:#1d4ed8;">제목: ${firstMailSubj}</div>
+                  <pre style="white-space:pre-wrap;font-family:inherit;line-height:1.45;max-height:180px;overflow-y:auto;background:#fff;padding:7px 9px;border-radius:4px;border:1px solid #dbeafe;color:#334155;">${firstMailBody}</pre>
+                </div>
+
+                <!-- [2단계] 셀러가 보내온 답장 원문 표시 영역 (항상 선명하게 노출) -->
+                <div style="font-size:12px;color:#0f172a;background:#fff;border:1px solid #cbd5e1;border-left:4px solid #2563eb;border-radius:6px;padding:9px 11px;margin-top:6px;line-height:1.55;max-height:145px;overflow-y:auto;">
+                  <div style="font-size:11px;font-weight:800;color:#1d4ed8;margin-bottom:3px;">📥 [셀러 답장 도착 원문] ${s.reply_at ? `(${s.reply_at})` : ''}</div>
+                  <div style="white-space:pre-line;">${cleanReplyText}</div>
+                </div>
+
+                <!-- [3단계] 우리가 보낸 2차 답변메일 원문 표시 영역 (클릭 시 펼쳐짐) -->
+                <div id="secondMailViewBox_${s.id}" style="display:none;margin-top:6px;background:#f0fdf4;border:1px solid #86efac;border-radius:6px;padding:9px 11px;font-size:11px;color:#14532d;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                    <strong>📤 [우리가 보낸 2차 답변메일 원문] 발송일시: ${s.sent_2nd_at || '발송완료'}</strong>
+                    <button class="btn btn-outline" style="padding:1px 6px;font-size:10px;" onclick="toggleSecondMailView('${s.id}')">닫기</button>
+                  </div>
+                  <div style="font-weight:700;margin-bottom:4px;color:#15803d;">제목: ${defaultSubj}</div>
+                  <pre style="white-space:pre-wrap;font-family:inherit;line-height:1.45;max-height:180px;overflow-y:auto;background:#fff;padding:7px 9px;border-radius:4px;border:1px solid #bbf7d0;color:#334155;">${defaultBody}</pre>
                 </div>
               </div>
+
+              <!-- 하단 작업 버튼 -->
               <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;align-items:center;">
                 <button class="btn ${alreadyReplied2nd ? 'btn-green' : 'btn-primary'}" style="padding:6px 11px;font-size:12px;" onclick="toggleInlineReply('${s.id}')">
-                  ${alreadyReplied2nd ? '✅ 2차회신 완료 (다시 열기/추가발송)' : '✉️ 여기서 바로 답장쓰기'}
+                  ${alreadyReplied2nd ? '✉️ 2차 답장 수정/추가발송' : '✉️ 여기서 바로 2차 답장쓰기'}
                 </button>
-                <button class="btn btn-outline" style="padding:5px 9px;font-size:11px;color:#1d4ed8;border-color:#bfdbfe;background:#eff6ff;" onclick="toggleFirstMail('${s.id}')">📤 보낸 1차메일 보기</button>
                 <button class="btn btn-outline" style="padding:5px 9px;font-size:11px;" onclick="updateSeller('${s.id}', {stage: '1_1차제안메일', memo: '[거절/보류제외] ' + (allSellers.find(x=>x.id==='${s.id}')?.memo||'')})">❌ 보류/제외</button>
               </div>
-              <!-- 인라인 답장 에디터 (새 창 없이 카드 내부에서 즉시 열림) -->
+
+              <!-- 인라인 2차 답장 에디터 (새 창 없이 카드 내부에서 즉시 열림) -->
               <div id="inlineReplyBox_${s.id}" style="display:none;margin-top:8px;padding-top:10px;border-top:2px dashed #cbd5e1;background:#ffffff;padding:10px;border-radius:8px;">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex-wrap:wrap;gap:4px;">
                   <span style="font-size:11px;font-weight:700;color:#1d4ed8;">📤 2차 답장 받는사람: ${s.email || ''} (${safeName}님)</span>
-                  <button class="btn btn-outline" style="padding:2px 7px;font-size:10px;color:#1d4ed8;" onclick="toggleFirstMail('${s.id}')">📤 1차 보낸메일 같이보기</button>
+                  <button class="btn btn-outline" style="padding:2px 7px;font-size:10px;color:#1d4ed8;" onclick="toggleFirstMail('${s.id}')">📤 1차 보낸메일 다시확인</button>
                 </div>
                 <input type="text" id="replySubj_${s.id}" class="inline-input" style="margin-bottom:6px;font-weight:700;font-size:12px;" value="${defaultSubj.replace(/"/g, '&quot;')}" />
                 <textarea id="replyBody_${s.id}" style="width:100%;height:210px;padding:8px;font-size:12px;line-height:1.45;border:1px solid #cbd5e1;border-radius:6px;resize:vertical;">${defaultBody}</textarea>
@@ -644,7 +726,7 @@
                   </label>
                   <div style="display:flex;gap:6px;">
                     <button class="btn btn-outline" style="padding:6px 10px;font-size:11px;" onclick="toggleInlineReply('${s.id}')">닫기</button>
-                    <button class="btn btn-primary" id="btnSendInline_${s.id}" style="padding:6px 12px;font-size:12px;" onclick="sendInlineReply('${s.id}', '${s.email || ''}')">🚀 지금 바로 메일 발송</button>
+                    <button class="btn btn-primary" id="btnSendInline_${s.id}" style="padding:6px 12px;font-size:12px;" onclick="sendInlineReply('${s.id}', '${s.email || ''}')">🚀 지금 바로 2차메일 발송</button>
                   </div>
                 </div>
               </div>
@@ -823,7 +905,7 @@
     const SECOND_TEMPLATE_KEY = 'LUNAON_SECOND_REPLY_TEMPLATE_V1';
 
     function getDefaultSecondReplyTemplate() {
-      return `안녕하세요, {{셀러명}}님!\n기능성 침구 브랜드 '루나온(LUNA ON)' 본사 공급원 테란2(온누리유통) 담당자 남대현입니다.\n\n바쁘신 와중에도 '루나온 그래핀 50% 자가발열 이불' 공동구매 제안에 긍정적으로 회신해 주셔서 진심으로 감사드립니다.\n문의해 주신 공동구매 진행 방식, 판매가·정산 구조, 촬영용 샘플 지원 및 자료 제공에 대해 한눈에 보실 수 있도록 정리해 드립니다.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 1. 공동구매 진행 및 주문·정산 방식 (편하신 방식 선택 가능)\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n셀러님의 운영 스타일에 맞춰 아래 A·B 두 가지 방식 중 편하신 방법으로 진행하실 수 있습니다.\n\n• [방식 A] 본사 전용 결제 링크 발급형 (스토어/사업자가 없으셔도 즉시 가능)\n  - 본사에서 {{셀러명}}님만의 [전용 공동구매 결제 링크]를 생성해 드립니다.\n  - 팔로워분들이 해당 링크로 주문 시 본사(파주 물류센터)에서 당일 출고 및 CS를 전담하며,\n  - 공구 종료 후 [실판매가 - 본사 공급가] 차액(셀러 수익금)을 정산해 드립니다.\n\n• [방식 B] 셀러 자체 마켓/스토어 판매 + 본사 위탁출고형\n  - 셀러님께서 보유하신 스마트스토어·인스타샵·자체 주문폼 등에서 직접 주문을 받으시고,\n  - 평일 오후 4시(16시)까지 본사 양식으로 발주서를 전달해 주시면 공급가 정산 후 파주 물류센터에서 당일 칼출고해 드립니다.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 2. 공급 단가 및 추천 공구 판매가 (셀러 수익 구조)\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n• 슈퍼싱글 (SS, 150x200cm)\n  - 소비자가 99,000원 ➔ 본사 공급가: 29,000원 (VAT 포함)\n  - 추천 공구 판매가: 49,000원 ~ 59,000원 (셀러님 채널 특성에 맞춰 협의/자율 책정 가능)\n\n• 퀸 (Q, 200x230cm)\n  - 소비자가 129,000원 ➔ 본사 공급가: 39,000원 (VAT 포함)\n  - 추천 공구 판매가: 59,000원 ~ 69,000원 (셀러님 채널 특성에 맞춰 협의/자율 책정 가능)\n\n• 배송비 기준: 택배비 3,000원 별도 (롯데택배 / 제주·도서산간 +3,000원 / 합포장 4개 기준)\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 3. 홍보 촬영용 샘플 지원 및 콘텐츠 가이드\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n• 샘플 제공: 공동구매 진행 확정 시, 직접 덮어보시고 생생한 후기를 촬영하실 수 있도록 [루나온 그래핀 발열이불 본품 1채 (SS 또는 Q 중 택1)]를 지원(발송)해 드립니다.\n• 제품 컬러: 호불호 없이 모던한 침실 연출이 가능한 [차콜 & 라이트그레이 양면 투톤(리버시블)] 단일 디자인으로, 앞뒤 양면 모두 활용하실 수 있습니다.\n• 홍보 채널 및 기간: 인스타그램(릴스·피드·스토리), 블로그, 유튜브, 클립 등 셀러님 주력 채널로 자유롭게 진행 가능하며, 공구 기간도 일정에 맞춰(예: 3일~7일) 유연하게 조율 가능합니다.\n• 촬영 가이드 (얼굴 노출 불필요): 인물(얼굴) 노출은 전혀 필수가 아니며, 침실/거실 침구 연출컷, 포근한 촉감·두께감 영상 등 셀러님 채널 분위기에 맞게 편하게 촬영하시면 됩니다. (KATRI 집먼지진드기 0마리·폼알데하이드 불검출 인증 및 세탁기 통세탁 가능 제품이라 아이·반려동물과 함께 쓰는 가정에도 매우 반응이 좋습니다.)\n• 원본 자료 제공: 상세페이지용 고화질 사진, 발열/보온 GIF 움짤, 15초 홍보 영상 및 KATRI 공인 시험성적서 6종 이미지를 모두 제공해 드립니다.\n  - 상세페이지(GIF): https://always-nam.github.io/lunacool-website/lunaon-detail-v9/\n  - 15초 홍보영상(CF): https://always-nam.github.io/lunacool-website/lunaon-cf-v8/\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 4. 진행 확정을 위해 회신 부탁드릴 내용 (간단 답장 양식)\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n진행을 희망하시면 본 메일 답장으로 아래 4가지를 편하게 남겨주시면 즉시 샘플 출고 및 전용 링크 세팅을 도와드리겠습니다!\n\n1. 성함 / 연락처: \n2. 희망 진행 방식: (방식 A: 본사 전용 결제링크 발급 / 방식 B: 자체 스토어 판매 후 위탁발주)\n3. 샘플 수령 주소지 및 희망 사이즈: (슈퍼싱글 SS 또는 퀸 Q 중 택1)\n4. 희망 공구 오픈 시기 및 기간: (예: 11월 넷째 주 / 3일간 진행 등)\n\n추가로 궁금하신 점은 언제든 본 메일이나 아래 연락처로 편하게 말씀해 주세요.\n이번 겨울 시즌 {{셀러명}}님과 좋은 시너지를 낼 수 있도록 본사에서 든든하게 지원하겠습니다.\n감사합니다!\n\n테란2 (온누리유통) 루나온 공구제안팀 드림\n• 담당자: 남대현 (010-4527-8781)\n• 대표번호: 070-8858-5231\n• 회신 이메일: akrrntn1@gmail.com`;
+      return `안녕하세요, {{셀러명}}님!\n기능성 침구 브랜드 '루나온(LUNA ON)' 본사 공급원 테란2(온누리유통) 담당자 남대현입니다.\n\n바쁘신 와중에도 '루나온 그래핀 50% 자가발열 이불' 공동구매 제안에 긍정적으로 회신해 주셔서 진심으로 감사드립니다.\n문의해 주신 공동구매 진행 방식, 판매가·정산 구조, 촬영용 샘플 지원 및 자료 제공에 대해 한눈에 보실 수 있도록 정리해 드립니다.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 1. 공동구매 진행 및 주문·정산 방식 (편하신 방식 선택 가능)\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n셀러님의 운영 스타일에 맞춰 아래 A·B 두 가지 방식 중 편하신 방법으로 진행하실 수 있습니다.\n\n• [방식 A] 본사 전용 결제 링크 발급형 (스토어/사업자가 없으셔도 즉시 가능)\n  - 본사에서 {{셀러명}}님만의 [전용 공동구매 결제 링크]를 생성해 드립니다.\n  - 팔로워분들이 해당 링크로 주문 시 본사(파주 물류센터)에서 당일 출고 및 CS를 전담하며,\n  - 공구 종료 후 [실판매가 - 본사 공급가] 차액(셀러 수익금)을 정산해 드립니다.\n\n• [방식 B] 셀러 자체 마켓/스토어 판매 + 본사 위탁출고형\n  - 셀러님께서 보유하신 스마트스토어·인스타샵·자체 주문폼 등에서 직접 주문을 받으시고,\n  - 평일 오후 4시(16시)까지 본사 양식으로 발주서를 전달해 주시면 공급가 정산 후 파주 물류센터에서 당일 칼출고해 드립니다.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 2. 공급 단가 및 추천 공구 판매가 (셀러 수익 구조)\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n• 슈퍼싱글 (SS, 150x200cm)\n  - 소비자가 99,000원 ➔ 본사 공급가: 29,000원 (VAT 포함)\n  - 추천 공구 판매가: 49,000원 ~ 59,000원 (셀러님 채널 특성에 맞춰 협의/자율 책정 가능)\n\n• 퀸 (Q, 200x230cm)\n  - 소비자가 129,000원 ➔ 본사 공급가: 39,000원 (VAT 포함)\n  - 추천 공구 판매가: 59,000원 ~ 69,000원 (셀러님 채널 특성에 맞춰 협의/자율 책정 가능)\n\n• 배송비 기준: 택배비 3,000원 별도 (롯데택배 / 제주·도서산간 +3,000원 / 합포장 4개 기준)\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 3. 홍보 촬영용 샘플 지원 및 콘텐츠 가이드\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n• 샘플 제공: 공동구매 진행 확정 시, 직접 덮어보시고 생생한 후기를 촬영하실 수 있도록 [루나온 그래핀 발열이불 본품 1채 (SS 또는 Q 중 택1)]를 지원(발송)해 드립니다.\n• 제품 컬러: 호불호 없이 모던한 침실 연출이 가능한 [차콜 & 라이트그레이 양면 투톤(리버시블)] 단일 디자인으로, 앞뒤 양면 모두 활용하실 수 있습니다.\n• 홍보 채널 및 기간: 인스타그램(릴스·피드·스토리), 블로그, 유튜브, 클립 등 셀러님 주력 채널로 자유롭게 진행 가능하며, 공구 기간도 일정에 맞춰(예: 3일~7일) 유연하게 조율 가능합니다.\n• 촬영 가이드 (얼굴 노출 불필요): 인물(얼굴) 노출은 전혀 필수가 아니며, 침실/거실 침구 연출컷, 포근한 촉감·두께감 영상 등 셀러님 채널 분위기에 맞게 편하게 촬영하시면 됩니다. (KATRI 집먼지진드기 0마리·폼알데하이드 불검출 인증 및 세탁기 통세탁 가능 제품이라 아이·반려동물과 함께 쓰는 가정에도 매우 반응이 좋습니다.)\n• 원본 자료 제공: 상세페이지용 고화질 사진, 발열/보온 GIF 움짤, 15초 홍보 영상 및 KATRI 공인 시험성적서 6종 이미지를 모두 제공해 드립니다.\n  - 상세페이지(GIF): https://always-nam.github.io/lunacool-website/lunaon-detail-v9/\n  - 15초 홍보영상(CF): https://always-nam.github.io/lunacool-website/lunaon-cf-v8/\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 4. 진행 확정을 위해 회신 부탁드릴 내용 (간단 답장 양식)\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n진행을 희망하시면 본 메일 답장으로 아래 4가지를 편하게 남겨주시면 즉시 샘플 출고 및 전용 링크 세팅을 도와드리겠습니다!\n\n1. 성함 / 연락처 / 카카오톡 ID(또는 오픈채팅 링크): \n2. 희망 진행 방식: (방식 A: 본사 전용 결제링크 발급 / 방식 B: 자체 스토어 판매 후 위탁발주)\n3. 샘플 수령 주소지 및 희망 사이즈: (슈퍼싱글 SS 또는 퀸 Q 중 택1)\n4. 희망 공구 오픈 시기 및 기간: (예: 11월 넷째 주 / 3일간 진행 등)\n\n추가로 궁금하신 점은 언제든 본 메일이나 아래 연락처로 편하게 말씀해 주세요.\n이번 겨울 시즌 {{셀러명}}님과 좋은 시너지를 낼 수 있도록 본사에서 든든하게 지원하겠습니다.\n감사합니다!\n\n테란2 (온누리유통) 루나온 공구제안팀 드림\n• 담당자: 남대현 (010-4527-8781)\n• 대표번호: 070-8858-5231\n• 회신 이메일: akrrntn1@gmail.com`;
     }
 
     function getSecondReplyText(displayName) {
@@ -846,6 +928,38 @@
       const box = document.getElementById('firstMailBox_' + id);
       if (!box) return;
       box.style.display = (box.style.display === 'none' || !box.style.display) ? 'block' : 'none';
+    }
+
+    function toggleSecondMailView(id) {
+      const box = document.getElementById('secondMailViewBox_' + id);
+      if (!box) return;
+      box.style.display = (box.style.display === 'none' || !box.style.display) ? 'block' : 'none';
+    }
+
+    function toggleContactEdit(id) {
+      const box = document.getElementById('contactEditBox_' + id);
+      if (!box) return;
+      box.style.display = (box.style.display === 'none' || !box.style.display) ? 'block' : 'none';
+    }
+
+    async function saveCardContacts(id) {
+      const phone = (document.getElementById('inpPhone_' + id)?.value || '').trim();
+      const kakao_url = (document.getElementById('inpKakao_' + id)?.value || '').trim();
+      const insta_id = (document.getElementById('inpInsta_' + id)?.value || '').trim().replace(/^@/, '');
+      const insta_url = insta_id ? `https://www.instagram.com/${insta_id}/` : '';
+      await updateSeller(id, { phone, kakao_url, insta_id, insta_url });
+      showToast('✅ 카카오톡/연락처/인스타 정보가 카드에 저장되었습니다!');
+    }
+
+    function copyTextWithToast(txt, msg) {
+      navigator.clipboard.writeText(txt);
+      showToast(msg || '복사되었습니다!');
+    }
+
+    function copyDmScript(displayName, channelName) {
+      const msg = `안녕하세요, ${displayName}님! 😊\n프리미엄 기능성 침구 브랜드 '루나온(LUNA ON)' 본사 담당자 남대현입니다.\n메일로 회신 주신 '그래핀 50% 자가발열 이불' 공동구매 관련하여, 샘플 발송 및 진행 일정 편하게 조율 도와드리고자 ${channelName}으로 연락드렸습니다!`;
+      navigator.clipboard.writeText(msg);
+      showToast(`📋 [${displayName}님 ${channelName} 첫인사 멘트]가 자동 복사되었습니다! 열린 창에서 붙여넣기(Ctrl+V) 하세요.`);
     }
 
     function toggleMasterFirstMailBox() {
@@ -898,10 +1012,19 @@
           const idx = allSellers.findIndex(x => x.id === id);
           if (idx !== -1) {
             allSellers[idx].stage = '3_3차재진행조율';
+            allSellers[idx].sent_2nd_at = nowStr;
+            allSellers[idx].sent_2nd_subject = subject;
+            allSellers[idx].sent_2nd_body = body;
             if (!(allSellers[idx].memo || '').includes('[2차답장 발송완료')) {
               allSellers[idx].memo = `[2차답장 발송완료 ${nowStr}] ` + (allSellers[idx].memo || '');
             }
-            saveLocalOverride(id, { stage: '3_3차재진행조율', memo: allSellers[idx].memo });
+            saveLocalOverride(id, {
+              stage: '3_3차재진행조율',
+              memo: allSellers[idx].memo,
+              sent_2nd_at: nowStr,
+              sent_2nd_subject: subject,
+              sent_2nd_body: body
+            });
           }
           showToast(`✅ [${toEmail}] 2차 회신 메일 발송 완료!`);
           updateCounts();

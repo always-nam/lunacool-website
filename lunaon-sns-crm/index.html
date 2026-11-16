@@ -268,8 +268,8 @@
         <p style="font-size:12px;color:#64748b;margin-top:5px;">본 시스템은 핵심 영업 자산 보호를 위해<br><strong>남대표님이 승인한 계정(ID/PW)</strong>만 접속할 수 있습니다.</p>
       </div>
       <div style="margin-bottom:12px;">
-        <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:5px;">승인 아이디 (ID)</label>
-        <input type="text" id="loginIdInput" class="inline-input" style="padding:11px 12px;font-size:14px;font-weight:700;" placeholder="아이디 입력 (예: nam, staff1)" onkeydown="if(event.key==='Enter')document.getElementById('loginPwInput').focus()" />
+        <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:5px;">승인 아이디 (한글/영문 입력 가능)</label>
+        <input type="text" id="loginIdInput" lang="ko" class="inline-input" style="padding:11px 12px;font-size:14px;font-weight:700;ime-mode:active;" placeholder="아이디 입력 (예: 화식, 현경, 남대현, nam)" onkeydown="if(event.key==='Enter' && !event.isComposing)document.getElementById('loginPwInput').focus()" />
       </div>
       <div style="margin-bottom:16px;">
         <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:5px;">비밀번호 (Password)</label>
@@ -947,6 +947,12 @@
     }
 
     async function updateSeller(id, patch) {
+      if (currentUser && currentUser.name && !patch.assigned_staff) {
+        const cur = allSellers.find(x => x.id === id);
+        if (cur && !cur.assigned_staff) {
+          patch.assigned_staff = currentUser.name.replace(' 대표님', '');
+        }
+      }
       const idx = allSellers.findIndex(x => x.id === id);
       if (idx !== -1) {
         allSellers[idx] = { ...allSellers[idx], ...patch };
@@ -1317,7 +1323,7 @@
     let managedUsers = [];
 
     // 기본 내장 승인 계정 SHA-256 해시 (nam/4527, admin/8781, staff1/1234)
-    const DEFAULT_AUTH_HASHES = [{"id": "nam", "name": "남대현 대표님", "role": "admin", "hash": "d4b50b395e5b9820a4289550169714814a9572736845c6b841c1cbe7b6f976e4"}, {"id": "admin", "name": "남대현 대표님(관리자)", "role": "admin", "hash": "ffe54e35fc463b14c7f507939aa4f824a2e29f0fd18c6b9f8556501f5809f38c"}, {"id": "staff1", "name": "담당직원1", "role": "staff", "hash": "ff48e5be1df9eedfd45d8195f3a18d17383d47f4809bd772c233a534a4d93fdf"}];
+    const DEFAULT_AUTH_HASHES = [{"id": "남대현", "name": "남대현 대표님", "role": "admin", "hash": "cc50b48b34e9a114a11978134e7c42c1a0c31bc4d80de05235a7b0d647793b1f"}, {"id": "nam", "name": "남대현 대표님", "role": "admin", "hash": "d4b50b395e5b9820a4289550169714814a9572736845c6b841c1cbe7b6f976e4"}, {"id": "화식", "name": "화식", "role": "staff", "hash": "87f3cc76605ca74f94632e4c02ecfb186be7b23fa5dc574cdc48eea06b13a552"}, {"id": "현경", "name": "현경", "role": "staff", "hash": "405677e75d7eb0f6895640761bd566edf8944e248cca1263a0e079fa74f3217e"}, {"id": "admin", "name": "남대현 대표님(관리자)", "role": "admin", "hash": "ffe54e35fc463b14c7f507939aa4f824a2e29f0fd18c6b9f8556501f5809f38c"}];
 
     async function sha256Hex(str) {
       const buf = new TextEncoder().encode(str);
@@ -1408,9 +1414,11 @@
       } catch (e) {}
       if (!managedUsers || managedUsers.length === 0) {
         managedUsers = JSON.parse(localStorage.getItem(AUTH_LOCAL_USERS_KEY) || 'null') || [
+          { id: '남대현', pw: '4527', name: '남대현 대표님', role: 'admin' },
           { id: 'nam', pw: '4527', name: '남대현 대표님', role: 'admin' },
-          { id: 'admin', pw: '8781', name: '남대현 대표님(관리자)', role: 'admin' },
-          { id: 'staff1', pw: '1234', name: '담당직원1', role: 'staff' }
+          { id: '화식', pw: '8784', name: '화식', role: 'staff' },
+          { id: '현경', pw: '8784', name: '현경', role: 'staff' },
+          { id: 'admin', pw: '8781', name: '남대현 대표님(관리자)', role: 'admin' }
         ];
       }
       renderAuthUsersModalList();

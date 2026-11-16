@@ -697,6 +697,7 @@
                   </select>
                 </div>
                 <div style="font-size:12px;color:#475569;margin-top:3px;">📧 <strong>${s.email || ''}</strong> · 팔로워 ${Number(s.followers || 0).toLocaleString()}명 ${s.assigned_staff ? `· 담당: <strong>${s.assigned_staff}</strong>` : ''}</div>
+                ${s.seller_traits ? `<div style="font-size:11px;color:#4338ca;background:#eef2ff;border:1px solid #c7d2fe;border-radius:5px;padding:4px 8px;margin-top:4px;font-weight:600;">📊 ${s.seller_traits}</div>` : ''}
 
                 <!-- 카카오톡 / 전화번호 / 인스타 DM 직통 액션 바 -->
                 <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-top:6px;padding:6px 8px;background:#ffffff;border:1px solid #e2e8f0;border-radius:7px;">
@@ -947,12 +948,6 @@
     }
 
     async function updateSeller(id, patch) {
-      if (currentUser && currentUser.name && !patch.assigned_staff) {
-        const cur = allSellers.find(x => x.id === id);
-        if (cur && !cur.assigned_staff) {
-          patch.assigned_staff = currentUser.name.replace(' 대표님', '');
-        }
-      }
       const idx = allSellers.findIndex(x => x.id === id);
       if (idx !== -1) {
         allSellers[idx] = { ...allSellers[idx], ...patch };

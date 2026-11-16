@@ -527,6 +527,7 @@
   <div class="toast" id="toastBox"></div>
 
   <script>
+    window.LUNAON_REMOTE_API_URL = "https://remix-bundle-trader-county.trycloudflare.com";
     let allSellers = [];
     let currentChannel = 'ALL';
     let currentStage = 'ALL';
@@ -601,6 +602,33 @@
         });
         updateCounts();
         renderTable();
+
+        // 원격 HTTPS 터널 서버에서 실시간 변경분(2차 발송이력, 메모, 진행단계) 자동 동기화
+        try {
+          const rRes = await fetch(getApiUrl('/api/replied_state'));
+          if (rRes.ok) {
+            const rData = await rRes.json();
+            if (rData.ok && rData.active_sellers) {
+              document.getElementById('modeBadge').textContent = '🌐 원격 서버 실시간 연동됨 (타 PC·모바일 메일발송 가능)';
+              const btn = document.getElementById('gmailStatusBtn');
+              if (rData.gmail_ready && btn) {
+                btn.textContent = '✅ Gmail(akrrntn1) 원격연결됨';
+                btn.style.borderColor = '#16a34a';
+                btn.style.color = '#15803d';
+              }
+              const mapIdx = {};
+              allSellers.forEach((s, i) => { mapIdx[s.id] = i; });
+              rData.active_sellers.forEach(rs => {
+                const i = mapIdx[rs.id];
+                if (i !== undefined) {
+                  allSellers[i] = { ...allSellers[i], ...rs };
+                }
+              });
+              updateCounts();
+              renderTable();
+            }
+          }
+        } catch (re) {}
       }
     }
 
@@ -955,15 +983,13 @@
       saveLocalOverride(id, patch);
       updateCounts();
 
-      if (isLocalServer) {
-        try {
-          await fetch('/api/update_seller', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({id, ...patch})
-          });
-        } catch (e) {}
-      }
+      try {
+        await fetch(getApiUrl('/api/update_seller'), {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({id, ...patch})
+        });
+      } catch (e) {}
       showToast('저장되었습니다.');
     }
 
@@ -980,7 +1006,8 @@
 
     function getApiUrl(path) {
       if (isLocalServer) return path;
-      return 'http://localhost:8090' + path;
+      const remoteBase = (window.LUNAON_CRM_INITIAL_DATA && window.LUNAON_CRM_INITIAL_DATA.meta && window.LUNAON_CRM_INITIAL_DATA.meta.remote_api_url) || window.LUNAON_REMOTE_API_URL || 'http://localhost:8090';
+      return remoteBase.replace(/\/$/, '') + path;
     }
 
     function toggleInlineReply(id) {
@@ -1269,10 +1296,6 @@
     }
 
     async function sendSelectedEmails() {
-      if (!isLocalServer) {
-        alert('외부 웹 접속 중에는 각 셀러 이메일 칸 아래의 [✉️ Gmail 웹발송 창열기]를 누르시거나, 사무실 PC(localhost:8090)에서 일괄 발송을 실행해주세요.');
-        return;
-      }
       const checked = Array.from(document.querySelectorAll('.row-check:checked')).map(c => c.value);
       if (checked.length === 0) {
         alert('먼저 표 왼쪽 체크박스에서 제안 메일을 보낼 셀러를 선택해주세요.');
@@ -1280,7 +1303,7 @@
       }
       if (!confirm(`선택한 ${checked.length}명의 셀러에게 [루나온 그래핀 발열이불 제안서(29,000원/39,000원)] 첨부 메일을 발송하시겠습니까?`)) return;
       showToast('제안서 첨부 메일 발송 중...');
-      const res = await fetch('/api/send_email', {
+      const res = await fetch(getApiUrl('/api/send_email'), {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ids: checked})
@@ -1296,12 +1319,8 @@
     }
 
     async function checkGmailReplies() {
-      if (!isLocalServer) {
-        alert('수신함 자동 스캔은 사무실 PC(localhost:8090)에서 실행 가능합니다.');
-        return;
-      }
       showToast('akrrntn1@gmail.com 수신함 스캔 중...');
-      const res = await fetch('/api/check_replies', { method: 'POST' });
+      const res = await fetch(getApiUrl('/api/check_replies'), { method: 'POST' });
       const data = await res.json();
       if (data.ok) {
         alert(`수신함 확인 완료! 새롭게 회신이 감지된 셀러 ${data.matched}명을 [2차 회신 도착] 단계로 자동 이동했습니다.`);

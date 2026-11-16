@@ -363,10 +363,17 @@
     <!-- 실시간 2차 회신(답장) 도착 하이라이트 보드 -->
     <div id="replyHighlightBox" style="background:#ffffff;border-radius:12px;padding:16px 20px;box-shadow:0 1px 4px rgba(0,0,0,0.06);margin-bottom:14px;border-left:6px solid #16a34a;display:none;">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
-        <h3 style="font-size:15px;font-weight:800;color:#0f172a;">📩 실시간 2차 회신(답장) 도착 셀러 현황 — 클릭 시 바로 회신/협의 가능</h3>
-        <span id="replySummaryBadge" style="font-size:12px;font-weight:700;color:#15803d;background:#dcfce7;padding:4px 10px;border-radius:6px;"></span>
+        <div>
+          <h3 style="font-size:15px;font-weight:800;color:#0f172a;">📩 실시간 2차 회신(답장) 도착 셀러 현황 — 대시보드 안에서 답장 보고 바로 메일 발송</h3>
+          <p style="font-size:12px;color:#475569;margin-top:2px;">각 카드의 <strong>[✉️ 여기서 바로 답장쓰기]</strong>를 누르면 새 창이 뜨지 않고 그 자리에서 바로 내용을 수정해 1초 만에 발송됩니다.</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span id="replySummaryBadge" style="font-size:12px;font-weight:700;color:#15803d;background:#dcfce7;padding:5px 10px;border-radius:6px;"></span>
+          <button class="btn btn-outline" style="padding:6px 11px;font-size:12px;" onclick="openTemplateModal()">📝 2차 회신 공통초안 수정</button>
+          <button class="btn btn-green" style="padding:6px 11px;font-size:12px;" onclick="sendBulkSecondReplies()">🚀 답장대기 셀러 일괄 2차회신 발송</button>
+        </div>
       </div>
-      <div id="replyCardsGrid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(340px, 1fr));gap:10px;"></div>
+      <div id="replyCardsGrid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(380px, 1fr));gap:10px;"></div>
     </div>
 
     <!-- 채널 분류 탭 & 데이터 출처 필터 -->
@@ -412,6 +419,22 @@
         </thead>
         <tbody id="sellerTbody"></tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- 2차 회신 공통초안 수정 모달 -->
+  <div class="modal-backdrop" id="templateModal">
+    <div class="modal" style="max-width:720px;">
+      <h3>📝 2차 회신 메일 기본 초안 수정</h3>
+      <p style="margin-bottom:10px;">여기서 기본 초안을 수정하고 저장하시면 모든 셀러 카드의 <strong>[✉️ 여기서 바로 답장쓰기]</strong> 창에 자동 적용됩니다. (<code>{{셀러명}}</code> 부분은 각 셀러의 이름으로 자동 변환됩니다.)</p>
+      <textarea id="masterSecondTemplateInput" style="width:100%;height:340px;padding:10px;font-size:12px;line-height:1.5;border:1px solid #cbd5e1;border-radius:8px;margin-bottom:12px;"></textarea>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <button class="btn btn-outline" onclick="resetSecondTemplate()">🔄 기본 초안으로 초기화</button>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-outline" onclick="closeTemplateModal()">닫기</button>
+          <button class="btn btn-primary" onclick="saveSecondTemplate()">💾 저장 및 전체 카드 적용</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -543,23 +566,53 @@
         box.style.display = 'block';
         badge.textContent = `총 ${repliedSellers.length}건 회신 도착 (유효 발송 ${sentCnt + repliedSellers.length}명 기준)`;
         grid.innerHTML = repliedSellers.map(s => {
-          const safeName = (s.display_name || s.seller_id).replace(/'/g, "");
-          const replySubj = encodeURIComponent(`Re: [공동구매 제안] 루나온 그래핀 50% 자가발열 이불 상세 조건 및 샘플 안내 (${safeName}님)`);
+          const safeName = (s.display_name || s.seller_id).split('(')[0].trim().replace(/'/g, "");
+          const fullLabel = (s.display_name || s.seller_id).replace(/'/g, "");
+          const alreadyReplied2nd = (s.memo || '').includes('[2차답장 발송완료') || s.stage === '3_3차재진행조율' || s.stage === '5_공구확정';
+          const statusBadgeStyle = alreadyReplied2nd ? 'background:#dcfce7;color:#15803d;' : 'background:#dbeafe;color:#1d4ed8;';
+          const defaultSubj = `Re: [루나온 그래핀 발열이불] ${safeName}님 회신 감사드리며, 공동구매 상세 진행 방식 및 샘플 발송 안내드립니다.`;
+          const defaultBody = getSecondReplyText(safeName);
+
+          let cardStageOpts = '';
+          Object.keys(STAGE_LABELS).forEach(k => {
+            const sel = s.stage === k ? 'selected' : '';
+            cardStageOpts += `<option value="${k}" ${sel}>${STAGE_LABELS[k]}</option>`;
+          });
+
           return `
-            <div style="border:1px solid #cbd5e1;border-radius:10px;padding:12px 14px;background:#f8fafc;display:flex;flex-direction:column;justify-content:space-between;gap:6px;">
+            <div id="replyCard_${s.id}" style="border:1px solid ${alreadyReplied2nd ? '#86efac' : '#cbd5e1'};border-radius:10px;padding:12px 14px;background:${alreadyReplied2nd ? '#f0fdf4' : '#f8fafc'};display:flex;flex-direction:column;justify-content:space-between;gap:6px;">
               <div>
-                <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
-                  <span style="font-weight:800;font-size:14px;color:#0f172a;">${s.display_name || s.seller_id} <a href="${s.profile_url}" target="_blank" class="link-a" style="font-size:12px;">(@${s.seller_id})</a></span>
-                  <span class="badge" style="background:#dbeafe;color:#1d4ed8;">${STAGE_LABELS[s.stage] || s.stage}</span>
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;">
+                  <span style="font-weight:800;font-size:14px;color:#0f172a;">${fullLabel} <a href="${s.profile_url}" target="_blank" class="link-a" style="font-size:12px;">(@${s.seller_id})</a></span>
+                  <select class="stage-select" style="padding:3px 6px;font-size:11px;${statusBadgeStyle}" onchange="updateSeller('${s.id}', {stage: this.value})">
+                    ${cardStageOpts}
+                  </select>
                 </div>
                 <div style="font-size:12px;color:#475569;margin-top:3px;">📧 <strong>${s.email || ''}</strong> · 팔로워 ${Number(s.followers || 0).toLocaleString()}명</div>
-                <div style="font-size:12px;color:#0f172a;background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:7px 9px;margin-top:6px;line-height:1.45;">
+                <div style="font-size:12px;color:#0f172a;background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:8px 10px;margin-top:6px;line-height:1.5;max-height:130px;overflow-y:auto;">
                   ${s.memo || '회신 도착'}
                 </div>
               </div>
-              <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;">
-                <a href="https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(s.email || '')}&su=${replySubj}" target="_blank" class="btn btn-primary" style="padding:5px 10px;font-size:11px;">✉️ 2차 회신메일 작성</a>
-                <button class="btn btn-outline" style="padding:5px 10px;font-size:11px;" onclick="setStageFilter('2_2차회신도착')">🔍 아래 표에서 보기</button>
+              <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;align-items:center;">
+                <button class="btn ${alreadyReplied2nd ? 'btn-green' : 'btn-primary'}" style="padding:6px 11px;font-size:12px;" onclick="toggleInlineReply('${s.id}')">
+                  ${alreadyReplied2nd ? '✅ 2차회신 완료 (다시 열기/추가발송)' : '✉️ 여기서 바로 답장쓰기'}
+                </button>
+                <button class="btn btn-outline" style="padding:5px 9px;font-size:11px;" onclick="updateSeller('${s.id}', {stage: '1_1차제안메일', memo: '[거절/보류제외] ' + (allSellers.find(x=>x.id==='${s.id}')?.memo||'')})">❌ 보류/제외</button>
+              </div>
+              <!-- 인라인 답장 에디터 (새 창 없이 카드 내부에서 즉시 열림) -->
+              <div id="inlineReplyBox_${s.id}" style="display:none;margin-top:8px;padding-top:10px;border-top:2px dashed #cbd5e1;background:#ffffff;padding:10px;border-radius:8px;">
+                <div style="font-size:11px;font-weight:700;color:#1d4ed8;margin-bottom:4px;">📤 받는사람: ${s.email || ''} (${safeName}님) — 위 답장 내용을 보면서 바로 수정·발송하세요</div>
+                <input type="text" id="replySubj_${s.id}" class="inline-input" style="margin-bottom:6px;font-weight:700;font-size:12px;" value="${defaultSubj.replace(/"/g, '&quot;')}" />
+                <textarea id="replyBody_${s.id}" style="width:100%;height:210px;padding:8px;font-size:12px;line-height:1.45;border:1px solid #cbd5e1;border-radius:6px;resize:vertical;">${defaultBody}</textarea>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;flex-wrap:wrap;gap:6px;">
+                  <label style="font-size:11px;font-weight:700;color:#334155;display:flex;align-items:center;gap:4px;cursor:pointer;">
+                    <input type="checkbox" id="replyAttach_${s.id}" checked /> 📎 제안서(루나온_그래핀이불_제안서_v2.xlsx) 함께 첨부
+                  </label>
+                  <div style="display:flex;gap:6px;">
+                    <button class="btn btn-outline" style="padding:6px 10px;font-size:11px;" onclick="toggleInlineReply('${s.id}')">닫기</button>
+                    <button class="btn btn-primary" id="btnSendInline_${s.id}" style="padding:6px 12px;font-size:12px;" onclick="sendInlineReply('${s.id}', '${s.email || ''}')">🚀 지금 바로 메일 발송</button>
+                  </div>
+                </div>
               </div>
             </div>
           `;
@@ -670,11 +723,9 @@
 
         let emailHtml = '<span style="color:#94a3b8;">이메일 없음</span>';
         if (s.email) {
-          const mailSubject = encodeURIComponent(`[공동구매 제안] 지금 시즌 필수템! 신소재 '그래핀 50% 자가발열 이불' 루나온 공구 제안 (${safeName}님)`);
-          const mailBody = encodeURIComponent(getProposalText(safeName));
           emailHtml = `
             <div style="font-weight:600;color:#1e293b;">${s.email}</div>
-            <a href="https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(s.email)}&su=${mailSubject}&body=${mailBody}" target="_blank" class="link-a" style="font-size:11px;">[✉️ Gmail 웹발송 창열기]</a>
+            <button class="btn btn-outline" style="padding:3px 8px;font-size:11px;margin-top:3px;color:#2563eb;border-color:#93c5fd;" onclick="openRowQuickMail('${s.id}')">✉️ 바로 메일쓰기</button>
           `;
         }
 
@@ -733,6 +784,196 @@
         } catch (e) {}
       }
       showToast('저장되었습니다.');
+    }
+
+    const SECOND_TEMPLATE_KEY = 'LUNAON_SECOND_REPLY_TEMPLATE_V1';
+
+    function getDefaultSecondReplyTemplate() {
+      return `안녕하세요, {{셀러명}}님!\n기능성 침구 브랜드 '루나온(LUNA ON)' 본사 공급원 테란2(온누리유통) 담당자 남대현입니다.\n\n바쁘신 와중에도 '루나온 그래핀 50% 자가발열 이불' 공동구매 제안에 긍정적으로 회신해 주셔서 진심으로 감사드립니다.\n문의해 주신 공동구매 진행 방식, 판매가·정산 구조, 촬영용 샘플 지원 및 자료 제공에 대해 한눈에 보실 수 있도록 정리해 드립니다.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 1. 공동구매 진행 및 주문·정산 방식 (편하신 방식 선택 가능)\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n셀러님의 운영 스타일에 맞춰 아래 A·B 두 가지 방식 중 편하신 방법으로 진행하실 수 있습니다.\n\n• [방식 A] 본사 전용 결제 링크 발급형 (스토어/사업자가 없으셔도 즉시 가능)\n  - 본사에서 {{셀러명}}님만의 [전용 공동구매 결제 링크]를 생성해 드립니다.\n  - 팔로워분들이 해당 링크로 주문 시 본사(파주 물류센터)에서 당일 출고 및 CS를 전담하며,\n  - 공구 종료 후 [실판매가 - 본사 공급가] 차액(셀러 수익금)을 정산해 드립니다.\n\n• [방식 B] 셀러 자체 마켓/스토어 판매 + 본사 위탁출고형\n  - 셀러님께서 보유하신 스마트스토어·인스타샵·자체 주문폼 등에서 직접 주문을 받으시고,\n  - 평일 오후 4시(16시)까지 본사 양식으로 발주서를 전달해 주시면 공급가 정산 후 파주 물류센터에서 당일 칼출고해 드립니다.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 2. 공급 단가 및 추천 공구 판매가 (셀러 수익 구조)\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n• 슈퍼싱글 (SS, 150x200cm)\n  - 소비자가 99,000원 ➔ 본사 공급가: 29,000원 (VAT 포함)\n  - 추천 공구 판매가: 49,000원 ~ 59,000원 (셀러님 채널 특성에 맞춰 협의/자율 책정 가능)\n\n• 퀸 (Q, 200x230cm)\n  - 소비자가 129,000원 ➔ 본사 공급가: 39,000원 (VAT 포함)\n  - 추천 공구 판매가: 59,000원 ~ 69,000원 (셀러님 채널 특성에 맞춰 협의/자율 책정 가능)\n\n• 배송비 기준: 택배비 3,000원 별도 (롯데택배 / 제주·도서산간 +3,000원 / 합포장 4개 기준)\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 3. 홍보 촬영용 샘플 지원 및 콘텐츠 가이드\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n• 샘플 제공: 공동구매 진행 확정 시, 직접 덮어보시고 생생한 후기를 촬영하실 수 있도록 [루나온 그래핀 발열이불 본품 1채 (SS 또는 Q 중 택1)]를 지원(발송)해 드립니다.\n• 제품 컬러: 호불호 없이 모던한 침실 연출이 가능한 [차콜 & 라이트그레이 양면 투톤(리버시블)] 단일 디자인으로, 앞뒤 양면 모두 활용하실 수 있습니다.\n• 홍보 채널 및 기간: 인스타그램(릴스·피드·스토리), 블로그, 유튜브, 클립 등 셀러님 주력 채널로 자유롭게 진행 가능하며, 공구 기간도 일정에 맞춰(예: 3일~7일) 유연하게 조율 가능합니다.\n• 촬영 가이드 (얼굴 노출 불필요): 인물(얼굴) 노출은 전혀 필수가 아니며, 침실/거실 침구 연출컷, 포근한 촉감·두께감 영상 등 셀러님 채널 분위기에 맞게 편하게 촬영하시면 됩니다. (KATRI 집먼지진드기 0마리·폼알데하이드 불검출 인증 및 세탁기 통세탁 가능 제품이라 아이·반려동물과 함께 쓰는 가정에도 매우 반응이 좋습니다.)\n• 원본 자료 제공: 상세페이지용 고화질 사진, 발열/보온 GIF 움짤, 15초 홍보 영상 및 KATRI 공인 시험성적서 6종 이미지를 모두 제공해 드립니다.\n  - 상세페이지(GIF): https://always-nam.github.io/lunacool-website/lunaon-detail-v9/\n  - 15초 홍보영상(CF): https://always-nam.github.io/lunacool-website/lunaon-cf-v8/\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 4. 진행 확정을 위해 회신 부탁드릴 내용 (간단 답장 양식)\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n진행을 희망하시면 본 메일 답장으로 아래 4가지를 편하게 남겨주시면 즉시 샘플 출고 및 전용 링크 세팅을 도와드리겠습니다!\n\n1. 성함 / 연락처: \n2. 희망 진행 방식: (방식 A: 본사 전용 결제링크 발급 / 방식 B: 자체 스토어 판매 후 위탁발주)\n3. 샘플 수령 주소지 및 희망 사이즈: (슈퍼싱글 SS 또는 퀸 Q 중 택1)\n4. 희망 공구 오픈 시기 및 기간: (예: 11월 넷째 주 / 3일간 진행 등)\n\n추가로 궁금하신 점은 언제든 본 메일이나 아래 연락처로 편하게 말씀해 주세요.\n이번 겨울 시즌 {{셀러명}}님과 좋은 시너지를 낼 수 있도록 본사에서 든든하게 지원하겠습니다.\n감사합니다!\n\n테란2 (온누리유통) 루나온 공구제안팀 드림\n• 담당자: 남대현 (010-4527-8781)\n• 대표번호: 070-8858-5231\n• 회신 이메일: akrrntn1@gmail.com`;
+    }
+
+    function getSecondReplyText(displayName) {
+      const tpl = localStorage.getItem(SECOND_TEMPLATE_KEY) || getDefaultSecondReplyTemplate();
+      return tpl.replace(/\{\{셀러명\}\}/g, displayName);
+    }
+
+    function getApiUrl(path) {
+      if (isLocalServer) return path;
+      return 'http://localhost:8090' + path;
+    }
+
+    function toggleInlineReply(id) {
+      const box = document.getElementById('inlineReplyBox_' + id);
+      if (!box) return;
+      box.style.display = (box.style.display === 'none' || !box.style.display) ? 'block' : 'none';
+    }
+
+    async function sendInlineReply(id, toEmail) {
+      const subjEl = document.getElementById('replySubj_' + id);
+      const bodyEl = document.getElementById('replyBody_' + id);
+      const attEl = document.getElementById('replyAttach_' + id);
+      const btnEl = document.getElementById('btnSendInline_' + id);
+      if (!subjEl || !bodyEl) return;
+
+      const subject = subjEl.value.trim();
+      const body = bodyEl.value.trim();
+      const attach_proposal = attEl ? attEl.checked : true;
+      if (!subject || !body) {
+        alert('메일 제목과 본문을 입력해주세요.');
+        return;
+      }
+
+      if (btnEl) {
+        btnEl.disabled = true;
+        btnEl.textContent = '⏳ 발송 중...';
+      }
+      showToast(`${toEmail} 앞으로 2차 회신 메일 발송 중...`);
+
+      try {
+        const res = await fetch(getApiUrl('/api/send_custom_reply'), {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            id,
+            to_email: toEmail,
+            subject,
+            body,
+            attach_proposal,
+            next_stage: '3_3차재진행조율'
+          })
+        });
+        const data = await res.json();
+        if (data.ok && data.sent > 0) {
+          const nowStr = new Date().toISOString().slice(0,16).replace('T',' ');
+          const idx = allSellers.findIndex(x => x.id === id);
+          if (idx !== -1) {
+            allSellers[idx].stage = '3_3차재진행조율';
+            if (!(allSellers[idx].memo || '').includes('[2차답장 발송완료')) {
+              allSellers[idx].memo = `[2차답장 발송완료 ${nowStr}] ` + (allSellers[idx].memo || '');
+            }
+            saveLocalOverride(id, { stage: '3_3차재진행조율', memo: allSellers[idx].memo });
+          }
+          showToast(`✅ [${toEmail}] 2차 회신 메일 발송 완료!`);
+          updateCounts();
+          renderTable();
+        } else {
+          alert('발송 실패: ' + (data.msg || (data.errors || []).join(', ')));
+        }
+      } catch (e) {
+        alert('로컬 발송 서버(http://localhost:8090) 연결을 확인해주세요: ' + e);
+      } finally {
+        if (btnEl) {
+          btnEl.disabled = false;
+          btnEl.textContent = '🚀 지금 바로 메일 발송';
+        }
+      }
+    }
+
+    function openTemplateModal() {
+      const tpl = localStorage.getItem(SECOND_TEMPLATE_KEY) || getDefaultSecondReplyTemplate();
+      document.getElementById('masterSecondTemplateInput').value = tpl;
+      document.getElementById('templateModal').style.display = 'flex';
+    }
+
+    function closeTemplateModal() {
+      document.getElementById('templateModal').style.display = 'none';
+    }
+
+    function saveSecondTemplate() {
+      const val = document.getElementById('masterSecondTemplateInput').value.trim();
+      if (!val) { alert('초안 내용을 입력해주세요.'); return; }
+      localStorage.setItem(SECOND_TEMPLATE_KEY, val);
+      closeTemplateModal();
+      updateCounts();
+      showToast('✅ 2차 회신 공통 초안이 저장되어 모든 카드에 적용되었습니다!');
+    }
+
+    function resetSecondTemplate() {
+      localStorage.removeItem(SECOND_TEMPLATE_KEY);
+      document.getElementById('masterSecondTemplateInput').value = getDefaultSecondReplyTemplate();
+      showToast('기본 초안으로 복원되었습니다.');
+    }
+
+    async function sendBulkSecondReplies() {
+      const targets = allSellers.filter(s => {
+        if (s.stage !== '2_2차회신도착') return false;
+        const m = (s.memo || '').toLowerCase();
+        if (m.includes('[2차답장 발송완료') || m.includes('거절/보류') || m.includes('사양드리지만') || m.includes('어려울 것 같습니다') || m.includes('고객센터에 문의해')) return false;
+        return Boolean(s.email && s.email.includes('@'));
+      });
+      if (targets.length === 0) {
+        alert('현재 2차 답장 대기 중인(미발송) 긍정 회신 셀러가 없습니다.');
+        return;
+      }
+      if (!confirm(`거절/자동응답을 제외한 긍정 회신 셀러 ${targets.length}명 전원에게 현재 설정된 [2차 회신 메일 + 제안서 첨부]를 일괄 발송하시겠습니까?`)) return;
+
+      showToast(`총 ${targets.length}명에게 2차 회신 일괄 발송 중...`);
+      const items = targets.map(s => {
+        const safeName = (s.display_name || s.seller_id).split('(')[0].trim().replace(/'/g, "");
+        return {
+          id: s.id,
+          to_email: s.email,
+          subject: `Re: [루나온 그래핀 발열이불] ${safeName}님 회신 감사드리며, 공동구매 상세 진행 방식 및 샘플 발송 안내드립니다.`,
+          body: getSecondReplyText(safeName),
+          attach_proposal: true,
+          next_stage: '3_3차재진행조율'
+        };
+      });
+
+      try {
+        const res = await fetch(getApiUrl('/api/send_custom_reply'), {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ items })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          alert(`🎉 총 ${data.sent}명의 셀러에게 2차 회신 메일 일괄 발송 완료!`);
+          loadData();
+        } else {
+          alert('일괄 발송 오류: ' + (data.msg || (data.errors || []).join(', ')));
+        }
+      } catch (e) {
+        alert('로컬 서버(http://localhost:8090) 연결을 확인해주세요: ' + e);
+      }
+    }
+
+    function openRowQuickMail(id) {
+      const s = allSellers.find(x => x.id === id);
+      if (!s) return;
+      const cardBox = document.getElementById('inlineReplyBox_' + id);
+      if (cardBox) {
+        cardBox.style.display = 'block';
+        document.getElementById('replyCard_' + id).scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+      const safeName = (s.display_name || s.seller_id).split('(')[0].trim().replace(/'/g, "");
+      const isReplied = s.stage !== '0_발송대기' && s.stage !== '1_1차제안메일';
+      const subj = isReplied
+        ? `Re: [루나온 그래핀 발열이불] ${safeName}님 회신 감사드리며, 공동구매 상세 진행 방식 및 샘플 발송 안내드립니다.`
+        : `[공동구매 제안] 지금 시즌 필수템! 신소재 '그래핀 50% 자가발열 이불' 루나온 공구 제안 (${safeName}님)`;
+      const body = isReplied ? getSecondReplyText(safeName) : getProposalText(safeName);
+      if (confirm(`[${safeName} (${s.email})] 님께 대시보드에서 바로 메일을 발송하시겠습니까?\n\n제목: ${subj}`)) {
+        fetch(getApiUrl('/api/send_custom_reply'), {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            id: s.id,
+            to_email: s.email,
+            subject: subj,
+            body: body,
+            attach_proposal: true,
+            next_stage: isReplied ? '3_3차재진행조율' : '1_1차제안메일'
+          })
+        }).then(r => r.json()).then(d => {
+          if (d.ok && d.sent > 0) {
+            showToast(`✅ ${s.email} 발송 완료!`);
+            loadData();
+          } else {
+            alert('발송 실패: ' + (d.msg || (d.errors || []).join(', ')));
+          }
+        });
+      }
     }
 
     function getProposalText(displayName) {

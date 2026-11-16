@@ -259,25 +259,50 @@
   </style>
 </head>
 <body>
-  <div class="container">
+  <!-- 🔒 보안 로그인 게이트 (승인된 아이디만 접속 가능) -->
+  <div id="authGateBackdrop" style="position:fixed;inset:0;background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;">
+    <div style="background:#ffffff;border-radius:16px;max-width:420px;width:100%;padding:32px 28px;box-shadow:0 20px 45px rgba(0,0,0,0.45);border-top:6px solid #2563eb;">
+      <div style="text-align:center;margin-bottom:22px;">
+        <div style="display:inline-block;background:#eff6ff;color:#1d4ed8;font-weight:800;font-size:12px;padding:4px 12px;border-radius:99px;margin-bottom:8px;">🔒 (주)테란 · 온누리유통 사내 보안 시스템</div>
+        <h2 style="font-size:20px;font-weight:800;color:#0f172a;">루나온 공구 영업 마스터 CRM</h2>
+        <p style="font-size:12px;color:#64748b;margin-top:5px;">본 시스템은 핵심 영업 자산 보호를 위해<br><strong>남대표님이 승인한 계정(ID/PW)</strong>만 접속할 수 있습니다.</p>
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:5px;">승인 아이디 (ID)</label>
+        <input type="text" id="loginIdInput" class="inline-input" style="padding:11px 12px;font-size:14px;font-weight:700;" placeholder="아이디 입력 (예: nam, staff1)" onkeydown="if(event.key==='Enter')document.getElementById('loginPwInput').focus()" />
+      </div>
+      <div style="margin-bottom:16px;">
+        <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:5px;">비밀번호 (Password)</label>
+        <input type="password" id="loginPwInput" class="inline-input" style="padding:11px 12px;font-size:14px;font-weight:700;" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')submitLogin()" />
+      </div>
+      <div id="loginErrorMsg" style="display:none;color:#dc2626;font-size:12px;font-weight:700;margin-bottom:12px;text-align:center;background:#fef2f2;padding:8px;border-radius:6px;border:1px solid #fecaca;"></div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;padding:12px;font-size:14px;" onclick="submitLogin()">🔓 보안 인증 및 대시보드 접속</button>
+      <div style="font-size:11px;color:#94a3b8;text-align:center;margin-top:14px;">계정 발급 및 승인 문의: 남대현 대표 (010-4527-8781)</div>
+    </div>
+  </div>
+
+  <div class="container" id="mainDashboardContainer" style="display:none;">
     <!-- 헤더 -->
     <div class="header">
       <div class="header-left">
         <h1>
           🔥 루나온(LUNA ON) 그래핀 50% 발열이불 — SNS·라이브 공구 현황판
           <span class="mode-badge" id="modeBadge">🌐 웹/모바일 실시간 모드</span>
+          <span id="currentUserBadge" style="display:inline-block;background:#f1f5f9;color:#0f172a;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700;margin-left:6px;border:1px solid #cbd5e1;">👤 접속자 확인중</span>
         </h1>
         <span class="price-badge">
           확정 공급가: SS 29,000원 (정가 9.9만·마진 70.7%) / Q 39,000원 (정가 12.9만·마진 69.8%) / 택배비 3,000원 별도
         </span>
       </div>
       <div class="header-right">
+        <button class="btn btn-outline" id="btnManageUsers" style="display:none;border-color:#7c3aed;color:#6d28d9;background:#faf5ff;" onclick="openAuthAdminModal()">🔐 직원 계정 승인·관리</button>
         <a href="https://always-nam.github.io/lunacool-website/lunaon-detail-v9/" target="_blank" class="btn btn-outline">🖼️ 상세페이지 열기</a>
         <a href="https://always-nam.github.io/lunacool-website/lunaon-cf-v8/" target="_blank" class="btn btn-outline">🎬 15초 CF영상</a>
         <button class="btn btn-outline" onclick="exportProgressJson()">💾 진행현황 백업저장</button>
         <button class="btn btn-outline" onclick="openGmailModal()" id="gmailStatusBtn">⚙️ Gmail(akrrntn1) 설정</button>
         <button class="btn btn-primary" onclick="sendSelectedEmails()">✉️ 선택 셀러 1차 메일발송</button>
         <button class="btn btn-green" onclick="checkGmailReplies()" id="btnCheckReplies">🔄 수신함 회신체크</button>
+        <button class="btn btn-outline" style="color:#dc2626;border-color:#fecaca;" onclick="logoutUser()">🔓 로그아웃</button>
       </div>
     </div>
 
@@ -436,6 +461,32 @@
         </thead>
         <tbody id="sellerTbody"></tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- 🔐 대표님 전용 직원 계정 승인·관리 모달 -->
+  <div class="modal-backdrop" id="authAdminModal">
+    <div class="modal" style="max-width:640px;">
+      <h3>🔐 대시보드 접속 승인 계정(ID/PW) 관리 (남대표님 전용)</h3>
+      <p style="margin-bottom:12px;">여기서 승인해 준 아이디와 비밀번호를 가진 직원만 대시보드에 로그인할 수 있습니다. 퇴사자나 미승인자는 <strong>[삭제/차단]</strong>을 누르면 즉시 접속이 차단됩니다.</p>
+      <div id="authUsersListBox" style="max-height:260px;overflow-y:auto;border:1px solid #cbd5e1;border-radius:8px;padding:10px;margin-bottom:12px;background:#f8fafc;"></div>
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px;margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:800;color:#1e3a8a;margin-bottom:6px;">➕ 신규 승인 계정 추가</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <input type="text" id="newAuthId" class="inline-input" style="width:120px;" placeholder="로그인 아이디" />
+          <input type="text" id="newAuthPw" class="inline-input" style="width:120px;" placeholder="비밀번호" />
+          <input type="text" id="newAuthName" class="inline-input" style="flex:1;min-width:130px;" placeholder="직원 성함/직책 (예: 김대리)" />
+          <select id="newAuthRole" class="stage-select">
+            <option value="staff">일반 직원</option>
+            <option value="admin">관리자(대표)</option>
+          </select>
+          <button class="btn btn-primary" onclick="addAuthUserRow()">+ 추가</button>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;">
+        <button class="btn btn-outline" onclick="closeAuthAdminModal()">닫기</button>
+        <button class="btn btn-green" onclick="saveAuthUsersToServer()">💾 계정 변경사항 저장 및 즉시 적용</button>
+      </div>
     </div>
   </div>
 
@@ -1260,7 +1311,189 @@
       }
     }
 
-    loadData();
+    const AUTH_SESSION_KEY = 'LUNAON_CRM_AUTH_SESSION_V1';
+    const AUTH_LOCAL_USERS_KEY = 'LUNAON_CRM_AUTH_USERS_V1';
+    let currentUser = null;
+    let managedUsers = [];
+
+    // 기본 내장 승인 계정 SHA-256 해시 (nam/4527, admin/8781, staff1/1234)
+    const DEFAULT_AUTH_HASHES = [{"id": "nam", "name": "남대현 대표님", "role": "admin", "hash": "d4b50b395e5b9820a4289550169714814a9572736845c6b841c1cbe7b6f976e4"}, {"id": "admin", "name": "남대현 대표님(관리자)", "role": "admin", "hash": "ffe54e35fc463b14c7f507939aa4f824a2e29f0fd18c6b9f8556501f5809f38c"}, {"id": "staff1", "name": "담당직원1", "role": "staff", "hash": "ff48e5be1df9eedfd45d8195f3a18d17383d47f4809bd772c233a534a4d93fdf"}];
+
+    async function sha256Hex(str) {
+      const buf = new TextEncoder().encode(str);
+      const hashBuf = await crypto.subtle.digest('SHA-256', buf);
+      return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function applyLoggedInUser(user) {
+      currentUser = user;
+      sessionStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(user));
+      document.getElementById('authGateBackdrop').style.display = 'none';
+      document.getElementById('mainDashboardContainer').style.display = 'block';
+      const badge = document.getElementById('currentUserBadge');
+      if (badge) {
+        badge.textContent = `👤 접속자: ${user.name} (${user.role === 'admin' ? '대표/마스터' : '승인직원'})`;
+      }
+      const adminBtn = document.getElementById('btnManageUsers');
+      if (adminBtn) {
+        adminBtn.style.display = user.role === 'admin' ? 'inline-flex' : 'none';
+      }
+      loadData();
+    }
+
+    async function submitLogin() {
+      const uid = (document.getElementById('loginIdInput').value || '').trim().toLowerCase();
+      const pw = (document.getElementById('loginPwInput').value || '').trim();
+      const errBox = document.getElementById('loginErrorMsg');
+      errBox.style.display = 'none';
+
+      if (!uid || !pw) {
+        errBox.textContent = '아이디와 비밀번호를 모두 입력해주세요.';
+        errBox.style.display = 'block';
+        return;
+      }
+
+      // 1) 로컬 서버 API 인증 시도
+      try {
+        const res = await fetch(getApiUrl('/api/auth_login'), {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ id: uid, pw })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.ok && data.user) {
+            applyLoggedInUser(data.user);
+            return;
+          }
+        }
+      } catch (e) {}
+
+      // 2) 외부 웹(GitHub Pages) 접속 시 SHA-256 해시 대조 인증
+      const inputHash = await sha256Hex(`lunaon_salt_${uid}_${pw}`);
+      const serverHashes = (window.LUNAON_CRM_INITIAL_DATA && window.LUNAON_CRM_INITIAL_DATA.meta && window.LUNAON_CRM_INITIAL_DATA.meta.auth_hashes) || DEFAULT_AUTH_HASHES;
+      const localCustomUsers = JSON.parse(localStorage.getItem(AUTH_LOCAL_USERS_KEY) || 'null');
+      if (localCustomUsers) {
+        const foundLocal = localCustomUsers.find(u => u.id.trim().toLowerCase() === uid && u.pw.trim() === pw);
+        if (foundLocal) {
+          applyLoggedInUser({ id: foundLocal.id, name: foundLocal.name, role: foundLocal.role });
+          return;
+        }
+      }
+      const matched = serverHashes.find(h => h.id === uid && h.hash === inputHash);
+      if (matched) {
+        applyLoggedInUser({ id: matched.id, name: matched.name, role: matched.role });
+        return;
+      }
+
+      errBox.textContent = '❌ 승인되지 않은 아이디이거나 비밀번호가 일치하지 않습니다.';
+      errBox.style.display = 'block';
+    }
+
+    function logoutUser() {
+      currentUser = null;
+      sessionStorage.removeItem(AUTH_SESSION_KEY);
+      document.getElementById('loginPwInput').value = '';
+      document.getElementById('mainDashboardContainer').style.display = 'none';
+      document.getElementById('authGateBackdrop').style.display = 'flex';
+    }
+
+    async function openAuthAdminModal() {
+      try {
+        const res = await fetch(getApiUrl('/api/auth_users'));
+        if (res.ok) {
+          const data = await res.json();
+          if (data.ok && data.users) managedUsers = data.users;
+        }
+      } catch (e) {}
+      if (!managedUsers || managedUsers.length === 0) {
+        managedUsers = JSON.parse(localStorage.getItem(AUTH_LOCAL_USERS_KEY) || 'null') || [
+          { id: 'nam', pw: '4527', name: '남대현 대표님', role: 'admin' },
+          { id: 'admin', pw: '8781', name: '남대현 대표님(관리자)', role: 'admin' },
+          { id: 'staff1', pw: '1234', name: '담당직원1', role: 'staff' }
+        ];
+      }
+      renderAuthUsersModalList();
+      document.getElementById('authAdminModal').style.display = 'flex';
+    }
+
+    function closeAuthAdminModal() {
+      document.getElementById('authAdminModal').style.display = 'none';
+    }
+
+    function renderAuthUsersModalList() {
+      const box = document.getElementById('authUsersListBox');
+      box.innerHTML = managedUsers.map((u, idx) => `
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;background:#fff;padding:7px 9px;border-radius:6px;border:1px solid #e2e8f0;flex-wrap:wrap;">
+          <span class="badge" style="${u.role === 'admin' ? 'background:#ede9fe;color:#6d28d9;' : 'background:#f1f5f9;color:#334155;'}">${u.role === 'admin' ? '👑 대표/관리자' : '👤 승인직원'}</span>
+          <input type="text" class="inline-input" style="width:105px;font-weight:700;" value="${u.id}" onchange="managedUsers[${idx}].id=this.value.trim()" placeholder="아이디" />
+          <input type="text" class="inline-input" style="width:105px;" value="${u.pw}" onchange="managedUsers[${idx}].pw=this.value.trim()" placeholder="비밀번호" />
+          <input type="text" class="inline-input" style="flex:1;min-width:120px;" value="${u.name}" onchange="managedUsers[${idx}].name=this.value.trim()" placeholder="이름/직책" />
+          <button class="btn btn-outline" style="padding:4px 8px;font-size:11px;color:#dc2626;border-color:#fecaca;" onclick="removeAuthUserRow(${idx})">삭제/차단</button>
+        </div>
+      `).join('');
+    }
+
+    function addAuthUserRow() {
+      const id = (document.getElementById('newAuthId').value || '').trim();
+      const pw = (document.getElementById('newAuthPw').value || '').trim();
+      const name = (document.getElementById('newAuthName').value || '').trim() || id;
+      const role = document.getElementById('newAuthRole').value || 'staff';
+      if (!id || !pw) { alert('신규 아이디와 비밀번호를 입력해주세요.'); return; }
+      if (managedUsers.some(u => u.id.toLowerCase() === id.toLowerCase())) {
+        alert('이미 존재하는 아이디입니다.');
+        return;
+      }
+      managedUsers.push({ id, pw, name, role, created_at: new Date().toISOString().slice(0,10) });
+      document.getElementById('newAuthId').value = '';
+      document.getElementById('newAuthPw').value = '';
+      document.getElementById('newAuthName').value = '';
+      renderAuthUsersModalList();
+    }
+
+    function removeAuthUserRow(idx) {
+      if (managedUsers[idx].role === 'admin' && managedUsers.filter(u => u.role === 'admin').length <= 1) {
+        alert('최소 1개의 대표님(관리자) 계정은 남아있어야 합니다.');
+        return;
+      }
+      managedUsers.splice(idx, 1);
+      renderAuthUsersModalList();
+    }
+
+    async function saveAuthUsersToServer() {
+      localStorage.setItem(AUTH_LOCAL_USERS_KEY, JSON.stringify(managedUsers));
+      try {
+        const res = await fetch(getApiUrl('/api/save_auth_users'), {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ users: managedUsers })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          showToast('✅ 승인 계정 목록이 저장되어 즉시 적용되었습니다!');
+          closeAuthAdminModal();
+          return;
+        } else {
+          alert(data.msg || '저장 실패');
+        }
+      } catch (e) {
+        showToast('✅ 브라우저에 승인 계정 목록이 저장되었습니다.');
+        closeAuthAdminModal();
+      }
+    }
+
+    // 세션 유지 확인 후 자동 로그인 또는 로그인 게이트 표시
+    (function initAuthGate() {
+      try {
+        const saved = JSON.parse(sessionStorage.getItem(AUTH_SESSION_KEY) || 'null');
+        if (saved && saved.id) {
+          applyLoggedInUser(saved);
+          return;
+        }
+      } catch (e) {}
+      document.getElementById('authGateBackdrop').style.display = 'flex';
+      document.getElementById('mainDashboardContainer').style.display = 'none';
+    })();
   </script>
 </body>
 </html>

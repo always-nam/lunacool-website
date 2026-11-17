@@ -663,7 +663,7 @@
   <div class="toast" id="toastBox"></div>
 
   <script>
-    window.LUNAON_REMOTE_API_URL = "https://graduates-ronald-helping-youth.trycloudflare.com";
+    window.LUNAON_REMOTE_API_URL = "https://bryan-detailed-ladies-harris.trycloudflare.com";
     let allSellers = [];
     let currentChannel = 'ALL';
     let currentStage = 'ALL';
@@ -745,7 +745,7 @@
 
         // 원격 HTTPS 터널 서버에서 실시간 변경분(2차 발송이력, 메모, 진행단계) 자동 동기화
         try {
-          const rRes = await fetch(getApiUrl('/api/replied_state'));
+          const rRes = await smartApiFetch('/api/replied_state');
           if (rRes.ok) {
             const rData = await rRes.json();
             if (rData.ok && rData.active_sellers) {
@@ -1234,7 +1234,7 @@
       updateCounts();
 
       try {
-        await fetch(getApiUrl('/api/update_seller'), {
+        await smartApiFetch('/api/update_seller', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({id, ...patch})
@@ -1605,6 +1605,30 @@
       return remoteBase.replace(/\/$/, '') + path;
     }
 
+    async function smartApiFetch(path, options) {
+      const urls = [];
+      if (isLocalServer) {
+        urls.push(path);
+      } else {
+        urls.push('http://localhost:8090' + path);
+        urls.push('http://127.0.0.1:8090' + path);
+        const rem = getApiUrl(path);
+        if (!urls.includes(rem)) urls.push(rem);
+      }
+      let lastErr = null;
+      for (const u of urls) {
+        try {
+          const res = await fetch(u, options);
+          if (res.ok || res.status === 400 || res.status === 401 || res.status === 500) {
+            return res;
+          }
+        } catch (err) {
+          lastErr = err;
+        }
+      }
+      throw lastErr || new Error('Failed to fetch');
+    }
+
     function toggleInlineReply(id) {
       const box = document.getElementById('inlineReplyBox_' + id);
       if (!box) return;
@@ -1681,7 +1705,7 @@
       showToast(`${toEmail} 앞으로 2차 회신 메일 발송 중...`);
 
       try {
-        const res = await fetch(getApiUrl('/api/send_custom_reply'), {
+        const res = await smartApiFetch('/api/send_custom_reply', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({
@@ -1836,7 +1860,7 @@
       });
 
       try {
-        const res = await fetch(getApiUrl('/api/send_custom_reply'), {
+        const res = await smartApiFetch('/api/send_custom_reply', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({ items })
@@ -1869,7 +1893,7 @@
         : `[공동구매 제안] 지금 시즌 필수템! 신소재 '그래핀 50% 자가발열 이불' 루나온 공구 제안 (${safeName}님)`;
       const body = isReplied ? getSecondReplyText(safeName) : getProposalText(safeName);
       if (confirm(`[${safeName} (${s.email})] 님께 대시보드에서 바로 메일을 발송하시겠습니까?\n\n제목: ${subj}`)) {
-        fetch(getApiUrl('/api/send_custom_reply'), {
+        smartApiFetch('/api/send_custom_reply', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({
@@ -1928,7 +1952,7 @@
       const sumEl = document.getElementById('gmailPoolSummary');
       if (!box) return;
       try {
-        const res = await fetch(getApiUrl('/api/gmail_pool'));
+        const res = await smartApiFetch('/api/gmail_pool');
         const data = await res.json();
         if (data.ok) {
           if (sumEl) sumEl.textContent = `(발송전용 ${data.pool.length}개 계정 가동 + 메인 답장전용 1개)`;
@@ -1962,7 +1986,7 @@
         return;
       }
       showToast('SMTP 로그인 검증 중...');
-      const res = await fetch(getApiUrl('/api/add_gmail_pool'), {
+      const res = await smartApiFetch('/api/add_gmail_pool', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ email, app_password, owner })
@@ -1981,7 +2005,7 @@
 
     async function removeGmailPoolAccount(email) {
       if (!confirm(`[${email}] 계정을 발송 풀에서 제거하시겠습니까?`)) return;
-      await fetch(getApiUrl('/api/remove_gmail_pool'), {
+      await smartApiFetch('/api/remove_gmail_pool', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ email })
@@ -1997,7 +2021,7 @@
       }
       if (!confirm(`선택한 ${checked.length}명의 셀러에게 [루나온 그래핀 발열이불 신규 제안서(SS 32,000원/Q 42,000원 무료배송)] 첨부 메일을 발송하시겠습니까?`)) return;
       showToast('제안서 첨부 메일 발송 중...');
-      const res = await fetch(getApiUrl('/api/send_email'), {
+      const res = await smartApiFetch('/api/send_email', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ids: checked})
@@ -2014,7 +2038,7 @@
 
     async function checkGmailReplies() {
       showToast('akrrntn1@gmail.com 수신함 스캔 중...');
-      const res = await fetch(getApiUrl('/api/check_replies'), { method: 'POST' });
+      const res = await smartApiFetch('/api/check_replies', { method: 'POST' });
       const data = await res.json();
       if (data.ok) {
         alert(`수신함 확인 완료! 새롭게 회신이 감지된 셀러 ${data.matched}명을 [2차 회신 도착] 단계로 자동 이동했습니다.`);
@@ -2069,7 +2093,7 @@
 
       // 1) 로컬 서버 API 인증 시도
       try {
-        const res = await fetch(getApiUrl('/api/auth_login'), {
+        const res = await smartApiFetch('/api/auth_login', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({ id: uid, pw })
@@ -2114,7 +2138,7 @@
 
     async function openAuthAdminModal() {
       try {
-        const res = await fetch(getApiUrl('/api/auth_users'));
+        const res = await smartApiFetch('/api/auth_users');
         if (res.ok) {
           const data = await res.json();
           if (data.ok && data.users) managedUsers = data.users;
@@ -2179,7 +2203,7 @@
     async function saveAuthUsersToServer() {
       localStorage.setItem(AUTH_LOCAL_USERS_KEY, JSON.stringify(managedUsers));
       try {
-        const res = await fetch(getApiUrl('/api/save_auth_users'), {
+        const res = await smartApiFetch('/api/save_auth_users', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({ users: managedUsers })

@@ -909,8 +909,10 @@
                   <label style="font-size:11px;font-weight:700;color:#334155;display:flex;align-items:center;gap:4px;cursor:pointer;">
                     <input type="checkbox" id="replyAttach_${s.id}" checked /> 📎 제안서(루나온_그래핀이불_제안서_v2.xlsx) 함께 첨부
                   </label>
-                  <div style="display:flex;gap:6px;">
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;">
                     <button class="btn btn-outline" style="padding:6px 10px;font-size:11px;" onclick="toggleInlineReply('${s.id}')">닫기</button>
+                    <button class="btn btn-outline" style="padding:6px 10px;font-size:11px;background:#eff6ff;color:#1d4ed8;border-color:#93c5fd;font-weight:700;" onclick="openGmailWebCompose('${s.id}', '${s.email || ''}')">🌐 지메일 웹창으로 열기 (한도초과 시)</button>
+                    <button class="btn btn-outline" style="padding:6px 10px;font-size:11px;background:#f0fdf4;color:#15803d;border-color:#86efac;font-weight:700;" onclick="markReplySentManual('${s.id}', '${s.email || ''}')">✅ 발송완료 체크(단계이동)</button>
                     <button class="btn btn-primary" id="btnSendInline_${s.id}" style="padding:6px 12px;font-size:12px;" onclick="sendInlineReply('${s.id}', '${s.email || ''}')">🚀 지금 바로 2차메일 발송</button>
                   </div>
                 </div>
@@ -1267,7 +1269,14 @@
           updateCounts();
           renderTable();
         } else {
-          alert('발송 실패: ' + (data.msg || (data.errors || []).join(', ')));
+          const errMsg = data.msg || (data.errors || []).join(', ');
+          if (errMsg.includes('5.4.5') || errMsg.includes('발송 한도') || errMsg.includes('limit')) {
+            if (confirm('⚠️ 현재 akrrntn1@gmail.com의 구글 SMTP 일일 발송 한도(500통)가 소진되었습니다.\n\n[확인]을 누르시면 본문이 자동 복사되고 [Gmail 웹 발송창]이 바로 열립니다!\n(또는 상단 [📧 Gmail 연동 설정]에서 보조 지메일/네이버메일을 1개 추가하시면 대시보드에서 바로 발송됩니다.)')) {
+              openGmailWebCompose(id, toEmail);
+            }
+          } else {
+            alert('발송 실패: ' + errMsg);
+          }
         }
       } catch (e) {
         alert('로컬 발송 서버(http://localhost:8090) 연결을 확인해주세요: ' + e);
@@ -1276,6 +1285,54 @@
           btnEl.disabled = false;
           btnEl.textContent = '🚀 지금 바로 메일 발송';
         }
+      }
+    }
+
+    async function openGmailWebCompose(id, toEmail) {
+      const subjEl = document.getElementById('replySubj_' + id);
+      const bodyEl = document.getElementById('replyBody_' + id);
+      if (!subjEl || !bodyEl) return;
+      const subject = subjEl.value.trim();
+      const body = bodyEl.value.trim();
+      if (!subject || !body) {
+        alert('먼저 [🤖 고니(AI) 셀러맞춤 답변 자동작성] 버튼을 눌러 내용을 채워주세요.');
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(body);
+        showToast('📋 답장 본문이 클립보드에 복사되었습니다! 열리는 지메일 창에서 바로 [보내기]를 누르세요.');
+      } catch (e) {}
+      const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(toEmail)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      window.open(gmailUrl, '_blank', 'width=860,height=760');
+    }
+
+    async function markReplySentManual(id, toEmail) {
+      const subjEl = document.getElementById('replySubj_' + id);
+      const bodyEl = document.getElementById('replyBody_' + id);
+      const subject = subjEl ? subjEl.value.trim() : '';
+      const body = bodyEl ? bodyEl.value.trim() : '';
+      const nowStr = new Date().toISOString().slice(0,16).replace('T',' ');
+      const idx = allSellers.findIndex(x => x.id === id);
+      if (idx !== -1) {
+        const curSt = allSellers[idx].stage;
+        const nextSt = (curSt === '4_직원오픈채팅이관' || curSt === '5_공구확정') ? curSt : '3_3차재진행조율';
+        allSellers[idx].stage = nextSt;
+        allSellers[idx].sent_2nd_at = nowStr;
+        if (subject) allSellers[idx].sent_2nd_subject = subject;
+        if (body) allSellers[idx].sent_2nd_body = body;
+        if (!(allSellers[idx].memo || '').includes('[2차답장 발송완료')) {
+          allSellers[idx].memo = `[2차답장 발송완료 ${nowStr}] ` + (allSellers[idx].memo || '');
+        }
+        await updateSeller(id, {
+          stage: nextSt,
+          memo: allSellers[idx].memo,
+          sent_2nd_at: nowStr,
+          sent_2nd_subject: allSellers[idx].sent_2nd_subject || '',
+          sent_2nd_body: allSellers[idx].sent_2nd_body || ''
+        });
+        showToast(`✅ [${toEmail}] 발송완료 처리 및 다음 단계 이동 완료!`);
+        updateCounts();
+        renderTable();
       }
     }
 

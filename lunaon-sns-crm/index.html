@@ -785,10 +785,16 @@
           if (igHandle) {
             snsContactBtns += `<a href="${igDmUrl}" target="_blank" class="btn" style="padding:5px 9px;font-size:11px;background:#fce7f3;color:#be185d;border:1px solid #fbcfe8;" onclick="copyDmScript('${safeName}', '인스타 DM')">📸 인스타 DM (@${igHandle})</a>`;
           }
+          if (s.youtube_url) {
+            snsContactBtns += `<a href="${s.youtube_url}" target="_blank" class="btn btn-outline" style="padding:4px 8px;font-size:11px;color:#dc2626;border-color:#fecaca;background:#fef2f2;">▶️ 유튜브</a>`;
+          }
+          if (s.tiktok_url) {
+            snsContactBtns += `<a href="${s.tiktok_url}" target="_blank" class="btn btn-outline" style="padding:4px 8px;font-size:11px;color:#059669;border-color:#a7f3d0;background:#ecfdf5;">🎬 네이버클립/숏폼</a>`;
+          }
           if (blogUrl) {
             snsContactBtns += `<a href="${blogUrl}" target="_blank" class="btn btn-outline" style="padding:4px 8px;font-size:11px;color:#15803d;border-color:#bbf7d0;">📗 블로그</a>`;
           }
-          if (s.linktree_url) {
+          if (s.linktree_url && s.linktree_url !== blogUrl) {
             snsContactBtns += `<a href="${s.linktree_url}" target="_blank" class="btn btn-outline" style="padding:4px 8px;font-size:11px;color:#0f766e;border-color:#99f6e4;">🔗 링크모음</a>`;
           }
           snsContactBtns += `<button class="btn btn-outline" style="padding:4px 8px;font-size:11px;" onclick="toggleContactEdit('${s.id}')">➕ 카톡/연락처 입력</button>`;
@@ -796,6 +802,7 @@
           const isTargetStage = (currentStage !== 'ALL' && s.stage === currentStage);
           const borderStyle = isTargetStage ? '2px solid #2563eb' : `1px solid ${alreadyReplied2nd ? '#86efac' : '#cbd5e1'}`;
           const replyTimeLabel = (s.reply_at || s.updated_at || '').slice(0, 16);
+          const followerTypeLabel = (s.source || '').includes('브랜드커넥트') ? '전채널 합산 구독·팔로워' : '인스타 팔로워';
 
           return `
             <div id="replyCard_${s.id}" style="border:${borderStyle};border-radius:10px;padding:13px 15px;background:${alreadyReplied2nd ? '#f0fdf4' : '#f8fafc'};display:flex;flex-direction:column;justify-content:space-between;gap:7px;">
@@ -813,7 +820,7 @@
                     </select>
                   </div>
                 </div>
-                <div style="font-size:12px;color:#475569;margin-top:3px;">📧 <strong>${s.email || ''}</strong> · 팔로워 ${Number(s.followers || 0).toLocaleString()}명 ${s.assigned_staff ? `· 담당: <strong>${s.assigned_staff}</strong>` : ''}</div>
+                <div style="font-size:12px;color:#475569;margin-top:3px;">📧 <strong>${s.email || ''}</strong> · ${followerTypeLabel} <strong>${Number(s.followers || 0).toLocaleString()}명</strong> ${s.assigned_staff ? `· 담당: <strong>${s.assigned_staff}</strong>` : ''}</div>
                 ${s.seller_traits ? `<div style="font-size:11px;color:#4338ca;background:#eef2ff;border:1px solid #c7d2fe;border-radius:5px;padding:4px 8px;margin-top:4px;font-weight:600;">📊 ${s.seller_traits}</div>` : ''}
 
                 <!-- 카카오톡 / 전화번호 / 인스타 DM 직통 액션 바 -->

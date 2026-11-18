@@ -627,18 +627,26 @@
         <div id="gmailPoolListBox" style="border:1px solid #cbd5e1;border-radius:8px;padding:8px 10px;background:#f8fafc;max-height:180px;overflow-y:auto;font-size:12px;"></div>
       </div>
 
-      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px;margin-bottom:14px;">
-        <div style="font-size:13px;font-weight:800;color:#1e3a8a;margin-bottom:6px;">➕ 발송용 구글(@gmail.com) 또는 네이버(@naver.com) 계정 추가</div>
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px;margin-bottom:10px;">
+        <div style="font-size:13px;font-weight:800;color:#1e3a8a;margin-bottom:6px;">➕ 발송용 계정(네이버 · 네이트 · 다음 · 구글) 1개씩 추가</div>
         <ol style="margin:4px 0 10px 18px;font-size:12px;color:#334155;">
-          <li><strong>구글(Gmail)</strong>: <a href="https://myaccount.google.com/apppasswords" target="_blank" class="link-a">구글 앱 비밀번호 발급 페이지(클릭)</a>에서 생성한 <strong>16자리 앱 비밀번호</strong> 입력 (한 번 등록하면 2차 인증 팝업 없이 영구 발송!)</li>
-          <li><strong>네이버(Naver)</strong>: 네이버 메일 좌측 하단 [환경설정] ➔ [POP3/IMAP 설정] ➔ <strong>POP3/SMTP 사용: '사용함'</strong> 저장 후 네이버 비밀번호(2단계 인증 시 애플리케이션 비밀번호) 입력</li>
+          <li><strong>네이버 / 네이트 / 다음</strong>: 메일 좌측 하단 [환경설정] ➔ [POP3/IMAP(SMTP) 설정] ➔ <strong>'사용함'</strong> 저장 후 비밀번호(2단계 인증 시 앱 비밀번호) 입력</li>
+          <li><strong>구글(Gmail)</strong>: <a href="https://myaccount.google.com/apppasswords" target="_blank" class="link-a">구글 앱 비밀번호 발급 페이지(클릭)</a>에서 생성한 <strong>16자리 앱 비밀번호</strong> 입력</li>
         </ol>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          <input type="text" id="poolEmailInput" class="inline-input" style="flex:1;min-width:170px;" placeholder="이메일 주소 (gmail 또는 naver)" />
-          <input type="text" id="poolPwInput" class="inline-input" style="flex:1;min-width:170px;" placeholder="앱 비밀번호 (또는 네이버 비번)" />
+          <input type="text" id="poolEmailInput" class="inline-input" style="flex:1;min-width:170px;" placeholder="이메일 주소 (naver, nate, daum, gmail)" />
+          <input type="text" id="poolPwInput" class="inline-input" style="flex:1;min-width:170px;" placeholder="비밀번호 (또는 앱 비밀번호)" />
           <input type="text" id="poolOwnerInput" class="inline-input" style="width:90px;" placeholder="구분/담당" />
           <button class="btn btn-primary" onclick="addGmailPoolAccount()">+ 검증 및 추가</button>
         </div>
+      </div>
+
+      <div style="background:#faf5ff;border:1px solid #d8b4fe;border-radius:8px;padding:12px;margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <strong style="font-size:13px;color:#5b21b6;">🚀 [100개 대량 등록] 여러 계정 한꺼번에 붙여넣기 (한 줄에 1개씩: <code>이메일 / 비밀번호</code>)</strong>
+          <button class="btn btn-primary" id="btnBulkAddPool" style="background:#7c3aed;padding:5px 12px;font-size:12px;" onclick="addBulkGmailPoolAccounts()">⚡ 붙여넣은 계정 일괄 검증 & 등록</button>
+        </div>
+        <textarea id="bulkPoolPasteInput" style="width:100%;height:95px;padding:8px;font-size:12px;border:1px solid #c084fc;border-radius:6px;background:#fff;" placeholder="예시 (슬래시, 쉼표, 공백 모두 인식됩니다):&#10;taobao_korea@naver.com / orange09&#10;myid2@nate.com / pass1234&#10;myid3@daum.net / app_pw_here"></textarea>
       </div>
 
       <div style="display:flex;justify-content:flex-end;gap:8px;">
@@ -2976,6 +2984,45 @@
         await loadGmailPoolList();
       } else {
         alert(data.msg || '추가 실패');
+      }
+    }
+
+    async function addBulkGmailPoolAccounts() {
+      const raw = (document.getElementById('bulkPoolPasteInput')?.value || '').trim();
+      if (!raw) {
+        alert('붙여넣을 계정 목록(이메일 / 비밀번호)을 입력해주세요.');
+        return;
+      }
+      const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      const btn = document.getElementById('btnBulkAddPool');
+      if (btn) { btn.disabled = true; btn.textContent = `⏳ ${lines.length}개 계정 검증 중...`; }
+      let okCnt = 0;
+      const failList = [];
+      for (const ln of lines) {
+        const parts = ln.split(/[\s,\/|\t]+/).map(x => x.trim()).filter(Boolean);
+        if (parts.length < 2) continue;
+        const email = parts[0];
+        const app_password = parts.slice(1).join('');
+        try {
+          const res = await smartApiFetch('/api/add_gmail_pool', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ email, app_password, owner: '대량등록' })
+          });
+          const data = await res.json();
+          if (data.ok) okCnt += 1;
+          else failList.push(`${email}: ${data.msg}`);
+        } catch (e) {
+          failList.push(`${email}: 서버 연결 오류`);
+        }
+      }
+      if (btn) { btn.disabled = false; btn.textContent = '⚡ 붙여넣은 계정 일괄 검증 & 등록'; }
+      await loadGmailPoolList();
+      if (failList.length === 0) {
+        alert(`🎉 총 ${okCnt}개 계정이 모두 정상 검증되어 발송 풀에 등록되었습니다!`);
+        document.getElementById('bulkPoolPasteInput').value = '';
+      } else {
+        alert(`✅ 성공: ${okCnt}개 / ❌ 실패: ${failList.length}개\n\n[실패 사유]\n${failList.slice(0, 10).join('\n')}`);
       }
     }
 

@@ -320,11 +320,14 @@
 
     <!-- 🧭 상단 화면 전환 탭 (클릭 즉시 스크롤 없이 해당 단계 화면으로 바로 전환!) -->
     <div style="background:#1e293b;color:#ffffff;padding:8px 14px;border-radius:10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-      <span style="font-size:13px;font-weight:800;">👆 아래 [1차 / 2차 / 3차 / 4차 / 5차 / 📅달력] 카드를 누르시면 스크롤 없이 해당 화면으로 즉시 전환됩니다!</span>
-      <span id="activeScreenIndicator" style="background:#2563eb;color:#fff;padding:3px 10px;border-radius:6px;font-size:12px;font-weight:800;">현재 화면: 📋 전체 통합 보기</span>
+      <span style="font-size:13px;font-weight:800;">👆 아래 [1차 / 2차 / 3차 / 4차 / 5차 / 📦샘플출고·송장 / 📅달력] 카드를 누르시면 스크롤 없이 해당 화면으로 즉시 전환됩니다!</span>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <button class="btn" style="background:#f59e0b;color:#0f172a;font-weight:900;padding:4px 11px;font-size:12px;border-radius:6px;" onclick="openBulkTrackingModal()">📦 송장번호 일괄 업로드 & 안내메일 자동발송</button>
+        <span id="activeScreenIndicator" style="background:#2563eb;color:#fff;padding:3px 10px;border-radius:6px;font-size:12px;font-weight:800;">현재 화면: 📋 전체 통합 보기</span>
+      </div>
     </div>
 
-    <div class="pipeline-grid" style="grid-template-columns: repeat(7, 1fr); margin-bottom: 14px;">
+    <div class="pipeline-grid" style="grid-template-columns: repeat(8, 1fr); margin-bottom: 14px;">
       <div class="stage-card active" onclick="setStageFilter('ALL')" id="stCard_ALL">
         <div class="st-title">📋 전체 통합화면</div>
         <div class="st-count" id="cnt_ALL">0</div>
@@ -341,9 +344,9 @@
         <div class="st-sub">👉 클릭 시 2차 답장창만 전환</div>
       </div>
       <div class="stage-card" onclick="setStageFilter('3_3차재진행조율')" id="stCard_3_3차재진행조율" style="border-left: 4px solid #7c3aed;">
-        <div class="st-title">3️⃣ 3차 재진행·샘플</div>
+        <div class="st-title">3️⃣ 3차 재진행·3차답변</div>
         <div class="st-count" id="cnt_3_3차재진행조율" style="color:#7c3aed;">0</div>
-        <div class="st-sub">👉 클릭 시 3차 조율창만 전환</div>
+        <div class="st-sub">👉 클릭 시 3차 답변·조율창 전환</div>
       </div>
       <div class="stage-card st-staff" onclick="setStageFilter('4_직원오픈채팅이관')" id="stCard_4_직원오픈채팅이관">
         <div class="st-title">4️⃣ 👥 신청접수·상담</div>
@@ -354,6 +357,11 @@
         <div class="st-title">5️⃣ 🎉 최종 공구확정</div>
         <div class="st-count" id="cnt_5_공구확정">0</div>
         <div class="st-sub">👉 클릭 시 최종확정 전환</div>
+      </div>
+      <div class="stage-card" onclick="setStageFilter('SAMPLE_SHIPPED')" id="stCard_SAMPLE_SHIPPED" style="border-left: 4px solid #d97706; background:#fffbeb;">
+        <div class="st-title" style="color:#b45309;">📦 실제품(샘플) 출고·송장</div>
+        <div class="st-count" id="cnt_SAMPLE_SHIPPED" style="color:#d97706;">0</div>
+        <div class="st-sub" style="color:#92400e;">👉 클릭 시 샘플출고·송장메일 전환</div>
       </div>
       <div class="stage-card" onclick="setStageFilter('CALENDAR')" id="stCard_CALENDAR" style="border-left: 4px solid #059669; background:#f0fdf4;">
         <div class="st-title" style="color:#166534;">📅 공구 오픈 달력</div>
@@ -670,6 +678,41 @@
     </div>
   </div>
 
+  <!-- 📦 실제품(샘플) 출고 송장번호 일괄 업로드 & 안내메일 자동발송 모달 -->
+  <div class="modal-backdrop" id="bulkTrackingModal">
+    <div class="modal" style="max-width:780px;">
+      <h3>📦 실제품(샘플) 출고 표시 & CJ대한통운 송장번호 일괄 업로드 · 안내메일 자동발송</h3>
+      <p style="margin-bottom:10px;font-size:12px;color:#475569;line-height:1.5;">
+        1) 아래 목록에서 실제품이 출고된 셀러 옆에 <strong>CJ대한통운 송장번호</strong>를 입력하시거나,<br>
+        2) 엑셀/택배프로그램에서 복사한 <code>셀러명(또는 이메일·전화번호) [탭/공백/쉼표] 송장번호</code>를 하단 입력창에 붙여넣고 <strong>[🚀 송장 저장 & 안내메일 일괄발송]</strong>을 누르시면 자동으로 출고 표시와 함께 셀러에게 송장 안내 메일이 발송됩니다!
+      </p>
+
+      <div style="margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <strong style="font-size:13px;color:#0f172a;">📋 3·4·5차 및 실제품 출고 대상 셀러 빠른 송장 입력표</strong>
+          <span style="font-size:11px;color:#b45309;font-weight:700;">💡 개별 카드에서도 [🚀 송장 안내메일 즉시발송]이 가능합니다.</span>
+        </div>
+        <div id="bulkTrackingTableBox" style="max-height:240px;overflow-y:auto;border:1px solid #cbd5e1;border-radius:8px;padding:8px;background:#f8fafc;"></div>
+      </div>
+
+      <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:10px 12px;margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+          <strong style="font-size:12px;color:#92400e;">📥 엑셀/택배 송장 대량 붙여넣기 (한 줄에 한 명씩: <code>셀러명 또는 이메일 또는 연락처   송장번호</code>)</strong>
+          <button class="btn btn-outline" style="padding:3px 9px;font-size:11px;background:#fff;" onclick="applyPastedTrackingToRows()">🔍 붙여넣은 송장번호 자동 매칭하기</button>
+        </div>
+        <textarea id="bulkTrackingPasteInput" style="width:100%;height:90px;padding:8px;font-size:12px;border:1px solid #fde68a;border-radius:6px;background:#fff;" placeholder="예시:&#10;박은정 651234567890&#10;이연경 651234567891&#10;wlsgml850@naver.com 651234567892"></textarea>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+        <button class="btn btn-outline" onclick="saveBulkTrackingWithoutMail()">💾 메일 발송 없이 [실제품 출고·송장번호]만 일괄 저장</button>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-outline" onclick="closeBulkTrackingModal()">닫기</button>
+          <button class="btn btn-primary" id="btnBulkSendTracking" style="background:#d97706;font-weight:800;" onclick="sendBulkTrackingEmails()">🚀 송장 저장 & 송장번호 안내메일 일괄 발송</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toastBox"></div>
 
   <script>
@@ -795,18 +838,26 @@
         if (el) el.textContent = c.toLocaleString();
       });
 
+      const shippedCnt = allSellers.filter(s => Boolean(s.sample_shipped || s.tracking_number)).length;
+      const elShipped = document.getElementById('cnt_SAMPLE_SHIPPED');
+      if (elShipped) elShipped.textContent = shippedCnt.toLocaleString();
+
       const confirmed = allSellers.filter(s => s.stage === '5_공구확정').length;
       const activePipe = allSellers.filter(s => ['2_2차회신도착', '3_3차재진행조율', '4_직원오픈채팅이관'].includes(s.stage)).length;
       const sentCnt = allSellers.filter(s => s.stage === '1_1차제안메일').length;
       const pct = Math.min(100, Math.round((confirmed / 100) * 100));
       document.getElementById('goalProgressFill').style.width = pct + '%';
       document.getElementById('goalProgressText').textContent = `${confirmed} / 100명 (${pct}%)`;
-      document.getElementById('goalSummaryText').textContent = `현재 공구확정 ${confirmed}명 | 2차 회신(답장) 도착 ${activePipe}명 | 1차 제안 정상도달 ${sentCnt.toLocaleString()}명`;
+      document.getElementById('goalSummaryText').textContent = `현재 공구확정 ${confirmed}명 | 샘플출고 ${shippedCnt}명 | 2·3·4차 회신·조율 ${activePipe}명 | 1차 제안 정상도달 ${sentCnt.toLocaleString()}명`;
 
-      // 실시간 2차 회신 하이라이트 보드 렌더링 (상단 클릭한 단계 최우선 정렬 + 먼저 답변한 셀러 순 정렬)
-      let repliedSellers = allSellers.filter(s => ['2_2차회신도착', '3_3차재진행조율', '4_직원오픈채팅이관', '5_공구확정'].includes(s.stage));
+      // 실시간 2차·3차 회신 하이라이트 보드 렌더링 (상단 클릭한 단계 최우선 정렬 + 먼저 답변한 셀러 순 정렬)
+      let repliedSellers = allSellers.filter(s => ['2_2차회신도착', '3_3차재진행조율', '4_직원오픈채팅이관', '5_공구확정'].includes(s.stage) || Boolean(s.sample_shipped || s.tracking_number));
       const onlySelected = document.getElementById('chkOnlySelectedStage')?.checked;
-      if (onlySelected && ['2_2차회신도착', '3_3차재진행조율', '4_직원오픈채팅이관', '5_공구확정'].includes(currentStage)) {
+      if (currentStage === 'SAMPLE_SHIPPED') {
+        const shippedList = repliedSellers.filter(s => Boolean(s.sample_shipped || s.tracking_number));
+        // 만약 아직 출고 체크된 인원이 0명이면 4·5·3차 신청접수 셀러를 바로 출고 체크할 수 있도록 함께 표시
+        repliedSellers = shippedList.length > 0 ? shippedList : repliedSellers.filter(s => ['4_직원오픈채팅이관', '5_공구확정', '3_3차재진행조율'].includes(s.stage));
+      } else if (onlySelected && ['2_2차회신도착', '3_3차재진행조율', '4_직원오픈채팅이관', '5_공구확정'].includes(currentStage)) {
         repliedSellers = repliedSellers.filter(s => s.stage === currentStage);
       }
 
@@ -819,24 +870,25 @@
 
       const stageLblEl = document.getElementById('currentStageSortLabel');
       if (stageLblEl) {
-        const stName = STAGE_LABELS[currentStage] || '전체(확정➔4차➔3차➔2차)';
+        const stName = currentStage === 'SAMPLE_SHIPPED' ? '📦 실제품(샘플) 출고·송장관리' : (STAGE_LABELS[currentStage] || '전체(확정➔4차➔3차➔2차)');
         const sortName = currentReplySort === 'FIRST_REPLY' ? '제일 먼저 답변한 순' : (currentReplySort === 'LATEST_REPLY' ? '최근 답변/처리 순' : '팔로워 많은 순');
         stageLblEl.textContent = `📌 우선순위: [${stName}] 최상단 + [${sortName}]`;
       }
 
       repliedSellers.sort((a, b) => {
-        // 1순위: 상단에서 클릭한 단계(currentStage)가 있으면 그 단계를 무조건 맨 위(0순위)로 배치!
-        if (currentStage !== 'ALL') {
+        if (currentStage === 'SAMPLE_SHIPPED') {
+          const aSh = (a.sample_shipped || a.tracking_number) ? 0 : 1;
+          const bSh = (b.sample_shipped || b.tracking_number) ? 0 : 1;
+          if (aSh !== bSh) return aSh - bSh;
+        } else if (currentStage !== 'ALL') {
           const aMatch = a.stage === currentStage ? 0 : 1;
           const bMatch = b.stage === currentStage ? 0 : 1;
           if (aMatch !== bMatch) return aMatch - bMatch;
         }
-        // 2순위: 진행단계 높은 순 (5_공구확정 -> 4_직원오픈채팅 -> 3_3차재진행 -> 2_2차회신)
         const sa = STAGE_PRIORITY_DEFAULT[a.stage] !== undefined ? STAGE_PRIORITY_DEFAULT[a.stage] : 9;
         const sb = STAGE_PRIORITY_DEFAULT[b.stage] !== undefined ? STAGE_PRIORITY_DEFAULT[b.stage] : 9;
         if (sa !== sb) return sa - sb;
 
-        // 3순위: 제일 먼저 답변한 셀러부터 (reply_at 오름차순) 또는 선택한 정렬 기준
         const ta = (a.reply_at || a.updated_at || '9999-99-99').slice(0, 16);
         const tb = (b.reply_at || b.updated_at || '9999-99-99').slice(0, 16);
         if (currentReplySort === 'FIRST_REPLY') {
@@ -856,14 +908,26 @@
       const badge = document.getElementById('replySummaryBadge');
       if (box && grid && (repliedSellers.length > 0 || onlySelected)) {
         box.style.display = 'block';
-        badge.textContent = `표시 ${repliedSellers.length}건 (3차 재진행 ${allSellers.filter(x=>x.stage==='3_3차재진행조율').length}명 / 2차 회신대기 ${allSellers.filter(x=>x.stage==='2_2차회신도착').length}명)`;
+        badge.textContent = `표시 ${repliedSellers.length}건 (3차 재진행 ${allSellers.filter(x=>x.stage==='3_3차재진행조율').length}명 / 샘플출고 ${shippedCnt}명 / 2차 회신대기 ${allSellers.filter(x=>x.stage==='2_2차회신도착').length}명)`;
         grid.innerHTML = repliedSellers.map((s, orderIdx) => {
           const safeName = (s.display_name || s.seller_id).split('(')[0].trim().replace(/'/g, "");
           const fullLabel = (s.display_name || s.seller_id).replace(/'/g, "");
-          const alreadyReplied2nd = Boolean(s.sent_2nd_body) || (s.memo || '').includes('[2차답장 발송완료') || s.stage === '3_3차재진행조율' || s.stage === '5_공구확정';
-          const statusBadgeStyle = alreadyReplied2nd ? 'background:#dcfce7;color:#15803d;' : 'background:#dbeafe;color:#1d4ed8;';
-          const defaultSubj = s.sent_2nd_subject || `Re: [루나온 그래핀 발열이불] ${safeName}님 회신 감사드리며, 공동구매 상세 진행 방식 및 샘플 발송 안내드립니다.`;
-          const defaultBody = s.sent_2nd_body || getSecondReplyText(safeName);
+          const isStage345 = ['3_3차재진행조율', '4_직원오픈채팅이관', '5_공구확정'].includes(s.stage);
+          const alreadyReplied2nd = Boolean(s.sent_2nd_body) || (s.memo || '').includes('[2차답장 발송완료') || isStage345;
+          const alreadyReplied3rd = Boolean(s.sent_3rd_body) || (s.memo || '').includes('[3차답장 발송완료') || (s.memo || '').includes('[송장안내 발송완료');
+          const isSampleShipped = Boolean(s.sample_shipped || s.tracking_number);
+
+          const statusBadgeStyle = isSampleShipped ? 'background:#fef3c7;color:#b45309;border-color:#f59e0b;font-weight:800;' : (alreadyReplied2nd ? 'background:#dcfce7;color:#15803d;' : 'background:#dbeafe;color:#1d4ed8;');
+          const secondSubj = s.sent_2nd_subject || `Re: [루나온 그래핀 발열이불] ${safeName}님 회신 감사드리며, 공동구매 상세 진행 방식 및 샘플 발송 안내드립니다.`;
+          const secondBody = s.sent_2nd_body || getSecondReplyText(safeName);
+
+          // 3차 셀러는 3차 전용 제목과 깨끗한 3차 작성창(또는 기존 3차 발송분)으로 시작!
+          const editorDefaultSubj = isStage345
+            ? (s.sent_3rd_subject || `Re: [루나온 그래핀 발열이불] ${safeName}님 공동구매 진행 및 샘플 출고·전용 링크(3차) 안내드립니다.`)
+            : secondSubj;
+          const editorDefaultBody = isStage345
+            ? (s.sent_3rd_body || s.third_reply_draft || '')
+            : (s.sent_2nd_body || '');
 
           let cardStageOpts = '';
           Object.keys(STAGE_LABELS).forEach(k => {
@@ -886,7 +950,6 @@
           const blogUrl = s.blog_url || ((s.profile_url || '').includes('blog.naver.com') ? s.profile_url : '');
 
           let snsContactBtns = '';
-          // 1) 카카오톡 오픈채팅 또는 전화번호(카톡 친구추가) 버튼
           if (s.kakao_url) {
             const isUrl = s.kakao_url.startsWith('http');
             if (isUrl) {
@@ -898,7 +961,6 @@
           if (s.phone) {
             snsContactBtns += `<button class="btn btn-kakao" style="padding:5px 9px;font-size:11px;background:#fef08a;border:1px solid #eab308;" onclick="copyTextWithToast('${s.phone}', '연락처 [${s.phone}] 복사완료! 카카오톡 연락처 친구추가 또는 문자로 대화하세요.')">📞 ${s.phone} (카톡/전화 복사)</button>`;
           }
-          // 2) 인스타그램 DM 바로가기 버튼
           if (igHandle) {
             snsContactBtns += `<a href="${igDmUrl}" target="_blank" class="btn" style="padding:5px 9px;font-size:11px;background:#fce7f3;color:#be185d;border:1px solid #fbcfe8;" onclick="copyDmScript('${safeName}', '인스타 DM')">📸 인스타 DM (@${igHandle})</a>`;
           }
@@ -916,19 +978,21 @@
           }
           snsContactBtns += `<button class="btn btn-outline" style="padding:4px 8px;font-size:11px;" onclick="toggleContactEdit('${s.id}')">➕ 카톡/연락처 입력</button>`;
 
-          const isTargetStage = (currentStage !== 'ALL' && s.stage === currentStage);
-          const borderStyle = isTargetStage ? '2px solid #2563eb' : `1px solid ${alreadyReplied2nd ? '#86efac' : '#cbd5e1'}`;
+          const isTargetStage = (currentStage !== 'ALL' && s.stage === currentStage) || (currentStage === 'SAMPLE_SHIPPED' && isSampleShipped);
+          const borderStyle = isSampleShipped ? '2px solid #d97706' : (isTargetStage ? '2px solid #2563eb' : `1px solid ${alreadyReplied2nd ? '#86efac' : '#cbd5e1'}`);
+          const cardBgColor = isSampleShipped ? '#fffbeb' : (alreadyReplied2nd ? '#f0fdf4' : '#f8fafc');
           const replyTimeLabel = (s.reply_at || s.updated_at || '').slice(0, 16);
           const followerTypeLabel = (s.source || '').includes('브랜드커넥트') ? '전채널 합산 구독·팔로워' : '인스타 팔로워';
 
           return `
-            <div id="replyCard_${s.id}" style="border:${borderStyle};border-radius:10px;padding:13px 15px;background:${alreadyReplied2nd ? '#f0fdf4' : '#f8fafc'};display:flex;flex-direction:column;justify-content:space-between;gap:7px;">
+            <div id="replyCard_${s.id}" style="border:${borderStyle};border-radius:10px;padding:13px 15px;background:${cardBgColor};display:flex;flex-direction:column;justify-content:space-between;gap:7px;">
               <div>
-                <!-- 상단 순번 + 셀러명 + 답장도착시각 + 진행단계 선택 -->
+                <!-- 상단 순번 + 셀러명 + 실제품 출고 배지 + 답장도착시각 + 진행단계 선택 -->
                 <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;">
-                  <span style="font-weight:800;font-size:14px;color:#0f172a;">
-                    <span style="display:inline-block;background:#0f172a;color:#fff;font-size:11px;padding:2px 7px;border-radius:99px;margin-right:4px;">#${orderIdx + 1}</span>
+                  <span style="font-weight:800;font-size:14px;color:#0f172a;display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
+                    <span style="display:inline-block;background:#0f172a;color:#fff;font-size:11px;padding:2px 7px;border-radius:99px;">#${orderIdx + 1}</span>
                     ${fullLabel} <a href="${igUrl || s.profile_url}" target="_blank" class="link-a" style="font-size:12px;">(@${igHandle || s.seller_id})</a>
+                    ${isSampleShipped ? `<span style="background:#d97706;color:#fff;font-size:11px;padding:2px 8px;border-radius:6px;font-weight:900;">📦 실제품 출고완료 ${s.tracking_number ? `(CJ: ${s.tracking_number})` : ''}</span>` : ''}
                   </span>
                   <div style="display:flex;align-items:center;gap:5px;">
                     ${replyTimeLabel ? `<span style="font-size:11px;font-weight:700;color:#475569;background:#e2e8f0;padding:3px 7px;border-radius:5px;">⏳ 답장: ${replyTimeLabel.slice(5)}</span>` : ''}
@@ -940,8 +1004,20 @@
                 <div style="font-size:12px;color:#475569;margin-top:3px;">📧 <strong>${s.email || ''}</strong> · ${followerTypeLabel} <strong>${Number(s.followers || 0).toLocaleString()}명</strong> ${s.assigned_staff ? `· 담당: <strong>${s.assigned_staff}</strong>` : ''}</div>
                 ${s.seller_traits ? `<div style="font-size:11px;color:#4338ca;background:#eef2ff;border:1px solid #c7d2fe;border-radius:5px;padding:4px 8px;margin-top:4px;font-weight:600;">📊 ${s.seller_traits}</div>` : ''}
 
+                <!-- 📦 [신규] 실제품(샘플) 출고 따로 표기 & CJ대한통운 송장번호 업로드 시 즉시 메일발송 바 -->
+                <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-top:6px;padding:6px 9px;background:${isSampleShipped ? '#fef3c7' : '#fff7ed'};border:1px solid ${isSampleShipped ? '#f59e0b' : '#fed7aa'};border-radius:7px;font-size:11px;">
+                  <label style="display:flex;align-items:center;gap:4px;font-weight:900;color:#b45309;cursor:pointer;">
+                    <input type="checkbox" id="chkShipped_${s.id}" ${isSampleShipped ? 'checked' : ''} onchange="toggleSampleShipped('${s.id}', this.checked)" />
+                    📦 실제품(샘플) 출고표시
+                  </label>
+                  <input type="text" id="cardTrkNum_${s.id}" class="inline-input" style="width:155px;padding:3px 7px;font-size:11px;font-weight:800;background:#fff;border-color:#f59e0b;" placeholder="CJ대한통운 송장번호 입력" value="${(s.tracking_number || '').replace(/"/g, '&quot;')}" />
+                  <button class="btn btn-outline" style="padding:3px 8px;font-size:11px;background:#fff;color:#92400e;border-color:#f59e0b;font-weight:700;" onclick="saveCardTracking('${s.id}', 'cardTrkNum_${s.id}')">💾 출고·송장저장</button>
+                  <button class="btn btn-primary" id="btnTrkMail_${s.id}" style="padding:3px 9px;font-size:11px;background:#d97706;font-weight:800;" onclick="sendTrackingMailNow('${s.id}', '${s.email || ''}', '${safeName}', 'cardTrkNum_${s.id}')">🚀 송장번호 안내메일 즉시발송</button>
+                  ${s.sample_shipped_at ? `<span style="font-size:10px;color:#92400e;font-weight:700;">(출고: ${s.sample_shipped_at.slice(5,16)})</span>` : ''}
+                </div>
+
                 <!-- 카카오톡 / 전화번호 / 인스타 DM 직통 액션 바 -->
-                <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-top:6px;padding:6px 8px;background:#ffffff;border:1px solid #e2e8f0;border-radius:7px;">
+                <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-top:5px;padding:6px 8px;background:#ffffff;border:1px solid #e2e8f0;border-radius:7px;">
                   ${snsContactBtns}
                   <button class="btn btn-outline" style="padding:4px 8px;font-size:11px;background:#faf5ff;color:#6d28d9;border-color:#d8b4fe;font-weight:700;" onclick="openScheduleModal('${s.id}')">📅 달력 일정기입 ${s.schedule_start ? `(${s.schedule_start.slice(5)})` : ''}</button>
                 </div>
@@ -967,21 +1043,26 @@
                   </div>
                 </div>
 
-                <!-- 메일 수발신 히스토리 버튼 바 (1차 보낸메일 / 2차 보낸메일 확인용) -->
+                <!-- 메일 수발신 히스토리 버튼 바 (1차 / 2차 / 3차 보낸메일 확인용) -->
                 <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:7px;">
                   <button class="btn btn-outline" style="padding:4px 9px;font-size:11px;color:#1d4ed8;border-color:#93c5fd;background:#eff6ff;" onclick="toggleFirstMail('${s.id}')">
-                    📤 1차 보낸메일 내용 보기 (${firstMailAt.slice(5,16)})
+                    📤 1차 보낸메일 보기 (${firstMailAt.slice(5,16)})
                   </button>
                   ${alreadyReplied2nd ? `
                     <button class="btn btn-outline" style="padding:4px 9px;font-size:11px;color:#15803d;border-color:#86efac;background:#dcfce7;" onclick="toggleSecondMailView('${s.id}')">
-                      📤 2차 보낸메일 내용 보기 (${(s.sent_2nd_at || '발송완료').slice(5,16)})
+                      📤 2차 보낸메일 보기 (${(s.sent_2nd_at || '발송완료').slice(5,16)})
                     </button>
                   ` : `
                     <span style="font-size:11px;color:#dc2626;font-weight:700;padding:4px 6px;">⏳ 2차 답변 메일 미발송 (발송 대기)</span>
                   `}
+                  ${alreadyReplied3rd ? `
+                    <button class="btn btn-outline" style="padding:4px 9px;font-size:11px;color:#6d28d9;border-color:#c084fc;background:#f3e8ff;font-weight:800;" onclick="toggleThirdMailView('${s.id}')">
+                      📤 3차/송장 보낸메일 보기 (${(s.sent_3rd_at || '발송완료').slice(5,16)})
+                    </button>
+                  ` : (isStage345 ? `<span style="font-size:11px;color:#7c3aed;font-weight:800;padding:4px 6px;">🟣 3차 답변/송장메일 발송 가능</span>` : '')}
                 </div>
 
-                <!-- [1단계] 우리가 보낸 1차 제안메일 원문 표시 영역 (클릭 시 펼쳐짐) -->
+                <!-- [1단계] 우리가 보낸 1차 제안메일 원문 표시 영역 -->
                 <div id="firstMailBox_${s.id}" style="display:none;margin-top:6px;background:#eff6ff;border:1px solid #93c5fd;border-radius:6px;padding:9px 11px;font-size:11px;color:#1e3a8a;">
                   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
                     <strong>📤 [1차 보낸 메일 원문] 발송일시: ${firstMailAt} | 첨부: 루나온_그래핀이불_제안서_v2.xlsx</strong>
@@ -991,9 +1072,15 @@
                   <pre style="white-space:pre-wrap;font-family:inherit;line-height:1.45;max-height:180px;overflow-y:auto;background:#fff;padding:7px 9px;border-radius:4px;border:1px solid #dbeafe;color:#334155;">${firstMailBody}</pre>
                 </div>
 
-                <!-- [2단계] 좌측: 셀러 답장 원문 / 우측: 우리만 보는 내부 특징 메모장 (나란히 배치) -->
+                <!-- [2단계] 좌측: 셀러 답장 원문(2차 추가회신 포함) / 우측: 우리만 보는 내부 특징 메모장 -->
                 <div style="display:grid;grid-template-columns:1.15fr 0.85fr;gap:8px;margin-top:6px;">
-                  <div style="font-size:12px;color:#0f172a;background:#fff;border:1px solid #cbd5e1;border-left:4px solid #2563eb;border-radius:6px;padding:9px 11px;line-height:1.55;max-height:155px;overflow-y:auto;">
+                  <div style="font-size:12px;color:#0f172a;background:#fff;border:1px solid #cbd5e1;border-left:4px solid ${s.reply_2nd_text ? '#7c3aed' : '#2563eb'};border-radius:6px;padding:9px 11px;line-height:1.55;max-height:165px;overflow-y:auto;">
+                    ${s.reply_2nd_text ? `
+                      <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:5px;padding:6px 8px;margin-bottom:6px;">
+                        <div style="font-size:11px;font-weight:900;color:#6d28d9;margin-bottom:2px;">🔥 [셀러 2차 추가 회신 / 신청서 도착] ${s.reply_2nd_at ? `(${s.reply_2nd_at.slice(5,16)})` : ''}</div>
+                        <div style="white-space:pre-line;color:#1e1b4b;font-weight:600;">${s.reply_2nd_text}</div>
+                      </div>
+                    ` : ''}
                     <div style="font-size:11px;font-weight:800;color:#1d4ed8;margin-bottom:3px;">📥 [셀러 답장 도착 원문] ${s.reply_at ? `(${s.reply_at.slice(5,16)})` : ''}</div>
                     <div style="white-space:pre-line;">${cleanReplyText}</div>
                   </div>
@@ -1009,47 +1096,76 @@
                   </div>
                 </div>
 
-                <!-- [3단계] 우리가 보낸 2차 답변메일 원문 표시 영역 (클릭 시 펼쳐짐) -->
+                <!-- [3단계] 우리가 보낸 2차 답변메일 원문 표시 영역 -->
                 <div id="secondMailViewBox_${s.id}" style="display:none;margin-top:6px;background:#f0fdf4;border:1px solid #86efac;border-radius:6px;padding:9px 11px;font-size:11px;color:#14532d;">
                   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
                     <strong>📤 [우리가 보낸 2차 답변메일 원문] 발송일시: ${s.sent_2nd_at || '발송완료'}</strong>
                     <button class="btn btn-outline" style="padding:1px 6px;font-size:10px;" onclick="toggleSecondMailView('${s.id}')">닫기</button>
                   </div>
-                  <div style="font-weight:700;margin-bottom:4px;color:#15803d;">제목: ${defaultSubj}</div>
-                  <pre style="white-space:pre-wrap;font-family:inherit;line-height:1.45;max-height:180px;overflow-y:auto;background:#fff;padding:7px 9px;border-radius:4px;border:1px solid #bbf7d0;color:#334155;">${defaultBody}</pre>
+                  <div style="font-weight:700;margin-bottom:4px;color:#15803d;">제목: ${secondSubj}</div>
+                  <pre style="white-space:pre-wrap;font-family:inherit;line-height:1.45;max-height:180px;overflow-y:auto;background:#fff;padding:7px 9px;border-radius:4px;border:1px solid #bbf7d0;color:#334155;">${secondBody}</pre>
+                </div>
+
+                <!-- [4단계] 우리가 보낸 3차/송장 답변메일 원문 표시 영역 -->
+                <div id="thirdMailViewBox_${s.id}" style="display:none;margin-top:6px;background:#faf5ff;border:1px solid #c084fc;border-radius:6px;padding:9px 11px;font-size:11px;color:#4c1d95;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                    <strong>📤 [우리가 보낸 3차/송장 안내메일 원문] 발송일시: ${s.sent_3rd_at || '발송완료'}</strong>
+                    <button class="btn btn-outline" style="padding:1px 6px;font-size:10px;" onclick="toggleThirdMailView('${s.id}')">닫기</button>
+                  </div>
+                  <div style="font-weight:700;margin-bottom:4px;color:#6d28d9;">제목: ${s.sent_3rd_subject || ''}</div>
+                  <pre style="white-space:pre-wrap;font-family:inherit;line-height:1.45;max-height:180px;overflow-y:auto;background:#fff;padding:7px 9px;border-radius:4px;border:1px solid #e9d5ff;color:#334155;">${s.sent_3rd_body || ''}</pre>
                 </div>
               </div>
 
-              <!-- 하단 작업 버튼 -->
+              <!-- 하단 작업 버튼 (2차 셀러는 2차 답장쓰기 / 3·4·5차 셀러는 3차 답변·송장 메일쓰기) -->
               <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;align-items:center;">
-                <button class="btn ${alreadyReplied2nd ? 'btn-green' : 'btn-primary'}" style="padding:6px 11px;font-size:12px;" onclick="toggleInlineReply('${s.id}')">
-                  ${alreadyReplied2nd ? '✉️ 2차 답장 수정/추가발송' : '✉️ 여기서 바로 2차 답장쓰기'}
+                <button class="btn" style="padding:6px 12px;font-size:12px;font-weight:800;background:${isStage345 ? '#7c3aed' : '#2563eb'};color:#fff;" onclick="toggleInlineReply('${s.id}')">
+                  ${isStage345 ? '✉️ 여기서 바로 3차 답변·송장 메일쓰기' : '✉️ 여기서 바로 2차 답장쓰기'}
                 </button>
+                ${isStage345 ? `
+                  <button class="btn btn-outline" style="padding:5px 10px;font-size:11px;background:#faf5ff;color:#6d28d9;border-color:#c084fc;font-weight:700;" onclick="openThirdReplyWithDraft('${s.id}', '${safeName}')">🎉 3차 신청접수·일정조율 초안으로 바로 열기</button>
+                ` : ''}
                 <button class="btn btn-outline" style="padding:5px 9px;font-size:11px;" onclick="updateSeller('${s.id}', {stage: '1_1차제안메일', memo: '[거절/보류제외] ' + (allSellers.find(x=>x.id==='${s.id}')?.memo||'')})">❌ 보류/제외</button>
               </div>
 
-              <!-- 인라인 2차 답장 에디터 (자동 문구 없이 공란으로 시작하여 셀러별 맞춤 작성) -->
-              <div id="inlineReplyBox_${s.id}" style="display:none;margin-top:8px;padding-top:10px;border-top:2px dashed #cbd5e1;background:#ffffff;padding:10px;border-radius:8px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex-wrap:wrap;gap:4px;">
-                  <span style="font-size:11px;font-weight:700;color:#1d4ed8;">📤 2차 답장 받는사람: ${s.email || ''} (${safeName}님)</span>
+              <!-- 인라인 2차 / 3차 답장 에디터 -->
+              <div id="inlineReplyBox_${s.id}" style="display:none;margin-top:8px;padding-top:10px;border-top:2px dashed ${isStage345 ? '#a855f7' : '#cbd5e1'};background:#ffffff;padding:10px;border-radius:8px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;flex-wrap:wrap;gap:4px;">
+                  <span style="font-size:11px;font-weight:800;color:${isStage345 ? '#6d28d9' : '#1d4ed8'};">
+                    📤 ${isStage345 ? '3차 답변 / 진행조율 / 송장안내 메일 받는사람' : '2차 답장 받는사람'}: ${s.email || ''} (${safeName}님)
+                  </span>
                   <div style="display:flex;gap:4px;flex-wrap:wrap;">
-                    <button class="btn btn-primary" style="padding:3px 9px;font-size:11px;background:#7c3aed;" onclick="fillGoniCustomDraft('${s.id}', '${safeName}')">🤖 고니(AI) 셀러맞춤 답변 자동작성</button>
-                    <button class="btn btn-outline" style="padding:2px 8px;font-size:10px;background:#fefce8;color:#854d0e;border-color:#fde047;" onclick="fillSecondTemplate('${s.id}', '${safeName}')">📋 기본 2차안내문 넣기</button>
+                    <button class="btn btn-primary" style="padding:3px 9px;font-size:11px;background:#7c3aed;" onclick="${isStage345 ? `fillGoniThirdDraft('${s.id}', '${safeName}')` : `fillGoniCustomDraft('${s.id}', '${safeName}')`}">
+                      🤖 고니(AI) ${isStage345 ? '3차 맞춤답변' : '셀러맞춤 답변'} 자동작성
+                    </button>
                     <button class="btn btn-outline" style="padding:2px 8px;font-size:10px;background:#f0fdf4;color:#15803d;border-color:#86efac;font-weight:700;" onclick="fillThirdTemplate('${s.id}', '${safeName}')">🎉 3차 신청접수·샘플출고 초안 넣기</button>
-                    <button class="btn btn-outline" style="padding:2px 7px;font-size:10px;color:#1d4ed8;" onclick="toggleFirstMail('${s.id}')">📤 1차 보낸메일 확인</button>
+                    <button class="btn btn-outline" style="padding:2px 8px;font-size:10px;background:#fffbeb;color:#b45309;border-color:#fcd34d;font-weight:800;" onclick="fillTrackingTemplate('${s.id}', '${safeName}', 'cardTrkNum_${s.id}')">📦 송장번호 발송 안내초안 넣기</button>
+                    <button class="btn btn-outline" style="padding:2px 8px;font-size:10px;background:#fefce8;color:#854d0e;border-color:#fde047;" onclick="fillSecondTemplate('${s.id}', '${safeName}')">📋 기본 2차안내문 넣기</button>
                   </div>
                 </div>
-                <input type="text" id="replySubj_${s.id}" class="inline-input" style="margin-bottom:6px;font-weight:700;font-size:12px;" value="${defaultSubj.replace(/"/g, '&quot;')}" />
-                <textarea id="replyBody_${s.id}" style="width:100%;height:210px;padding:8px;font-size:12px;line-height:1.45;border:1px solid #cbd5e1;border-radius:6px;resize:vertical;" placeholder="셀러의 답장 내용을 먼저 확인하신 후, 질문에 맞게 직접 답변을 작성하세요. (표준 안내문이 필요하면 우측 위 [📋 2차 기본안내문 불러오기] 버튼을 누르세요)">${s.sent_2nd_body || ''}</textarea>
+                <input type="text" id="replySubj_${s.id}" class="inline-input" style="margin-bottom:6px;font-weight:700;font-size:12px;" value="${editorDefaultSubj.replace(/"/g, '&quot;')}" />
+                <textarea id="replyBody_${s.id}" style="width:100%;height:210px;padding:8px;font-size:12px;line-height:1.45;border:1px solid #cbd5e1;border-radius:6px;resize:vertical;" placeholder="${isStage345 ? '3차 답변 내용을 자유롭게 작성하시거나 위 [🤖 고니 3차 맞춤답변] / [🎉 3차 신청접수 초안] / [📦 송장번호 안내초안] 버튼을 누르세요.' : '셀러의 답장 내용을 확인하신 후 질문에 맞게 답변을 작성하세요.'}">${editorDefaultBody}</textarea>
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;flex-wrap:wrap;gap:6px;">
-                  <label style="font-size:11px;font-weight:700;color:#334155;display:flex;align-items:center;gap:4px;cursor:pointer;">
-                    <input type="checkbox" id="replyAttach_${s.id}" checked /> 📎 제안서(루나온_그래핀이불_제안서_v2.xlsx) 함께 첨부
-                  </label>
+                  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                    <label style="font-size:11px;font-weight:700;color:#334155;display:flex;align-items:center;gap:4px;cursor:pointer;">
+                      <input type="checkbox" id="replyAttach_${s.id}" ${isStage345 ? '' : 'checked'} /> 📎 제안서(v2.xlsx) 첨부
+                    </label>
+                    <label style="font-size:11px;font-weight:700;color:#5b21b6;display:flex;align-items:center;gap:4px;">
+                      발송 후 단계:
+                      <select id="replyNextStage_${s.id}" class="stage-select" style="padding:2px 6px;font-size:11px;">
+                        <option value="3_3차재진행조율" ${!isStage345 || s.stage === '3_3차재진행조율' ? 'selected' : ''}>3. 3차 재진행·샘플</option>
+                        <option value="4_직원오픈채팅이관" ${s.stage === '4_직원오픈채팅이관' ? 'selected' : ''}>4. 👥 신청접수·상담</option>
+                        <option value="5_공구확정" ${s.stage === '5_공구확정' ? 'selected' : ''}>5. 🎉 최종 공구확정</option>
+                      </select>
+                    </label>
+                  </div>
                   <div style="display:flex;gap:6px;flex-wrap:wrap;">
                     <button class="btn btn-outline" style="padding:6px 10px;font-size:11px;" onclick="toggleInlineReply('${s.id}')">닫기</button>
-                    <button class="btn btn-outline" style="padding:6px 10px;font-size:11px;background:#eff6ff;color:#1d4ed8;border-color:#93c5fd;font-weight:700;" onclick="openGmailWebCompose('${s.id}', '${s.email || ''}')">🌐 지메일 웹창으로 열기 (한도초과 시)</button>
-                    <button class="btn btn-outline" style="padding:6px 10px;font-size:11px;background:#f0fdf4;color:#15803d;border-color:#86efac;font-weight:700;" onclick="markReplySentManual('${s.id}', '${s.email || ''}')">✅ 발송완료 체크(단계이동)</button>
-                    <button class="btn btn-primary" id="btnSendInline_${s.id}" style="padding:6px 12px;font-size:12px;" onclick="sendInlineReply('${s.id}', '${s.email || ''}')">🚀 지금 바로 2차메일 발송</button>
+                    <button class="btn btn-outline" style="padding:6px 10px;font-size:11px;background:#eff6ff;color:#1d4ed8;border-color:#93c5fd;font-weight:700;" onclick="openGmailWebCompose('${s.id}', '${s.email || ''}')">🌐 지메일 웹창으로 열기</button>
+                    <button class="btn btn-outline" style="padding:6px 10px;font-size:11px;background:#f0fdf4;color:#15803d;border-color:#86efac;font-weight:700;" onclick="markReplySentManual('${s.id}', '${s.email || ''}')">✅ 발송완료 체크</button>
+                    <button class="btn btn-primary" id="btnSendInline_${s.id}" style="padding:6px 12px;font-size:12px;background:${isStage345 ? '#7c3aed' : '#2563eb'};" onclick="sendInlineReply('${s.id}', '${s.email || ''}', ${isStage345 ? 3 : 2})">
+                      🚀 지금 바로 ${isStage345 ? '3차 답변메일' : '2차 답장메일'} 발송
+                    </button>
                   </div>
                 </div>
               </div>
@@ -1100,7 +1216,15 @@
         if (repSec) repSec.style.display = 'block';
         if (tblBar) tblBar.style.display = 'none';
         if (tblCard) tblCard.style.display = 'none';
-        if (indEl) indEl.textContent = '현재 화면: 3️⃣ 3차 재진행·샘플발송 조율 단독 화면';
+        if (indEl) indEl.textContent = '현재 화면: 3️⃣ 3차 재진행·3차 답변메일 발송 단독 화면';
+      } else if (currentStage === 'SAMPLE_SHIPPED') {
+        if (m340) m340.style.display = 'none';
+        if (calSec) calSec.style.display = 'none';
+        if (vipSec) vipSec.style.display = 'none';
+        if (repSec) repSec.style.display = 'block';
+        if (tblBar) tblBar.style.display = 'none';
+        if (tblCard) tblCard.style.display = 'none';
+        if (indEl) indEl.textContent = '현재 화면: 📦 실제품(샘플) 출고자 표시 & 송장번호 안내메일 발송 화면';
       } else if (currentStage === '4_직원오픈채팅이관' || currentStage === '5_공구확정') {
         if (m340) m340.style.display = 'none';
         if (calSec) calSec.style.display = 'none';
@@ -1328,9 +1452,9 @@
       return `안녕하세요, ${displayName}님!\n루나온 공구제안팀입니다. 공동구매 진행 신청 양식과 희망 일정을 회신해 주셔서 진심으로 감사드립니다! 😊\n\n보내주신 신청 내역을 정상 접수하였으며, 빠른 샘플 출고 및 전용 결제창 세팅을 위해 아래 3차 안내를 드립니다.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ [3차 안내] 샘플 입금·당일출고 및 스마트스토어 전용 링크 세팅\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n1. [샘플 입금 및 당일 출고 안내]\n   • 샘플 공급가 : 슈퍼싱글(SS) 32,000원 / 퀸(Q) 42,000원 (VAT·무료배송 포함)\n   • 입금 계좌 : 기업은행 534-028152-01-023 (예금주: 주식회사 테란)\n   • 출고 기준 : 입금 확인 후 평일 1차 오후 1시 / 2차 오후 4시 마감 기준 CJ대한통운으로 당일 출고됩니다.\n   • 무상 전환 : 공구에서 샘플 포함 5개 이상 판매 시 샘플 1개는 무상으로 제공됩니다. (정산 시 샘플 1개 금액을 받지 않고 전액 환급 / 5개 미만 시 단순 구매 처리)\n\n2. [본사 스마트스토어 비노출 전용 링크 및 홍보자료 제공]\n   • 말씀해주신 희망 오픈 일정에 맞추어 셀러님 전용 '네이버 스마트스토어 비노출 구매 링크'를 생성해 전달드립니다.\n   • 상세페이지 (GIF 버전) : https://always-nam.github.io/lunacool-website/lunaon-detail-v9/\n   • 홍보 영상 (15초 CF) : https://always-nam.github.io/lunacool-website/lunaon-cf-v8/\n\n3. [담당자 실시간 카카오톡 소통]\n   • 샘플 송장번호 안내 및 오픈 링크 전달을 위해 남겨주신 연락처/카카오톡으로 담당자(이화식 / 남대현)가 연락드리겠습니다! (샘플비 입금 시 입금자명을 알려주시면 즉시 확인 후 당일 출고해 드립니다.)\n\n이번 공동구매에서 좋은 결과 있으시도록 본사에서 최선을 다해 지원하겠습니다. 감사합니다!\n\n(주)테란 · 테란2(온누리유통) 루나온 공구제안팀 드림\n• 담당자 : 이화식 / 남대현 (010-2807-0174 / 010-4527-8781 / 070-8858-5230)\n• 회신 이메일 : akrrntn1@gmail.com`;
     }
 
-    function fillThirdTemplate(id, displayName) {
-      const el = document.getElementById('replyBody_' + id);
-      const subjEl = document.getElementById('replySubj_' + id);
+    function fillThirdTemplate(id, displayName, prefix = '') {
+      const el = document.getElementById(prefix + 'replyBody_' + id);
+      const subjEl = document.getElementById(prefix + 'replySubj_' + id);
       if (!el) return;
       const s = allSellers.find(x => x.id === id);
       if (s && s.third_reply_draft) {
@@ -1343,6 +1467,54 @@
       }
       el.focus();
       showToast(`🎉 [${displayName}]님 3차 신청접수·샘플출고 안내 초안이 입력되었습니다!`);
+    }
+
+    function openThirdReplyWithDraft(id, displayName) {
+      const box = document.getElementById('inlineReplyBox_' + id);
+      if (box) box.style.display = 'block';
+      fillThirdTemplate(id, displayName, '');
+    }
+
+    function getTrackingEmailTemplate(displayName, trackingNum, sampleSize) {
+      const trk = (trackingNum || '').trim() || '[송장번호 입력]';
+      const sz = (sampleSize || '').trim() ? ` (${sampleSize})` : '';
+      return `안녕하세요, ${displayName}님!\n루나온 공구제안팀입니다. 😊\n\n요청하신 '루나온 그래핀 50% 자가발열 이불'${sz} 실제품(샘플)이 파주 본사 물류센터에서 정상 출고되어 송장번호를 안내드립니다.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 📦 [루나온 그래핀 발열이불] 실제품(샘플) 출고 및 송장 안내\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n• 택배사 : CJ대한통운\n• 운송장번호 : ${trk}\n• 배송조회 링크 : https://trace.cjlogistics.com/next/tracking.html?wblNo=${trk.replace(/[^0-9]/g, '')}\n• 출고 제품 : 루나온 그래핀 50% 자가발열 이불 (차콜 & 연그레이 양면 투톤)${sz}\n\n■ 🎬 공동구매 홍보용 고화질 GIF 상세페이지 & 15초 영상 링크\n• 상세페이지 (GIF 버전) : https://always-nam.github.io/lunacool-website/lunaon-detail-v9/\n• 홍보 영상 (15초 CF) : https://always-nam.github.io/lunacool-website/lunaon-cf-v8/\n\n■ 💡 안내사항\n• 제품 수령 후 직접 덮어보시며 가벼운 무게감과 빠른 자가발열 보온력을 편하게 테스트해 보시기 바랍니다.\n• 공구 오픈 일정에 맞추어 셀러님 전용 '네이버 스마트스토어 비노출 구매 링크'를 세팅해 전달드리며, 샘플 포함 5개 이상 판매 시 본 샘플 1개 비용은 정산 시 전액 무상(환급) 처리됩니다.\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n제품 수령 후 궁금하신 점이나 오픈 일정 조율이 필요하시면 언제든 본 메일(akrrntn1@gmail.com) 또는 담당자 연락처로 말씀해 주세요.\n감사합니다!\n\n(주)테란 · 테란2(온누리유통) 루나온 공구제안팀 드림\n• 담당자 : 이화식 / 남대현 (010-2807-0174 / 010-4527-8781 / 070-8858-5230)\n• 회신 이메일 : akrrntn1@gmail.com`;
+    }
+
+    function fillTrackingTemplate(id, displayName, inputId, prefix = '') {
+      const el = document.getElementById(prefix + 'replyBody_' + id);
+      const subjEl = document.getElementById(prefix + 'replySubj_' + id);
+      if (!el) return;
+      const s = allSellers.find(x => x.id === id) || {};
+      const trkVal = (document.getElementById(inputId)?.value || s.tracking_number || '').trim();
+      el.value = getTrackingEmailTemplate(displayName, trkVal, s.sample_size || '');
+      if (subjEl) {
+        subjEl.value = `[루나온 그래핀 발열이불] ${displayName}님 실제품(샘플) CJ대한통운 출고 및 송장번호(${trkVal || '출고완료'}) 안내드립니다.`;
+      }
+      el.focus();
+      showToast(`📦 [${displayName}]님 실제품 출고·송장번호 안내메일 초안이 입력되었습니다!`);
+    }
+
+    function fillGoniThirdDraft(id, displayName, prefix = '') {
+      const el = document.getElementById(prefix + 'replyBody_' + id);
+      const subjEl = document.getElementById(prefix + 'replySubj_' + id);
+      if (!el) return;
+      const s = allSellers.find(x => x.id === id) || {};
+      const latestQ = (s.reply_2nd_text || s.reply_text || '').trim();
+      if (s.third_reply_draft) {
+        el.value = s.third_reply_draft;
+      } else if (s.tracking_number) {
+        el.value = getTrackingEmailTemplate(displayName, s.tracking_number, s.sample_size || '');
+      } else if (latestQ) {
+        el.value = `안녕하세요, ${displayName}님!\n루나온 공구제안팀입니다. 추가로 회신해 주신 내용 잘 확인하였습니다! 😊\n\n문의·말씀해주신 부분에 대해 아래와 같이 안내드립니다.\n\n` + getDefaultThirdReplyTemplate(displayName);
+      } else {
+        el.value = getDefaultThirdReplyTemplate(displayName);
+      }
+      if (subjEl) {
+        subjEl.value = `Re: [루나온 그래핀 발열이불] ${displayName}님 공동구매 진행 및 샘플·전용 링크(3차) 안내드립니다.`;
+      }
+      el.focus();
+      showToast(`🤖 고니가 [${displayName}]님의 3차 진행조율 맞춤 답변을 작성했습니다!`);
     }
 
     function setCalendarYearMonth(y, m) {
@@ -1477,8 +1649,9 @@
         const safeName = (s.display_name || s.seller_id).split('(')[0].trim().replace(/'/g, "");
         const fullLabel = (s.display_name || s.seller_id).replace(/'/g, "");
         const isStage45 = (s.stage === '4_직원오픈채팅이관' || s.stage === '5_공구확정');
-        const cardBg = s.stage === '5_공구확정' ? '#dcfce7' : (s.stage === '4_직원오픈채팅이관' ? '#f5f3ff' : '#ffffff');
-        const cardBdr = s.stage === '5_공구확정' ? '2px solid #16a34a' : (s.stage === '4_직원오픈채팅이관' ? '2px solid #7c3aed' : '1px solid #cbd5e1');
+        const isSampleShipped = Boolean(s.sample_shipped || s.tracking_number);
+        const cardBg = isSampleShipped ? '#fffbeb' : (s.stage === '5_공구확정' ? '#dcfce7' : (s.stage === '4_직원오픈채팅이관' ? '#f5f3ff' : '#ffffff'));
+        const cardBdr = isSampleShipped ? '2px solid #d97706' : (s.stage === '5_공구확정' ? '2px solid #16a34a' : (s.stage === '4_직원오픈채팅이관' ? '2px solid #7c3aed' : '1px solid #cbd5e1'));
         const followerTypeLabel = (s.source || '').includes('브랜드커넥트') ? '전채널 합산 구독·팔로워' : '인스타 팔로워';
 
         let igHandle = s.insta_id || '';
@@ -1505,7 +1678,7 @@
         if (blogUrl) {
           btns += `<a href="${blogUrl}" target="_blank" class="btn btn-outline" style="padding:5px 10px;font-size:12px;color:#15803d;border-color:#bbf7d0;">📗 블로그</a>`;
         }
-        btns += `<button class="btn btn-primary" style="padding:5px 10px;font-size:12px;background:#2563eb;" onclick="document.getElementById('replyCard_${s.id}')?.scrollIntoView({behavior:'smooth',block:'center'}); toggleInlineReply('${s.id}');">✉️ 답장/내역 열기</button>`;
+        btns += `<button class="btn btn-primary" style="padding:5px 11px;font-size:12px;background:#7c3aed;font-weight:800;" onclick="toggleVipInlineReply('${s.id}')">✉️ 여기서 바로 3차 답변·송장 메일쓰기</button>`;
 
         let stageOpts = '';
         Object.keys(STAGE_LABELS).forEach(k => {
@@ -1513,12 +1686,16 @@
           stageOpts += `<option value="${k}" ${sel}>${STAGE_LABELS[k]}</option>`;
         });
 
+        const vipSubjDefault = s.sent_3rd_subject || `Re: [루나온 그래핀 발열이불] ${safeName}님 공동구매 진행 및 샘플 출고·전용 링크(3차) 안내드립니다.`;
+        const vipBodyDefault = s.sent_3rd_body || s.third_reply_draft || '';
+
         return `
           <div style="border:${cardBdr};border-radius:12px;padding:15px 17px;background:${cardBg};display:flex;flex-direction:column;gap:8px;box-shadow:0 2px 5px rgba(0,0,0,0.05);">
             <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
-              <span style="font-size:16px;font-weight:900;color:#0f172a;">
-                <span style="background:#4c1d95;color:#fff;font-size:12px;padding:3px 8px;border-radius:99px;margin-right:5px;">VIP #${idx + 1}</span>
+              <span style="font-size:16px;font-weight:900;color:#0f172a;display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
+                <span style="background:#4c1d95;color:#fff;font-size:12px;padding:3px 8px;border-radius:99px;">VIP #${idx + 1}</span>
                 ${fullLabel} <a href="${igUrl || s.profile_url}" target="_blank" class="link-a" style="font-size:13px;">(@${igHandle || s.seller_id})</a>
+                ${isSampleShipped ? `<span style="background:#d97706;color:#fff;font-size:11px;padding:2px 8px;border-radius:6px;font-weight:900;">📦 실제품 출고완료 ${s.tracking_number ? `(CJ: ${s.tracking_number})` : ''}</span>` : ''}
               </span>
               <select class="stage-select" style="padding:4px 8px;font-size:12px;font-weight:800;" onchange="updateSeller('${s.id}', {stage: this.value})">
                 ${stageOpts}
@@ -1526,6 +1703,17 @@
             </div>
             <div style="font-size:13px;color:#334155;font-weight:700;">📧 ${s.email || ''} · ${followerTypeLabel} <strong style="color:#1d4ed8;">${Number(s.followers || 0).toLocaleString()}명</strong></div>
             ${s.seller_traits ? `<div style="font-size:12px;color:#3730a3;background:#eef2ff;border:1px solid #c7d2fe;border-radius:6px;padding:6px 10px;font-weight:700;line-height:1.45;">📊 ${s.seller_traits}</div>` : ''}
+
+            <!-- 📦 실제품(샘플) 출고 체크 & CJ대한통운 송장번호 즉시 메일발송 바 -->
+            <div style="background:${isSampleShipped ? '#fef3c7' : '#fff7ed'};border:1px solid ${isSampleShipped ? '#f59e0b' : '#fed7aa'};border-radius:8px;padding:7px 10px;display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:12px;">
+              <label style="display:flex;align-items:center;gap:4px;font-weight:900;color:#b45309;cursor:pointer;">
+                <input type="checkbox" ${isSampleShipped ? 'checked' : ''} onchange="toggleSampleShipped('${s.id}', this.checked)" />
+                📦 실제품(샘플) 출고표시
+              </label>
+              <input type="text" id="vipTrkNum_${s.id}" class="inline-input" style="width:165px;padding:4px 8px;font-size:12px;font-weight:800;background:#fff;border-color:#f59e0b;" placeholder="CJ대한통운 송장번호 입력" value="${(s.tracking_number || '').replace(/"/g, '&quot;')}" />
+              <button class="btn btn-outline" style="padding:4px 9px;font-size:11px;background:#fff;color:#92400e;border-color:#f59e0b;font-weight:800;" onclick="saveCardTracking('${s.id}', 'vipTrkNum_${s.id}')">💾 출고·송장저장</button>
+              <button class="btn btn-primary" style="padding:4px 10px;font-size:11px;background:#d97706;font-weight:900;" onclick="sendTrackingMailNow('${s.id}', '${s.email || ''}', '${safeName}', 'vipTrkNum_${s.id}')">🚀 송장번호 안내메일 즉시발송</button>
+            </div>
 
             <!-- 📅 공구 희망/확정 일정 & 샘플 즉시 기입 박스 -->
             <div style="background:#ffffff;border:2px solid #a855f7;border-radius:8px;padding:8px 10px;display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:12px;">
@@ -1541,7 +1729,31 @@
             <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">${btns}</div>
 
             <div style="font-size:12px;color:#0f172a;background:#ffffff;border:1px solid #cbd5e1;border-left:4px solid #7c3aed;border-radius:6px;padding:9px 11px;line-height:1.5;max-height:140px;overflow-y:auto;white-space:pre-line;">
+              ${s.reply_2nd_text ? `<div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:4px;padding:5px 7px;margin-bottom:5px;color:#4c1d95;font-weight:700;">🔥 [2차 추가 회신 / 신청서]\n${s.reply_2nd_text}</div>` : ''}
               <strong style="color:#6d28d9;">📥 [셀러 신청서 / 최근 답장 원문]</strong>\n${s.reply_text || s.memo || ''}
+            </div>
+
+            <!-- ✉️ VIP 보드 내 인라인 3차 답변·송장 메일 작성창 -->
+            <div id="vipInlineReplyBox_${s.id}" style="display:none;margin-top:4px;padding:10px;background:#ffffff;border:2px dashed #7c3aed;border-radius:8px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;flex-wrap:wrap;gap:4px;">
+                <span style="font-size:11px;font-weight:800;color:#6d28d9;">📤 3차 답변/송장 안내메일 받는사람: ${s.email || ''} (${safeName}님)</span>
+                <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                  <button class="btn btn-primary" style="padding:3px 9px;font-size:11px;background:#7c3aed;" onclick="fillGoniThirdDraft('${s.id}', '${safeName}', 'vip_')">🤖 고니(AI) 3차 맞춤답변</button>
+                  <button class="btn btn-outline" style="padding:2px 8px;font-size:10px;background:#f0fdf4;color:#15803d;border-color:#86efac;font-weight:700;" onclick="fillThirdTemplate('${s.id}', '${safeName}', 'vip_')">🎉 3차 신청접수 초안</button>
+                  <button class="btn btn-outline" style="padding:2px 8px;font-size:10px;background:#fffbeb;color:#b45309;border-color:#fcd34d;font-weight:800;" onclick="fillTrackingTemplate('${s.id}', '${safeName}', 'vipTrkNum_${s.id}', 'vip_')">📦 송장번호 안내초안</button>
+                </div>
+              </div>
+              <input type="text" id="vip_replySubj_${s.id}" class="inline-input" style="margin-bottom:6px;font-weight:700;font-size:12px;" value="${vipSubjDefault.replace(/"/g, '&quot;')}" />
+              <textarea id="vip_replyBody_${s.id}" style="width:100%;height:190px;padding:8px;font-size:12px;line-height:1.45;border:1px solid #cbd5e1;border-radius:6px;resize:vertical;" placeholder="3차 답변 또는 샘플 송장 안내 내용을 작성하세요.">${vipBodyDefault}</textarea>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;flex-wrap:wrap;gap:6px;">
+                <label style="font-size:11px;font-weight:700;color:#334155;display:flex;align-items:center;gap:4px;cursor:pointer;">
+                  <input type="checkbox" id="vip_replyAttach_${s.id}" /> 📎 제안서(v2.xlsx) 함께 첨부
+                </label>
+                <div style="display:flex;gap:6px;">
+                  <button class="btn btn-outline" style="padding:5px 10px;font-size:11px;" onclick="toggleVipInlineReply('${s.id}')">닫기</button>
+                  <button class="btn btn-primary" id="vip_btnSendInline_${s.id}" style="padding:5px 12px;font-size:12px;background:#7c3aed;" onclick="sendInlineReply('${s.id}', '${s.email || ''}', 3, 'vip_')">🚀 지금 바로 3차 답변메일 발송</button>
+                </div>
+              </div>
             </div>
           </div>
         `;
@@ -1732,6 +1944,12 @@
       box.style.display = (box.style.display === 'none' || !box.style.display) ? 'block' : 'none';
     }
 
+    function toggleVipInlineReply(id) {
+      const box = document.getElementById('vipInlineReplyBox_' + id);
+      if (!box) return;
+      box.style.display = (box.style.display === 'none' || !box.style.display) ? 'block' : 'none';
+    }
+
     function toggleFirstMail(id) {
       const box = document.getElementById('firstMailBox_' + id);
       if (!box) return;
@@ -1744,10 +1962,262 @@
       box.style.display = (box.style.display === 'none' || !box.style.display) ? 'block' : 'none';
     }
 
+    function toggleThirdMailView(id) {
+      const box = document.getElementById('thirdMailViewBox_' + id);
+      if (!box) return;
+      box.style.display = (box.style.display === 'none' || !box.style.display) ? 'block' : 'none';
+    }
+
     function toggleContactEdit(id) {
       const box = document.getElementById('contactEditBox_' + id);
       if (!box) return;
       box.style.display = (box.style.display === 'none' || !box.style.display) ? 'block' : 'none';
+    }
+
+    async function toggleSampleShipped(id, checked) {
+      const nowStr = new Date().toISOString().slice(0,16).replace('T',' ');
+      const trkVal = (document.getElementById('cardTrkNum_' + id)?.value || document.getElementById('vipTrkNum_' + id)?.value || '').trim();
+      await updateSeller(id, {
+        sample_shipped: Boolean(checked),
+        sample_shipped_at: checked ? nowStr : '',
+        ...(trkVal ? { tracking_number: trkVal, tracking_carrier: 'CJ대한통운' } : {})
+      });
+      showToast(checked ? '📦 실제품(샘플) 출고 완료로 표시되었습니다!' : '실제품 출고 표시가 해제되었습니다.');
+    }
+
+    async function saveCardTracking(id, inputId) {
+      const trkVal = (document.getElementById(inputId)?.value || '').trim();
+      const nowStr = new Date().toISOString().slice(0,16).replace('T',' ');
+      await updateSeller(id, {
+        sample_shipped: true,
+        tracking_number: trkVal,
+        tracking_carrier: 'CJ대한통운',
+        sample_shipped_at: nowStr
+      });
+      showToast(`📦 실제품 출고 표시 및 송장번호(${trkVal || '출고완료'})가 저장되었습니다!`);
+    }
+
+    async function sendTrackingMailNow(id, toEmail, displayName, inputId) {
+      const trkVal = (document.getElementById(inputId)?.value || '').trim();
+      if (!trkVal) {
+        alert('먼저 CJ대한통운 송장번호를 입력칸에 입력해주세요!');
+        document.getElementById(inputId)?.focus();
+        return;
+      }
+      if (!toEmail || !toEmail.includes('@')) {
+        alert('셀러 이메일 주소가 없습니다.');
+        return;
+      }
+      const s = allSellers.find(x => x.id === id) || {};
+      const subject = `[루나온 그래핀 발열이불] ${displayName}님 실제품(샘플) CJ대한통운 출고 및 송장번호(${trkVal}) 안내드립니다.`;
+      const body = getTrackingEmailTemplate(displayName, trkVal, s.sample_size || '');
+
+      if (!confirm(`[${displayName} (${toEmail})] 님께 실제품 출고 표시와 함께\nCJ대한통운 송장번호 [${trkVal}] 안내 메일을 즉시 발송하시겠습니까?`)) return;
+
+      showToast(`📦 ${toEmail} 앞으로 송장번호 안내메일 발송 중...`);
+      const nextSt = (s.stage === '5_공구확정' || s.stage === '4_직원오픈채팅이관') ? s.stage : '4_직원오픈채팅이관';
+
+      try {
+        const res = await smartApiFetch('/api/send_custom_reply', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            id,
+            to_email: toEmail,
+            subject,
+            body,
+            attach_proposal: false,
+            reply_round: 3,
+            sample_shipped: true,
+            tracking_number: trkVal,
+            tracking_carrier: 'CJ대한통운',
+            next_stage: nextSt
+          })
+        });
+        const data = await res.json();
+        if (data.ok && data.sent > 0) {
+          const nowStr = new Date().toISOString().slice(0,16).replace('T',' ');
+          const idx = allSellers.findIndex(x => x.id === id);
+          if (idx !== -1) {
+            allSellers[idx].stage = nextSt;
+            allSellers[idx].sample_shipped = true;
+            allSellers[idx].tracking_number = trkVal;
+            allSellers[idx].tracking_carrier = 'CJ대한통운';
+            allSellers[idx].sample_shipped_at = nowStr;
+            allSellers[idx].sent_3rd_at = nowStr;
+            allSellers[idx].sent_3rd_subject = subject;
+            allSellers[idx].sent_3rd_body = body;
+            allSellers[idx].memo = `[송장안내 발송완료(${trkVal}) ${nowStr}] ` + (allSellers[idx].memo || '');
+            saveLocalOverride(id, {
+              stage: nextSt,
+              sample_shipped: true,
+              tracking_number: trkVal,
+              tracking_carrier: 'CJ대한통운',
+              sample_shipped_at: nowStr,
+              sent_3rd_at: nowStr,
+              sent_3rd_subject: subject,
+              sent_3rd_body: body,
+              memo: allSellers[idx].memo
+            });
+          }
+          showToast(`✅ [${displayName}] 송장번호(${trkVal}) 안내 메일 발송 및 출고표시 완료!`);
+          updateCounts();
+          renderTable();
+        } else {
+          alert('송장 메일 발송 실패: ' + (data.msg || (data.errors || []).join(', ')));
+        }
+      } catch (e) {
+        alert('발송 서버 연결을 확인해주세요: ' + e);
+      }
+    }
+
+    function openBulkTrackingModal() {
+      renderBulkTrackingTable();
+      document.getElementById('bulkTrackingModal').style.display = 'flex';
+    }
+
+    function closeBulkTrackingModal() {
+      document.getElementById('bulkTrackingModal').style.display = 'none';
+    }
+
+    function renderBulkTrackingTable() {
+      const box = document.getElementById('bulkTrackingTableBox');
+      if (!box) return;
+      const targets = allSellers.filter(s => ['4_직원오픈채팅이관', '5_공구확정', '3_3차재진행조율'].includes(s.stage) || Boolean(s.sample_shipped || s.tracking_number));
+      targets.sort((a, b) => {
+        const aSh = (a.sample_shipped || a.tracking_number) ? 0 : 1;
+        const bSh = (b.sample_shipped || b.tracking_number) ? 0 : 1;
+        if (aSh !== bSh) return aSh - bSh;
+        const ord = { '4_직원오픈채팅이관': 0, '5_공구확정': 1, '3_3차재진행조율': 2 };
+        return (ord[a.stage] ?? 9) - (ord[b.stage] ?? 9);
+      });
+
+      box.innerHTML = targets.map(s => {
+        const nm = (s.display_name || s.seller_id).replace(/'/g, "");
+        const shipped = Boolean(s.sample_shipped || s.tracking_number);
+        return `
+          <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;background:${shipped ? '#fffbeb' : '#ffffff'};border:1px solid ${shipped ? '#f59e0b' : '#e2e8f0'};border-radius:6px;margin-bottom:4px;font-size:12px;flex-wrap:wrap;">
+            <input type="checkbox" class="bulk-trk-chk" data-id="${s.id}" ${shipped ? 'checked' : ''} />
+            <span style="min-width:170px;font-weight:800;color:#0f172a;">${nm}</span>
+            <span style="min-width:155px;color:#475569;font-size:11px;">${s.email || ''} ${s.phone ? `(${s.phone})` : ''}</span>
+            <span style="font-size:11px;color:#6d28d9;font-weight:700;min-width:90px;">${s.sample_size || ''}</span>
+            <input type="text" class="inline-input bulk-trk-input" data-id="${s.id}" id="bulkTrkRow_${s.id}" style="flex:1;min-width:150px;padding:4px 8px;font-size:12px;font-weight:800;border-color:#f59e0b;" placeholder="CJ대한통운 송장번호 입력" value="${(s.tracking_number || '').replace(/"/g, '&quot;')}" oninput="if(this.value.trim()) this.parentElement.querySelector('.bulk-trk-chk').checked=true;" />
+            ${s.sent_3rd_at && (s.memo || '').includes('송장안내') ? `<span style="font-size:10px;background:#dcfce7;color:#166534;padding:2px 6px;border-radius:4px;font-weight:800;">✅ 송장메일 발송됨</span>` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function applyPastedTrackingToRows() {
+      const raw = (document.getElementById('bulkTrackingPasteInput')?.value || '').trim();
+      if (!raw) {
+        alert('붙여넣을 송장번호 텍스트를 입력해주세요.');
+        return;
+      }
+      const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      let matchedCnt = 0;
+      lines.forEach(line => {
+        // 마지막 숫자열(하이픈 포함 10~14자리)을 송장번호로 추출하고 앞부분을 셀러 키워드로 매칭
+        const m = line.match(/^(.+?)[\s,\t]+([0-9\-]{8,16})$/);
+        if (!m) return;
+        const key = m[1].trim().toLowerCase();
+        const trk = m[2].trim();
+        const found = allSellers.find(s => {
+          const hay = `${s.display_name || ''} ${s.seller_id || ''} ${s.email || ''} ${s.phone || ''} ${s.sample_size || ''}`.toLowerCase();
+          return hay.includes(key);
+        });
+        if (found) {
+          const inp = document.getElementById('bulkTrkRow_' + found.id);
+          if (inp) {
+            inp.value = trk;
+            const chk = inp.parentElement.querySelector('.bulk-trk-chk');
+            if (chk) chk.checked = true;
+            matchedCnt += 1;
+          }
+        }
+      });
+      showToast(`🔍 총 ${matchedCnt}명의 셀러에게 송장번호가 자동 매칭되었습니다!`);
+    }
+
+    async function saveBulkTrackingWithoutMail() {
+      const inputs = Array.from(document.querySelectorAll('.bulk-trk-input'));
+      const chks = Array.from(document.querySelectorAll('.bulk-trk-chk'));
+      let savedCnt = 0;
+      const nowStr = new Date().toISOString().slice(0,16).replace('T',' ');
+      for (let i = 0; i < inputs.length; i++) {
+        const id = inputs[i].getAttribute('data-id');
+        const trk = inputs[i].value.trim();
+        const isChecked = chks[i]?.checked;
+        const s = allSellers.find(x => x.id === id);
+        if (!s) continue;
+        if (isChecked || trk) {
+          await updateSeller(id, {
+            sample_shipped: true,
+            tracking_number: trk,
+            tracking_carrier: 'CJ대한통운',
+            sample_shipped_at: s.sample_shipped_at || nowStr
+          });
+          savedCnt += 1;
+        }
+      }
+      closeBulkTrackingModal();
+      updateCounts();
+      renderTable();
+      showToast(`💾 총 ${savedCnt}명의 실제품 출고 표시 및 송장번호가 저장되었습니다!`);
+    }
+
+    async function sendBulkTrackingEmails() {
+      const inputs = Array.from(document.querySelectorAll('.bulk-trk-input'));
+      const items = [];
+      inputs.forEach(inp => {
+        const id = inp.getAttribute('data-id');
+        const trk = inp.value.trim();
+        if (!trk) return;
+        const s = allSellers.find(x => x.id === id);
+        if (!s || !s.email || !s.email.includes('@')) return;
+        const safeName = (s.display_name || s.seller_id).split('(')[0].trim().replace(/'/g, "");
+        const nextSt = (s.stage === '5_공구확정' || s.stage === '4_직원오픈채팅이관') ? s.stage : '4_직원오픈채팅이관';
+        items.push({
+          id: s.id,
+          to_email: s.email,
+          subject: `[루나온 그래핀 발열이불] ${safeName}님 실제품(샘플) CJ대한통운 출고 및 송장번호(${trk}) 안내드립니다.`,
+          body: getTrackingEmailTemplate(safeName, trk, s.sample_size || ''),
+          attach_proposal: false,
+          reply_round: 3,
+          sample_shipped: true,
+          tracking_number: trk,
+          tracking_carrier: 'CJ대한통운',
+          next_stage: nextSt
+        });
+      });
+
+      if (items.length === 0) {
+        alert('송장번호가 입력된 셀러가 없습니다. 송장번호를 입력하신 후 눌러주세요.');
+        return;
+      }
+      if (!confirm(`송장번호가 입력된 셀러 총 ${items.length}명에게\n[실제품 출고 표시] 저장과 동시에 [CJ대한통운 송장번호 안내 메일]을 일괄 발송하시겠습니까?`)) return;
+
+      const btn = document.getElementById('btnBulkSendTracking');
+      if (btn) { btn.disabled = true; btn.textContent = '⏳ 일괄 발송 중...'; }
+      try {
+        const res = await smartApiFetch('/api/send_custom_reply', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ items })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          alert(`🎉 총 ${data.sent}명의 셀러에게 실제품 출고 표시 및 송장번호 안내메일 발송이 완료되었습니다!`);
+          closeBulkTrackingModal();
+          loadData();
+        } else {
+          alert('송장 일괄발송 오류: ' + (data.msg || (data.errors || []).join(', ')));
+        }
+      } catch (e) {
+        alert('발송 서버 연결을 확인해주세요: ' + e);
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = '🚀 송장 저장 & 송장번호 안내메일 일괄 발송'; }
+      }
     }
 
     async function saveCardContacts(id) {
@@ -1780,26 +2250,35 @@
       box.style.display = (box.style.display === 'none' || !box.style.display) ? 'block' : 'none';
     }
 
-    async function sendInlineReply(id, toEmail) {
-      const subjEl = document.getElementById('replySubj_' + id);
-      const bodyEl = document.getElementById('replyBody_' + id);
-      const attEl = document.getElementById('replyAttach_' + id);
-      const btnEl = document.getElementById('btnSendInline_' + id);
+    async function sendInlineReply(id, toEmail, roundNum = 2, prefix = '') {
+      const subjEl = document.getElementById(prefix + 'replySubj_' + id);
+      const bodyEl = document.getElementById(prefix + 'replyBody_' + id);
+      const attEl = document.getElementById(prefix + 'replyAttach_' + id);
+      const btnEl = document.getElementById(prefix + 'btnSendInline_' + id);
+      const nextStEl = document.getElementById('replyNextStage_' + id);
       if (!subjEl || !bodyEl) return;
 
+      const s = allSellers.find(x => x.id === id) || {};
+      const is3rd = (roundNum === 3) || ['3_3차재진행조율', '4_직원오픈채팅이관', '5_공구확정'].includes(s.stage);
       const subject = subjEl.value.trim();
       const body = bodyEl.value.trim();
-      const attach_proposal = attEl ? attEl.checked : true;
+      const attach_proposal = attEl ? attEl.checked : !is3rd;
       if (!subject || !body) {
         alert('메일 제목과 본문을 입력해주세요.');
         return;
       }
 
+      const nextStageVal = nextStEl
+        ? nextStEl.value
+        : (is3rd ? (s.stage === '5_공구확정' ? '5_공구확정' : '4_직원오픈채팅이관') : '3_3차재진행조율');
+
+      const trkVal = (document.getElementById('cardTrkNum_' + id)?.value || document.getElementById('vipTrkNum_' + id)?.value || s.tracking_number || '').trim();
+
       if (btnEl) {
         btnEl.disabled = true;
         btnEl.textContent = '⏳ 발송 중...';
       }
-      showToast(`${toEmail} 앞으로 2차 회신 메일 발송 중...`);
+      showToast(`${toEmail} 앞으로 ${is3rd ? '3차 답변' : '2차 회신'} 메일 발송 중...`);
 
       try {
         const res = await smartApiFetch('/api/send_custom_reply', {
@@ -1811,7 +2290,9 @@
             subject,
             body,
             attach_proposal,
-            next_stage: '3_3차재진행조율'
+            reply_round: is3rd ? 3 : 2,
+            ...(trkVal ? { sample_shipped: true, tracking_number: trkVal, tracking_carrier: 'CJ대한통운' } : {}),
+            next_stage: nextStageVal
           })
         });
         const data = await res.json();
@@ -1819,52 +2300,74 @@
           const nowStr = new Date().toISOString().slice(0,16).replace('T',' ');
           const idx = allSellers.findIndex(x => x.id === id);
           if (idx !== -1) {
-            allSellers[idx].stage = '3_3차재진행조율';
-            allSellers[idx].sent_2nd_at = nowStr;
-            allSellers[idx].sent_2nd_subject = subject;
-            allSellers[idx].sent_2nd_body = body;
-            if (!(allSellers[idx].memo || '').includes('[2차답장 발송완료')) {
-              allSellers[idx].memo = `[2차답장 발송완료 ${nowStr}] ` + (allSellers[idx].memo || '');
+            allSellers[idx].stage = nextStageVal;
+            if (is3rd) {
+              allSellers[idx].sent_3rd_at = nowStr;
+              allSellers[idx].sent_3rd_subject = subject;
+              allSellers[idx].sent_3rd_body = body;
+              if (trkVal) {
+                allSellers[idx].sample_shipped = true;
+                allSellers[idx].tracking_number = trkVal;
+                allSellers[idx].sample_shipped_at = nowStr;
+              }
+              if (!(allSellers[idx].memo || '').includes('[3차답장 발송완료')) {
+                allSellers[idx].memo = `[3차답장 발송완료 ${nowStr}] ` + (allSellers[idx].memo || '');
+              }
+              saveLocalOverride(id, {
+                stage: nextStageVal,
+                memo: allSellers[idx].memo,
+                sent_3rd_at: nowStr,
+                sent_3rd_subject: subject,
+                sent_3rd_body: body,
+                ...(trkVal ? { sample_shipped: true, tracking_number: trkVal, sample_shipped_at: nowStr } : {})
+              });
+            } else {
+              allSellers[idx].sent_2nd_at = nowStr;
+              allSellers[idx].sent_2nd_subject = subject;
+              allSellers[idx].sent_2nd_body = body;
+              if (!(allSellers[idx].memo || '').includes('[2차답장 발송완료')) {
+                allSellers[idx].memo = `[2차답장 발송완료 ${nowStr}] ` + (allSellers[idx].memo || '');
+              }
+              saveLocalOverride(id, {
+                stage: nextStageVal,
+                memo: allSellers[idx].memo,
+                sent_2nd_at: nowStr,
+                sent_2nd_subject: subject,
+                sent_2nd_body: body
+              });
             }
-            saveLocalOverride(id, {
-              stage: '3_3차재진행조율',
-              memo: allSellers[idx].memo,
-              sent_2nd_at: nowStr,
-              sent_2nd_subject: subject,
-              sent_2nd_body: body
-            });
           }
-          showToast(`✅ [${toEmail}] 2차 회신 메일 발송 완료!`);
+          showToast(`✅ [${toEmail}] ${is3rd ? '3차 답변' : '2차 회신'} 메일 발송 완료!`);
           updateCounts();
           renderTable();
         } else {
           const errMsg = data.msg || (data.errors || []).join(', ');
           if (errMsg.includes('5.4.5') || errMsg.includes('발송 한도') || errMsg.includes('limit')) {
-            if (confirm('⚠️ 현재 akrrntn1@gmail.com의 구글 SMTP 일일 발송 한도(500통)가 소진되었습니다.\n\n[확인]을 누르시면 본문이 자동 복사되고 [Gmail 웹 발송창]이 바로 열립니다!\n(또는 상단 [📧 Gmail 연동 설정]에서 보조 지메일/네이버메일을 1개 추가하시면 대시보드에서 바로 발송됩니다.)')) {
-              openGmailWebCompose(id, toEmail);
+            if (confirm('⚠️ 현재 akrrntn1@gmail.com의 구글 SMTP 일일 발송 한도(500통)가 소진되었습니다.\n\n[확인]을 누르시면 본문이 자동 복사되고 [Gmail 웹 발송창]이 바로 열립니다!')) {
+              openGmailWebCompose(id, toEmail, prefix);
             }
           } else {
             alert('발송 실패: ' + errMsg);
           }
         }
       } catch (e) {
-        alert('로컬 발송 서버(http://localhost:8090) 연결을 확인해주세요: ' + e);
+        alert('발송 서버(http://localhost:8090) 연결을 확인해주세요: ' + e);
       } finally {
         if (btnEl) {
           btnEl.disabled = false;
-          btnEl.textContent = '🚀 지금 바로 메일 발송';
+          btnEl.textContent = `🚀 지금 바로 ${is3rd ? '3차 답변메일' : '2차 답장메일'} 발송`;
         }
       }
     }
 
-    async function openGmailWebCompose(id, toEmail) {
-      const subjEl = document.getElementById('replySubj_' + id);
-      const bodyEl = document.getElementById('replyBody_' + id);
+    async function openGmailWebCompose(id, toEmail, prefix = '') {
+      const subjEl = document.getElementById(prefix + 'replySubj_' + id);
+      const bodyEl = document.getElementById(prefix + 'replyBody_' + id);
       if (!subjEl || !bodyEl) return;
       const subject = subjEl.value.trim();
       const body = bodyEl.value.trim();
       if (!subject || !body) {
-        alert('먼저 [🤖 고니(AI) 셀러맞춤 답변 자동작성] 버튼을 눌러 내용을 채워주세요.');
+        alert('먼저 [🤖 고니(AI) 맞춤답변] 또는 초안 버튼을 눌러 내용을 채워주세요.');
         return;
       }
       try {
@@ -1878,28 +2381,42 @@
     async function markReplySentManual(id, toEmail) {
       const subjEl = document.getElementById('replySubj_' + id);
       const bodyEl = document.getElementById('replyBody_' + id);
+      const nextStEl = document.getElementById('replyNextStage_' + id);
       const subject = subjEl ? subjEl.value.trim() : '';
       const body = bodyEl ? bodyEl.value.trim() : '';
       const nowStr = new Date().toISOString().slice(0,16).replace('T',' ');
       const idx = allSellers.findIndex(x => x.id === id);
       if (idx !== -1) {
         const curSt = allSellers[idx].stage;
-        const nextSt = (curSt === '4_직원오픈채팅이관' || curSt === '5_공구확정') ? curSt : '3_3차재진행조율';
+        const is3rd = ['3_3차재진행조율', '4_직원오픈채팅이관', '5_공구확정'].includes(curSt);
+        const nextSt = nextStEl ? nextStEl.value : ((curSt === '4_직원오픈채팅이관' || curSt === '5_공구확정') ? curSt : '3_3차재진행조율');
         allSellers[idx].stage = nextSt;
-        allSellers[idx].sent_2nd_at = nowStr;
-        if (subject) allSellers[idx].sent_2nd_subject = subject;
-        if (body) allSellers[idx].sent_2nd_body = body;
-        if (!(allSellers[idx].memo || '').includes('[2차답장 발송완료')) {
-          allSellers[idx].memo = `[2차답장 발송완료 ${nowStr}] ` + (allSellers[idx].memo || '');
+        if (is3rd) {
+          allSellers[idx].sent_3rd_at = nowStr;
+          if (subject) allSellers[idx].sent_3rd_subject = subject;
+          if (body) allSellers[idx].sent_3rd_body = body;
+          await updateSeller(id, {
+            stage: nextSt,
+            sent_3rd_at: nowStr,
+            sent_3rd_subject: allSellers[idx].sent_3rd_subject || '',
+            sent_3rd_body: allSellers[idx].sent_3rd_body || ''
+          });
+        } else {
+          allSellers[idx].sent_2nd_at = nowStr;
+          if (subject) allSellers[idx].sent_2nd_subject = subject;
+          if (body) allSellers[idx].sent_2nd_body = body;
+          if (!(allSellers[idx].memo || '').includes('[2차답장 발송완료')) {
+            allSellers[idx].memo = `[2차답장 발송완료 ${nowStr}] ` + (allSellers[idx].memo || '');
+          }
+          await updateSeller(id, {
+            stage: nextSt,
+            memo: allSellers[idx].memo,
+            sent_2nd_at: nowStr,
+            sent_2nd_subject: allSellers[idx].sent_2nd_subject || '',
+            sent_2nd_body: allSellers[idx].sent_2nd_body || ''
+          });
         }
-        await updateSeller(id, {
-          stage: nextSt,
-          memo: allSellers[idx].memo,
-          sent_2nd_at: nowStr,
-          sent_2nd_subject: allSellers[idx].sent_2nd_subject || '',
-          sent_2nd_body: allSellers[idx].sent_2nd_body || ''
-        });
-        showToast(`✅ [${toEmail}] 발송완료 처리 및 다음 단계 이동 완료!`);
+        showToast(`✅ [${toEmail}] 발송완료 처리 및 단계 반영 완료!`);
         updateCounts();
         renderTable();
       }
@@ -2152,7 +2669,7 @@
     let managedUsers = [];
 
     // 기본 내장 승인 계정 SHA-256 해시 (nam/4527, admin/8781, staff1/1234)
-    const DEFAULT_AUTH_HASHES = [{"id": "남대현", "name": "남대현 대표님", "role": "admin", "hash": "cc50b48b34e9a114a11978134e7c42c1a0c31bc4d80de05235a7b0d647793b1f"}, {"id": "nam", "name": "남대현 대표님", "role": "admin", "hash": "d4b50b395e5b9820a4289550169714814a9572736845c6b841c1cbe7b6f976e4"}, {"id": "화식", "name": "화식", "role": "staff", "hash": "87f3cc76605ca74f94632e4c02ecfb186be7b23fa5dc574cdc48eea06b13a552"}, {"id": "현경", "name": "현경", "role": "staff", "hash": "405677e75d7eb0f6895640761bd566edf8944e248cca1263a0e079fa74f3217e"}, {"id": "admin", "name": "남대현 대표님(관리자)", "role": "admin", "hash": "ffe54e35fc463b14c7f507939aa4f824a2e29f0fd18c6b9f8556501f5809f38c"}];
+    const DEFAULT_AUTH_HASHES = [{"id": "남대현", "name": "남대현 대표님", "role": "admin", "hash": "cc50b48b34e9a114a11978134e7c42c1a0c31bc4d80de05235a7b0d647793b1f"}, {"id": "nam", "name": "남대현 대표님", "role": "admin", "hash": "d4b50b395e5b9820a4289550169714814a9572736845c6b841c1cbe7b6f976e4"}, {"id": "admin", "name": "남대현 대표님(관리자)", "role": "admin", "hash": "ffe54e35fc463b14c7f507939aa4f824a2e29f0fd18c6b9f8556501f5809f38c"}, {"id": "화식", "name": "이화식", "role": "staff", "hash": "87f3cc76605ca74f94632e4c02ecfb186be7b23fa5dc574cdc48eea06b13a552"}, {"id": "현경", "name": "현경", "role": "staff", "hash": "405677e75d7eb0f6895640761bd566edf8944e248cca1263a0e079fa74f3217e"}, {"id": "staff1", "name": "담당직원1", "role": "staff", "hash": "684dc380f34c316c42372769deb5d4aa2c57bba0d9013422984f0ca40bd63d4a"}, {"id": "staff2", "name": "담당직원2", "role": "staff", "hash": "6672e3e4db2a7b7709f995b5d3c80837ab55abc19c612b245091ba3680af543c"}, {"id": "staff3", "name": "담당직원3", "role": "staff", "hash": "ae7cb6c6d75df458f4cb2fab1ac93ee0ef531ccd0a39416999b305041c73059d"}, {"id": "staff4", "name": "담당직원4", "role": "staff", "hash": "cc627a2adec417efd520bd7021e92fc840414e16ad650d6de3809c009488e770"}, {"id": "staff5", "name": "담당직원5", "role": "staff", "hash": "de46712ab59fd2d0ed49bb1044197d66c26357d5ae61c633c05ed9edda70eaab"}, {"id": "직원1", "name": "담당직원1", "role": "staff", "hash": "30664f515cae07ccfd9e837d5fa552a3da3717fdcc72cddfe1de01b34574ab97"}, {"id": "직원2", "name": "담당직원2", "role": "staff", "hash": "9135dd5fbfdb8426df2ee6ee7b45e93be3214eacb3e578eaa06806be773c7a06"}, {"id": "직원3", "name": "담당직원3", "role": "staff", "hash": "176da121dd71f87c7dc680fb3e5f4f3fbd2f481ef4dbed9b93597b70739b3b1b"}, {"id": "직원4", "name": "담당직원4", "role": "staff", "hash": "69f844111fbeb1b731e8bdb09e0beaae791134b119f7bd8346a36c670409624d"}, {"id": "직원5", "name": "담당직원5", "role": "staff", "hash": "61edb09f847e8ba6b4f622c35a99c747fb5c85369c308b6c780987d4f95e8e2a"}];
 
     async function sha256Hex(str) {
       const buf = new TextEncoder().encode(str);

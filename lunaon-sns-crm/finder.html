@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔍 인스타·SNS 공구 셀러 찾기 — 34만 명(고유 26.8만) 카테고리별 마스터 탐색기</title>
+  <script src="crm_data.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', 'Malgun Gothic', sans-serif; }
+    body { background: #f1f5f9; color: #0f172a; padding: 18px; }
+    .container { max-width: 1620px; margin: 0 auto; }
+    .header {
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+      color: #fff;
+      border-radius: 14px;
+      padding: 18px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+    .header h1 { font-size: 20px; font-weight: 900; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .header p { font-size: 13px; color: #c7d2fe; margin-top: 4px; }
+    .btn {
+      border: none;
+      padding: 9px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: 0.15s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-primary { background: #2563eb; color: #fff; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-green { background: #16a34a; color: #fff; }
+    .btn-green:hover { background: #15803d; }
+    .btn-purple { background: #7c3aed; color: #fff; }
+    .btn-purple:hover { background: #6d28d9; }
+    .btn-outline { background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; }
+    .btn-outline:hover { background: #f8fafc; }
+
+    /* 상단 요약 카드 */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .sum-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 13px 16px;
+      border-left: 5px solid #6366f1;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .sum-card .t { font-size: 12px; font-weight: 800; color: #64748b; }
+    .sum-card .v { font-size: 22px; font-weight: 900; color: #0f172a; margin: 3px 0; }
+    .sum-card .s { font-size: 11px; color: #475569; }
+
+    /* 카테고리 그리드 */
+    .cat-box {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 15px 18px;
+      margin-bottom: 14px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .cat-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 10px;
+    }
+    .cat-btn {
+      padding: 7px 13px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      font-size: 13px;
+      font-weight: 800;
+      color: #334155;
+      cursor: pointer;
+      transition: 0.12s;
+    }
+    .cat-btn:hover { background: #eef2ff; border-color: #818cf8; }
+    .cat-btn.active { background: #4f46e5; color: #ffffff; border-color: #4f46e5; box-shadow: 0 2px 6px rgba(79,70,229,0.3); }
+
+    /* 상세 검색 바 */
+    .filter-panel {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 15px 18px;
+      margin-bottom: 14px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+    .chip-btn {
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      background: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      color: #334155;
+      cursor: pointer;
+    }
+    .chip-btn.active { background: #0f172a; color: #fff; border-color: #0f172a; }
+    .inp {
+      padding: 8px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    /* 결과 테이블 */
+    .table-card {
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      overflow-x: auto;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th {
+      background: #1e293b;
+      color: #ffffff;
+      padding: 11px 10px;
+      text-align: left;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #e2e8f0;
+      vertical-align: middle;
+    }
+    tr:hover td { background: #f8fafc; }
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .link-a { color: #2563eb; text-decoration: none; font-weight: 700; }
+    .link-a:hover { text-decoration: underline; }
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #0f172a;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      display: none;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 상단 헤더 -->
+    <div class="header">
+      <div>
+        <h1>
+          🔍 인스타·SNS 공구 셀러 찾기 (34만 명 마스터 탐색기)
+          <span id="finderModeBadge" style="font-size:12px;background:#4f46e5;color:#fff;padding:4px 10px;border-radius:99px;">⚡ 248,564명 전수 검색 연동중</span>
+        </h1>
+        <p>원본 수집 343,767행 ➔ 중복제거 고유 268,274명(실존 이메일 248,564명) 전체 DB에서 <strong>카테고리별 · 채널별 · 팔로워별 · 키워드별</strong>로 원하는 셀러를 즉시 찾고 메일을 발송합니다.</p>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <a href="./index.html" class="btn btn-outline" style="background:#fef08a;color:#0f172a;border-color:#facc15;font-weight:900;">⬅️ 루나온 공구 영업 대시보드(회신·도달률 현황판)로 돌아가기</a>
+        <button class="btn btn-green" onclick="exportFilteredCsv()">📥 현재 검색결과 엑셀(CSV) 다운로드</button>
+        <button class="btn btn-primary" onclick="sendMailToSelectedInFinder()">✉️ 선택 셀러 1차 제안메일 발송</button>
+      </div>
+    </div>
+
+    <!-- 마스터 모수 요약 -->
+    <div class="summary-grid">
+      <div class="sum-card" style="border-left-color:#7c3aed;">
+        <div class="t">📊 전체 수집 마스터 모수</div>
+        <div class="v">268,274명</div>
+        <div class="s">원본 343,767행 중복제거 완료 (실존메일 248,564명)</div>
+      </div>
+      <div class="sum-card" style="border-left-color:#db2777;">
+        <div class="t">📸 인스타그램 + 이메일 보유</div>
+        <div class="v">11,118명</div>
+        <div class="s">인스타 프로필 + 실존 이메일 검증 완료</div>
+      </div>
+      <div class="sum-card" style="border-left-color:#dc2626;">
+        <div class="t">🎥 유튜브 + 이메일 보유</div>
+        <div class="v">16,855명</div>
+        <div class="s">유튜브 채널 + 실존 이메일 검증 완료</div>
+      </div>
+      <div class="sum-card" style="border-left-color:#d97706;">
+        <div class="t">🔥 공동구매 완료 실적 VIP</div>
+        <div class="v">1,458명</div>
+        <div class="s">브랜드커넥트 실제 공구 진행·매출 검증 셀러</div>
+      </div>
+      <div class="sum-card" style="border-left-color:#16a34a;">
+        <div class="t">🏠 리빙·육아·푸드·건강 핵심타겟</div>
+        <div class="v">135,145명</div>
+        <div class="s">침구·살림·주부 구매력이 가장 높은 4대 분야</div>
+      </div>
+    </div>
+
+    <!-- 1. 카테고리별 원클릭 탐색 탭 -->
+    <div class="cat-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+        <strong style="font-size:15px;color:#0f172a;">📂 1단계: 카테고리별 찾기 (원하시는 분야를 클릭하세요)</strong>
+        <span id="catActiveSummary" style="font-size:12px;font-weight:800;color:#4f46e5;">현재 선택: 전체 카테고리</span>
+      </div>
+      <div class="cat-grid" id="categoryButtonsGrid"></div>
+    </div>
+
+    <!-- 2. 채널 / 팔로워 / 공구실적 / 키워드 상세 필터 -->
+    <div class="filter-panel">
+      <div class="filter-row">
+        <span style="font-size:13px;font-weight:900;color:#1e293b;min-width:95px;">📡 보유 채널:</span>
+        <button class="chip-btn active" id="ch_ALL" onclick="setFinderChannel('ALL')">전체 채널</button>
+        <button class="chip-btn" id="ch_INSTA" onclick="setFinderChannel('INSTA')">📸 인스타그램 보유 (11,118)</button>
+        <button class="chip-btn" id="ch_YOUTUBE" onclick="setFinderChannel('YOUTUBE')">🎥 유튜브 보유 (16,855)</button>
+        <button class="chip-btn" id="ch_GONGGU" onclick="setFinderChannel('GONGGU')" style="background:#fef3c7;border-color:#f59e0b;color:#92400e;">🔥 공구 완료 실적 보유 (1,458)</button>
+        <button class="chip-btn" id="ch_STORE" onclick="setFinderChannel('STORE')">🛒 스마트스토어 연동 셀러</button>
+        <button class="chip-btn" id="ch_CLIP" onclick="setFinderChannel('CLIP')">🎬 네이버클립/숏폼 보유</button>
+      </div>
+
+      <div class="filter-row">
+        <span style="font-size:13px;font-weight:900;color:#1e293b;min-width:95px;">👥 팔로워 규모:</span>
+        <button class="chip-btn active" id="flw_0" onclick="setMinFollowers(0)">전체 규모</button>
+        <button class="chip-btn" id="flw_1000" onclick="setMinFollowers(1000)">1,000명 이상</button>
+        <button class="chip-btn" id="flw_5000" onclick="setMinFollowers(5000)">5,000명 이상</button>
+        <button class="chip-btn" id="flw_10000" onclick="setMinFollowers(10000)">1만 명 이상</button>
+        <button class="chip-btn" id="flw_30000" onclick="setMinFollowers(30000)">3만 명 이상</button>
+        <button class="chip-btn" id="flw_50000" onclick="setMinFollowers(50000)">5만 명 이상</button>
+        <button class="chip-btn" id="flw_100000" onclick="setMinFollowers(100000)">👑 10만 명 이상 (메가셀러)</button>
+
+        <span style="font-size:13px;font-weight:900;color:#1e293b;margin-left:14px;">✉️ 발송 상태:</span>
+        <select id="sentFilterSelect" class="inp" style="padding:6px 10px;font-size:12px;" onchange="runFinderSearch(1)">
+          <option value="ALL">전체 (발송+미발송)</option>
+          <option value="UNSENT">⏳ 아직 메일 안 보낸 셀러만 (신규 발송용)</option>
+          <option value="SENT">✅ 1차 제안메일 발송 완료자</option>
+          <option value="REPLIED">📩 회신(답장) 온 셀러만</option>
+        </select>
+      </div>
+
+      <div class="filter-row" style="justify-content:space-between;padding-top:4px;border-top:1px solid #e2e8f0;">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1;">
+          <span style="font-size:13px;font-weight:900;color:#1e3a8a;">🔍 키워드·태그 검색:</span>
+          <input type="text" id="finderKeywordInput" class="inp" style="flex:1;min-width:280px;border:2px solid #4f46e5;" placeholder="셀러명, 인스타ID, 태그(예: 침구, 이불, 주부, 캠핑, 홈카페, 공동구매, 육아), 이메일 입력 후 엔터!" onkeydown="if(event.key==='Enter')runFinderSearch(1)" />
+          <button class="btn btn-purple" onclick="runFinderSearch(1)">🔍 조건 검색 실행</button>
+          <button class="btn btn-outline" onclick="resetFinderFilters()">🔄 필터 초기화</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span style="font-size:12px;font-weight:800;color:#475569;">정렬:</span>
+          <select id="finderSortSelect" class="inp" style="padding:6px 10px;font-size:12px;" onchange="runFinderSearch(1)">
+            <option value="GONGGU_DESC">🔥 공구 완료 횟수 많은 순</option>
+            <option value="FOLLOWERS_DESC" selected>👑 전체 구독·팔로워 많은 순</option>
+            <option value="INSTA_DESC">📸 인스타 팔로워 많은 순</option>
+            <option value="YOUTUBE_DESC">🎥 유튜브 구독자 많은 순</option>
+            <option value="BLOG_DESC">📗 블로그 일평균 방문자 순</option>
+          </select>
+          <select id="finderLimitSelect" class="inp" style="padding:6px 10px;font-size:12px;" onchange="runFinderSearch(1)">
+            <option value="50">50명씩 보기</option>
+            <option value="100" selected>100명씩 보기</option>
+            <option value="300">300명씩 보기</option>
+            <option value="500">500명씩 보기</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 검색 결과 바 & 페이지네이션 -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+      <div style="font-size:14px;font-weight:900;color:#0f172a;" id="finderResultCountText">검색 결과 불러오는 중...</div>
+      <div style="display:flex;align-items:center;gap:6px;" id="finderPaginationBox"></div>
+    </div>
+
+    <!-- 3. 셀러 상세 리스트 테이블 -->
+    <div class="table-card">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:36px;"><input type="checkbox" id="chkAllFinder" onchange="toggleFinderCheckAll(this)" /></th>
+            <th style="width:65px;">순번</th>
+            <th style="width:120px;">카테고리</th>
+            <th style="width:220px;">셀러명 / 아이디</th>
+            <th style="width:130px;">전체 구독·팔로워</th>
+            <th style="width:240px;">보유 채널별 상세 지표 (클릭 시 이동)</th>
+            <th style="width:120px;">공구 완료 실적</th>
+            <th>주요 태그 · 스토어 연동 카테고리 · 희망단가</th>
+            <th style="width:200px;">컨택 이메일</th>
+            <th style="width:135px;">루나온 발송상태</th>
+          </tr>
+        </thead>
+        <tbody id="finderTbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="toast" id="toastBox"></div>
+
+  <script>
+    window.LUNAON_REMOTE_API_URL = "https://myself-tablets-pill-tree.trycloudflare.com";
+    const MASTER_CATEGORIES = [
+      { id: 'ALL', label: '📋 전체 보기', count: 248564 },
+      { id: '리빙', label: '🏠 리빙(침구·인테리어·살림)', count: 51070 },
+      { id: '푸드', label: '🍳 푸드(요리·밀키트·주부)', count: 40498 },
+      { id: '여행', label: '✈️ 여행·숙박', count: 36927 },
+      { id: '육아', label: '👶 육아·출산·키즈', count: 23493 },
+      { id: '생활건강', label: '💊 생활건강·다이어트', count: 20084 },
+      { id: '뷰티', label: '💄 뷰티·화장품', count: 14760 },
+      { id: '경제/비즈니스', label: '💼 경제·비즈니스', count: 12909 },
+      { id: 'IT테크', label: '💻 IT테크·디지털가전', count: 12731 },
+      { id: '패션', label: '👗 패션·의류·잡화', count: 10534 },
+      { id: '동물/펫', label: '🐶 동물·반려동물(펫)', count: 5336 },
+      { id: '운동/레저', label: '⛺ 운동·레저·캠핑', count: 5137 },
+      { id: '방송/연예', label: '🎬 방송·연예', count: 3557 },
+      { id: '어학/교육', label: '📚 어학·교육', count: 2709 },
+      { id: '자동차', label: '🚗 자동차', count: 2031 },
+      { id: '도서', label: '📖 도서·책', count: 1738 },
+      { id: '공연/전시/예술', label: '🎨 공연·전시·예술', count: 1654 },
+      { id: '게임', label: '🎮 게임', count: 1376 },
+      { id: '프로스포츠', label: '⚽ 프로스포츠', count: 857 },
+      { id: '영화', label: '🎞️ 영화', count: 682 },
+      { id: '대중음악', label: '🎵 대중음악', count: 481 }
+    ];
+
+    let curCategory = 'ALL';
+    let curChannel = 'ALL';
+    let curMinFollowers = 0;
+    let curPage = 1;
+    let lastSearchItems = [];
+
+    function showToast(msg) {
+      const t = document.getElementById('toastBox');
+      t.textContent = msg;
+      t.style.display = 'block';
+      setTimeout(() => { t.style.display = 'none'; }, 3000);
+    }
+
+    function renderCategoryButtons() {
+      const box = document.getElementById('categoryButtonsGrid');
+      box.innerHTML = MASTER_CATEGORIES.map(c => `
+        <button class="cat-btn ${c.id === curCategory ? 'active' : ''}" onclick="setFinderCategory('${c.id}')">
+          ${c.label} <span style="font-size:11px;opacity:0.85;">(${c.count.toLocaleString()})</span>
+        </button>
+      `).join('');
+    }
+
+    function setFinderCategory(cat) {
+      curCategory = cat;
+      renderCategoryButtons();
+      const found = MASTER_CATEGORIES.find(x => x.id === cat);
+      document.getElementById('catActiveSummary').textContent = `현재 선택: ${found ? found.label : cat}`;
+      runFinderSearch(1);
+    }
+
+    function setFinderChannel(ch) {
+      curChannel = ch;
+      ['ALL', 'INSTA', 'YOUTUBE', 'GONGGU', 'STORE', 'CLIP'].forEach(k => {
+        const b = document.getElementById('ch_' + k);
+        if (b) b.classList.toggle('active', k === ch);
+      });
+      runFinderSearch(1);
+    }
+
+    function setMinFollowers(num) {
+      curMinFollowers = num;
+      [0, 1000, 5000, 10000, 30000, 50000, 100000].forEach(n => {
+        const b = document.getElementById('flw_' + n);
+        if (b) b.classList.toggle('active', n === num);
+      });
+      runFinderSearch(1);
+    }
+
+    function resetFinderFilters() {
+      curCategory = 'ALL';
+      curChannel = 'ALL';
+      curMinFollowers = 0;
+      document.getElementById('finderKeywordInput').value = '';
+      document.getElementById('sentFilterSelect').value = 'ALL';
+      document.getElementById('finderSortSelect').value = 'FOLLOWERS_DESC';
+      renderCategoryButtons();
+      setFinderChannel('ALL');
+      setMinFollowers(0);
+    }
+
+    async function smartFinderFetch(path, options) {
+      const candidates = [
+        path,
+        'http://127.0.0.1:8090' + path,
+        'http://localhost:8090' + path,
+        (window.LUNAON_REMOTE_API_URL || '').replace(/\/$/, '') + path
+      ];
+      for (const u of candidates) {
+        if (!u.startsWith('http') && location.protocol === 'file:') continue;
+        try {
+          const r = await fetch(u, options);
+          if (r.ok) return r;
+        } catch (e) {}
+      }
+      try {
+        const tr = await fetch(`https://raw.githubusercontent.com/always-nam/lunacool-website/master/lunaon-sns-crm/tunnel_url.txt?t=${Date.now()}`, { cache: 'no-store' });
+        if (tr.ok) {
+          const tun = (await tr.text()).trim().replace(/\/$/, '');
+          if (tun.startsWith('https://')) {
+            window.LUNAON_REMOTE_API_URL = tun;
+            const r2 = await fetch(tun + path, options);
+            if (r2.ok) return r2;
+          }
+        }
+      } catch (e2) {}
+      throw new Error('Server unreachable');
+    }
+
+    async function runFinderSearch(page = 1) {
+      curPage = page;
+      const kw = (document.getElementById('finderKeywordInput').value || '').trim();
+      const sentStatus = document.getElementById('sentFilterSelect').value;
+      const sortMode = document.getElementById('finderSortSelect').value;
+      const limit = Number(document.getElementById('finderLimitSelect').value || 100);
+      const countEl = document.getElementById('finderResultCountText');
+      countEl.textContent = '🔍 248,564명 마스터 DB에서 조건에 맞는 셀러를 검색 중입니다...';
+
+      const qs = new URLSearchParams({
+        category: curCategory,
+        channel: curChannel,
+        min_followers: String(curMinFollowers),
+        sent_status: sentStatus,
+        q: kw,
+        sort: sortMode,
+        page: String(page),
+        limit: String(limit)
+      });
+
+      try {
+        const res = await smartFinderFetch('/api/finder_search?' + qs.toString());
+        const data = await res.json();
+        if (data.ok) {
+          document.getElementById('finderModeBadge').textContent = `⚡ 248,564명 마스터 DB 실시간 검색됨`;
+          lastSearchItems = data.items || [];
+          renderFinderTable(data.items || [], data.total || 0, data.page || 1, limit);
+          return;
+        }
+      } catch (e) {
+        // Fallback: 정적 데이터(crm_data.js 31,236명 VIP 풀)에서 즉시 필터링
+        document.getElementById('finderModeBadge').textContent = `🌐 VIP 31,236명 내장 DB 검색 모드`;
+        runStaticFallbackSearch(kw, sentStatus, sortMode, page, limit);
+      }
+    }
+
+    function runStaticFallbackSearch(kw, sentStatus, sortMode, page, limit) {
+      const raw = (window.LUNAON_CRM_INITIAL_DATA && window.LUNAON_CRM_INITIAL_DATA.sellers) || [];
+      const kwLow = kw.toLowerCase();
+      let filtered = raw.filter(s => {
+        if (curCategory !== 'ALL' && !(s.category || '').includes(curCategory)) return false;
+        if (curChannel === 'INSTA' && !(s.insta_url || s.insta_id || s.channel === '인스타')) return false;
+        if (curChannel === 'YOUTUBE' && !(s.youtube_url || s.channel === '유튜브')) return false;
+        if (curChannel === 'GONGGU' && !(s.seller_traits || '').includes('공구완료')) return false;
+        if (curChannel === 'STORE' && !(s.seller_traits || '').includes('스토어연동')) return false;
+        if (curChannel === 'CLIP' && !s.tiktok_url) return false;
+        if ((Number(s.followers) || 0) < curMinFollowers) return false;
+        if (sentStatus === 'UNSENT' && s.stage !== '0_발송대기') return false;
+        if (sentStatus === 'SENT' && s.stage === '0_발송대기') return false;
+        if (sentStatus === 'REPLIED' && (s.stage === '0_발송대기' || s.stage === '1_1차제안메일')) return false;
+        if (kwLow) {
+          const hay = `${s.display_name || ''} ${s.seller_id || ''} ${s.category || ''} ${s.seller_traits || ''} ${s.email || ''}`.toLowerCase();
+          if (!hay.includes(kwLow)) return false;
+        }
+        return true;
+      });
+
+      filtered.sort((a, b) => (Number(b.followers) || 0) - (Number(a.followers) || 0));
+      const total = filtered.length;
+      const start = (page - 1) * limit;
+      const items = filtered.slice(start, start + limit).map(s => ({
+        id: s.id,
+        seller_id: s.seller_id,
+        name: s.display_name || s.seller_id,
+        category: s.category || '기타',
+        followers: Number(s.followers) || 0,
+        insta_followers: Number(s.followers) || 0,
+        youtube_subs: 0,
+        blog_visitors: Number(s.engagement) || 0,
+        gonggu_count: (s.seller_traits || '').includes('공구완료') ? 1 : 0,
+        insta_url: s.insta_url || (s.profile_url && s.profile_url.includes('instagram') ? s.profile_url : ''),
+        youtube_url: s.youtube_url || '',
+        blog_url: s.blog_url || (s.profile_url && s.profile_url.includes('blog.naver') ? s.profile_url : ''),
+        clip_url: s.tiktok_url || '',
+        traits: s.seller_traits || '',
+        email: s.email || '',
+        stage: s.stage || '0_발송대기'
+      }));
+      lastSearchItems = items;
+      renderFinderTable(items, total, page, limit);
+    }
+
+    function renderFinderTable(items, total, page, limit) {
+      const countEl = document.getElementById('finderResultCountText');
+      const totalPages = Math.max(1, Math.ceil(total / limit));
+      countEl.innerHTML = `🎯 검색 조건 일치 셀러: <span style="color:#4f46e5;font-size:17px;">${total.toLocaleString()}명</span> (현재 ${page} / ${totalPages.toLocaleString()} 페이지 · ${items.length}명 표시중)`;
+
+      const pagBox = document.getElementById('finderPaginationBox');
+      pagBox.innerHTML = `
+        <button class="btn btn-outline" style="padding:5px 10px;font-size:12px;" ${page <= 1 ? 'disabled' : ''} onclick="runFinderSearch(${page - 1})">◀ 이전</button>
+        <span style="font-size:12px;font-weight:800;padding:0 8px;">${page} / ${totalPages.toLocaleString()}</span>
+        <button class="btn btn-outline" style="padding:5px 10px;font-size:12px;" ${page >= totalPages ? 'disabled' : ''} onclick="runFinderSearch(${page + 1})">다음 ▶</button>
+      `;
+
+      const tbody = document.getElementById('finderTbody');
+      if (items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:30px;color:#64748b;font-weight:800;">조건에 맞는 셀러가 없습니다. 검색어나 필터를 조정해 보세요.</td></tr>`;
+        return;
+      }
+
+      const startIdx = (page - 1) * limit;
+      tbody.innerHTML = items.map((s, i) => {
+        const chLinks = [];
+        if (s.insta_url) chLinks.push(`<a href="${s.insta_url}" target="_blank" class="badge" style="background:#fce7f3;color:#be185d;text-decoration:none;">📸 인스타 ${s.insta_followers ? Number(s.insta_followers).toLocaleString() + '명' : '열기'}</a>`);
+        if (s.youtube_url) chLinks.push(`<a href="${s.youtube_url}" target="_blank" class="badge" style="background:#fee2e2;color:#b91c1c;text-decoration:none;">🎥 유튜브 ${s.youtube_subs ? Number(s.youtube_subs).toLocaleString() + '명' : '열기'}</a>`);
+        if (s.blog_url) chLinks.push(`<a href="${s.blog_url}" target="_blank" class="badge" style="background:#dcfce7;color:#15803d;text-decoration:none;">📗 블로그 ${s.blog_visitors ? '일방문 ' + Number(s.blog_visitors).toLocaleString() : '열기'}</a>`);
+        if (s.clip_url) chLinks.push(`<a href="${s.clip_url}" target="_blank" class="badge" style="background:#e0e7ff;color:#3730a3;text-decoration:none;">🎬 클립</a>`);
+
+        let stBadge = `<span class="badge" style="background:#f1f5f9;color:#475569;">⏳ 미발송</span>`;
+        if (s.stage === '1_1차제안메일') stBadge = `<span class="badge" style="background:#dbeafe;color:#1d4ed8;">📤 1차 발송완료</span>`;
+        else if (s.stage && s.stage !== '0_발송대기') stBadge = `<span class="badge" style="background:#dcfce7;color:#15803d;">📩 회신/상담중</span>`;
+
+        return `
+          <tr>
+            <td><input type="checkbox" class="finder-chk" value="${s.email || ''}" data-id="${s.id || ''}" data-name="${(s.name || '').replace(/"/g, '&quot;')}" /></td>
+            <td style="font-weight:800;color:#64748b;">#${(startIdx + i + 1).toLocaleString()}</td>
+            <td><span class="badge" style="background:#eef2ff;color:#4338ca;font-size:12px;">${s.category || '기타'}</span></td>
+            <td>
+              <div style="font-weight:900;color:#0f172a;font-size:14px;">${s.name || s.seller_id}</div>
+              <div style="font-size:11px;color:#64748b;">ID: ${s.seller_id || ''}</div>
+            </td>
+            <td style="font-weight:900;font-size:14px;color:#1e3a8a;">${Number(s.followers || 0).toLocaleString()}명</td>
+            <td><div style="display:flex;gap:4px;flex-wrap:wrap;">${chLinks.join(' ') || '-'}</div></td>
+            <td>
+              ${Number(s.gonggu_count || 0) > 0
+                ? `<span class="badge" style="background:#fef3c7;color:#b45309;border:1px solid #f59e0b;font-size:12px;">🔥 공구 ${s.gonggu_count}회 완료</span>`
+                : `<span style="color:#94a3b8;font-size:12px;">-</span>`}
+            </td>
+            <td style="font-size:12px;color:#334155;max-width:360px;">${s.traits || ''}</td>
+            <td style="font-weight:700;color:#0f172a;">${s.email || ''}</td>
+            <td>${stBadge}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function toggleFinderCheckAll(cb) {
+      document.querySelectorAll('.finder-chk').forEach(c => { c.checked = cb.checked; });
+    }
+
+    function exportFilteredCsv() {
+      if (!lastSearchItems || lastSearchItems.length === 0) {
+        alert('다운로드할 검색 결과가 없습니다.');
+        return;
+      }
+      const headers = ['카테고리', '셀러명', '아이디', '전체팔로워', '인스타팔로워', '유튜브구독자', '블로그일방문', '공구완료횟수', '이메일', '인스타URL', '유튜브URL', '블로그URL', '특징요약'];
+      const rows = lastSearchItems.map(s => [
+        s.category || '', s.name || '', s.seller_id || '', s.followers || 0, s.insta_followers || 0, s.youtube_subs || 0, s.blog_visitors || 0, s.gonggu_count || 0, s.email || '', s.insta_url || '', s.youtube_url || '', s.blog_url || '', (s.traits || '').replace(/,/g, ' ')
+      ]);
+      const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `인스타공구셀러_${curCategory}_${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+    }
+
+    async function sendMailToSelectedInFinder() {
+      const chks = Array.from(document.querySelectorAll('.finder-chk:checked'));
+      if (chks.length === 0) {
+        alert('먼저 왼쪽 체크박스에서 제안 메일을 발송할 셀러를 선택해주세요.');
+        return;
+      }
+      const ids = chks.map(c => c.getAttribute('data-id')).filter(Boolean);
+      if (ids.length === 0) {
+        alert('선택한 셀러의 발송 ID를 확인해주세요.');
+        return;
+      }
+      if (!confirm(`선택하신 ${ids.length}명의 셀러에게 [루나온 그래핀 발열이불 1차 제안메일]을 즉시 발송하시겠습니까?`)) return;
+      showToast('제안서 첨부 메일 발송 중...');
+      try {
+        const res = await smartFinderFetch('/api/send_email', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ ids })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          alert(`🎉 총 ${data.sent}건 발송 완료!`);
+          runFinderSearch(curPage);
+        } else {
+          alert('발송 오류: ' + (data.msg || ''));
+        }
+      } catch (e) {
+        alert('발송 서버 연결을 확인해주세요: ' + e);
+      }
+    }
+
+    renderCategoryButtons();
+    runFinderSearch(1);
+  </script>
+</body>
+</html>

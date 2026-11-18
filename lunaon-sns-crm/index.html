@@ -443,16 +443,19 @@
       <div id="monthlyCalendarGrid" style="display:grid;grid-template-columns:repeat(7, 1fr);gap:6px;"></div>
     </div>
 
-    <!-- 🌟 [신규] 3차·4차·5차 거의 확정 / 신청접수 셀러 전용 대형 집중 보드 -->
+    <!-- 🌟 [신규] 3차·4차·5차·6차 거의 확정 / 신청접수 셀러 전용 대형 집중 보드 -->
     <div id="vipConfirmedBoardSection" style="background:linear-gradient(180deg, #faf5ff 0%, #ffffff 100%);border-radius:12px;padding:18px 20px;box-shadow:0 2px 8px rgba(124,58,237,0.12);margin-bottom:16px;border:2px solid #c084fc;border-left:8px solid #7c3aed;">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
         <div>
-          <h3 style="font-size:17px;font-weight:900;color:#4c1d95;">🌟 [3차·4차·5차 집중 관리] 공구 신청접수 · 거의 확정 셀러 전용 대형 보드</h3>
-          <p style="font-size:12px;color:#5b21b6;margin-top:3px;">3차 이상 올라온 셀러(신청서 접수 완료 4차·5차 및 3차 재진행 조율 셀러)를 <strong>일반 목록과 분리하여 큼직하게 표시</strong>하고, 각 카드에서 바로 <strong>[📅 공구 오픈 일정]</strong>을 기입할 수 있습니다.</p>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <h3 style="font-size:17px;font-weight:900;color:#4c1d95;">🌟 [3차·4차·5차·6차 상담 영역] 공구 신청접수 · 최종 공구 확정 집중 관리 보드</h3>
+            <span id="vipConfirmedLiveBadge" onclick="setStageFilter('5_공구확정')" style="cursor:pointer;background:#16a34a;color:#ffffff;font-size:13px;font-weight:900;padding:5px 13px;border-radius:99px;box-shadow:0 2px 6px rgba(22,163,74,0.3);">🎉 현재 최종 공구 확정: 0명 (목표 100명 중 0%)</span>
+          </div>
+          <p style="font-size:12px;color:#5b21b6;margin-top:4px;">3차 이후 상담 영역의 각 카드에서 <strong>[🎉 최종 공구 확정하기]</strong> 버튼을 누르시면 즉시 상단 공구 확정 인원이 올라가며, 3·4·5·6차 언제든 추가 메일 답장이 오면 <strong>[🤖 고니(AI) 맞춤답변]</strong>으로 응대할 수 있습니다.</p>
         </div>
         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-          <button class="source-btn active" id="vipFilter_PRIORITY" style="font-weight:800;" onclick="setVipBoardFilter('PRIORITY')">🔥 신청접수(4·5차) + 일정기입 + 추가문의 셀러 우선 크게 보기</button>
-          <button class="source-btn" id="vipFilter_ALL345" style="font-weight:800;" onclick="setVipBoardFilter('ALL345')">📋 3차 재진행 조율 전체(37명+) 모두 크게 펼치기</button>
+          <button class="source-btn active" id="vipFilter_PRIORITY" style="font-weight:800;" onclick="setVipBoardFilter('PRIORITY')">🔥 신청접수·공구확정(4·5·6차) + 일정기입 셀러 우선 보기</button>
+          <button class="source-btn" id="vipFilter_ALL345" style="font-weight:800;" onclick="setVipBoardFilter('ALL345')">📋 3차 이후 상담 전체(40명+) 모두 크게 펼치기</button>
         </div>
       </div>
       <div id="vipStage345Grid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(560px, 1fr));gap:14px;"></div>
@@ -733,8 +736,9 @@
       '1_1차제안메일': '1. 1차 제안메일 발송',
       '2_2차회신도착': '2. 2차 회신 도착',
       '3_3차재진행조율': '3. 3차 재진행·샘플',
-      '4_직원오픈채팅이관': '4. 👥 직원 오픈채팅 상담',
-      '5_공구확정': '5. 🎉 최종 공구확정'
+      '4_직원오픈채팅이관': '4. 👥 4차 신청접수·상담',
+      '5_공구확정': '5. 🎉 5차 최종 공구확정',
+      '6_6차정산및재진행': '6. 💰 6차 정산·앵콜재진행'
     };
 
     function showToast(msg) {
@@ -833,7 +837,9 @@
 
       const stages = ['1_1차제안메일', '2_2차회신도착', '3_3차재진행조율', '4_직원오픈채팅이관', '5_공구확정'];
       stages.forEach(st => {
-        const c = allSellers.filter(s => s.stage === st).length;
+        const c = st === '5_공구확정'
+          ? allSellers.filter(s => s.stage === '5_공구확정' || s.stage === '6_6차정산및재진행' || Boolean(s.is_confirmed)).length
+          : allSellers.filter(s => s.stage === st).length;
         const el = document.getElementById('cnt_' + st);
         if (el) el.textContent = c.toLocaleString();
       });
@@ -842,26 +848,32 @@
       const elShipped = document.getElementById('cnt_SAMPLE_SHIPPED');
       if (elShipped) elShipped.textContent = shippedCnt.toLocaleString();
 
-      const confirmed = allSellers.filter(s => s.stage === '5_공구확정').length;
+      const confirmed = allSellers.filter(s => s.stage === '5_공구확정' || s.stage === '6_6차정산및재진행' || Boolean(s.is_confirmed)).length;
       const activePipe = allSellers.filter(s => ['2_2차회신도착', '3_3차재진행조율', '4_직원오픈채팅이관'].includes(s.stage)).length;
       const sentCnt = allSellers.filter(s => s.stage === '1_1차제안메일').length;
       const pct = Math.min(100, Math.round((confirmed / 100) * 100));
       document.getElementById('goalProgressFill').style.width = pct + '%';
       document.getElementById('goalProgressText').textContent = `${confirmed} / 100명 (${pct}%)`;
-      document.getElementById('goalSummaryText').textContent = `현재 공구확정 ${confirmed}명 | 샘플출고 ${shippedCnt}명 | 2·3·4차 회신·조율 ${activePipe}명 | 1차 제안 정상도달 ${sentCnt.toLocaleString()}명`;
+      document.getElementById('goalSummaryText').textContent = `🎉 현재 최종 공구확정 ${confirmed}명 | 📦 실제품 샘플출고 ${shippedCnt}명 | 📩 2·3·4차 회신·조율 ${activePipe}명 | 1차 제안 정상도달 ${sentCnt.toLocaleString()}명`;
+      const vipLiveBadge = document.getElementById('vipConfirmedLiveBadge');
+      if (vipLiveBadge) {
+        vipLiveBadge.textContent = `🎉 현재 최종 공구 확정: ${confirmed}명 (목표 100명 중 ${pct}%)`;
+      }
 
-      // 실시간 2차·3차 회신 하이라이트 보드 렌더링 (상단 클릭한 단계 최우선 정렬 + 먼저 답변한 셀러 순 정렬)
-      let repliedSellers = allSellers.filter(s => ['2_2차회신도착', '3_3차재진행조율', '4_직원오픈채팅이관', '5_공구확정'].includes(s.stage) || Boolean(s.sample_shipped || s.tracking_number));
+      // 실시간 2~6차 회신 하이라이트 보드 렌더링
+      let repliedSellers = allSellers.filter(s => ['2_2차회신도착', '3_3차재진행조율', '4_직원오픈채팅이관', '5_공구확정', '6_6차정산및재진행'].includes(s.stage) || Boolean(s.sample_shipped || s.tracking_number || s.is_confirmed));
       const onlySelected = document.getElementById('chkOnlySelectedStage')?.checked;
       if (currentStage === 'SAMPLE_SHIPPED') {
         const shippedList = repliedSellers.filter(s => Boolean(s.sample_shipped || s.tracking_number));
-        // 만약 아직 출고 체크된 인원이 0명이면 4·5·3차 신청접수 셀러를 바로 출고 체크할 수 있도록 함께 표시
-        repliedSellers = shippedList.length > 0 ? shippedList : repliedSellers.filter(s => ['4_직원오픈채팅이관', '5_공구확정', '3_3차재진행조율'].includes(s.stage));
-      } else if (onlySelected && ['2_2차회신도착', '3_3차재진행조율', '4_직원오픈채팅이관', '5_공구확정'].includes(currentStage)) {
+        repliedSellers = shippedList.length > 0 ? shippedList : repliedSellers.filter(s => ['4_직원오픈채팅이관', '5_공구확정', '6_6차정산및재진행', '3_3차재진행조율'].includes(s.stage));
+      } else if (currentStage === '5_공구확정') {
+        repliedSellers = repliedSellers.filter(s => s.stage === '5_공구확정' || s.stage === '6_6차정산및재진행' || Boolean(s.is_confirmed));
+      } else if (onlySelected && ['2_2차회신도착', '3_3차재진행조율', '4_직원오픈채팅이관', '6_6차정산및재진행'].includes(currentStage)) {
         repliedSellers = repliedSellers.filter(s => s.stage === currentStage);
       }
 
       const STAGE_PRIORITY_DEFAULT = {
+        '6_6차정산및재진행': 0,
         '5_공구확정': 0,
         '4_직원오픈채팅이관': 1,
         '3_3차재진행조율': 2,
@@ -908,27 +920,25 @@
       const badge = document.getElementById('replySummaryBadge');
       if (box && grid && (repliedSellers.length > 0 || onlySelected)) {
         box.style.display = 'block';
-        badge.textContent = `표시 ${repliedSellers.length}건 (3차 재진행 ${allSellers.filter(x=>x.stage==='3_3차재진행조율').length}명 / 샘플출고 ${shippedCnt}명 / 2차 회신대기 ${allSellers.filter(x=>x.stage==='2_2차회신도착').length}명)`;
+        badge.textContent = `표시 ${repliedSellers.length}건 (🎉 최종확정 ${confirmed}명 / 3차 조율 ${allSellers.filter(x=>x.stage==='3_3차재진행조율').length}명 / 📦 샘플출고 ${shippedCnt}명 / 2차 대기 ${allSellers.filter(x=>x.stage==='2_2차회신도착').length}명)`;
         grid.innerHTML = repliedSellers.map((s, orderIdx) => {
           const safeName = (s.display_name || s.seller_id).split('(')[0].trim().replace(/'/g, "");
           const fullLabel = (s.display_name || s.seller_id).replace(/'/g, "");
-          const isStage345 = ['3_3차재진행조율', '4_직원오픈채팅이관', '5_공구확정'].includes(s.stage);
+          const isStage345 = ['3_3차재진행조율', '4_직원오픈채팅이관', '5_공구확정', '6_6차정산및재진행'].includes(s.stage);
+          const isConfirmedSeller = (s.stage === '5_공구확정' || s.stage === '6_6차정산및재진행' || Boolean(s.is_confirmed));
           const alreadyReplied2nd = Boolean(s.sent_2nd_body) || (s.memo || '').includes('[2차답장 발송완료') || isStage345;
           const alreadyReplied3rd = Boolean(s.sent_3rd_body) || (s.memo || '').includes('[3차답장 발송완료') || (s.memo || '').includes('[송장안내 발송완료');
           const isSampleShipped = Boolean(s.sample_shipped || s.tracking_number);
 
-          const statusBadgeStyle = isSampleShipped ? 'background:#fef3c7;color:#b45309;border-color:#f59e0b;font-weight:800;' : (alreadyReplied2nd ? 'background:#dcfce7;color:#15803d;' : 'background:#dbeafe;color:#1d4ed8;');
+          const roundLabel = s.stage === '6_6차정산및재진행' ? '6차(정산·앵콜)' : (s.stage === '5_공구확정' ? '5차(공구확정·운영)' : (s.stage === '4_직원오픈채팅이관' ? '4차(링크·출고)' : (isStage345 ? '3차' : '2차')));
+          const statusBadgeStyle = isConfirmedSeller ? 'background:#dcfce7;color:#166534;border-color:#16a34a;font-weight:900;' : (isSampleShipped ? 'background:#fef3c7;color:#b45309;border-color:#f59e0b;font-weight:800;' : (alreadyReplied2nd ? 'background:#dcfce7;color:#15803d;' : 'background:#dbeafe;color:#1d4ed8;'));
           const secondSubj = s.sent_2nd_subject || `Re: [루나온 그래핀 발열이불] ${safeName}님 회신 감사드리며, 공동구매 상세 진행 방식 및 샘플 발송 안내드립니다.`;
           const secondBody = s.sent_2nd_body || getSecondReplyText(safeName);
 
-          // 3차 셀러는 셀러의 실제 답장 문맥을 분석한 고니 AI 맞춤 제목·본문(또는 기존 3차 발송분)으로 시작!
+          // 작성창(본문)은 처음에 100% 공란("")으로 비워두고, [🤖 고니(AI) 맞춤답변] 버튼을 누를 때만 채워지도록 설정!
           const goniCtx = generateContextualGoniReplyJS(s, safeName);
-          const editorDefaultSubj = isStage345
-            ? ((s.sent_3rd_at && s.sent_3rd_subject) ? s.sent_3rd_subject : goniCtx.subj)
-            : secondSubj;
-          const editorDefaultBody = isStage345
-            ? ((s.sent_3rd_at && s.sent_3rd_body) ? s.sent_3rd_body : goniCtx.body)
-            : (s.sent_2nd_body || goniCtx.body);
+          const editorDefaultSubj = isStage345 ? goniCtx.subj : secondSubj;
+          const editorDefaultBody = '';
 
           let cardStageOpts = '';
           Object.keys(STAGE_LABELS).forEach(k => {
@@ -1118,34 +1128,44 @@
                 </div>
               </div>
 
-              <!-- 하단 작업 버튼 (2차 셀러는 2차 답장쓰기 / 3·4·5차 셀러는 3차 답변·송장 메일쓰기) -->
+              <!-- 하단 작업 버튼 (2차 답장 / 3·4·5·6차 답변·송장 메일쓰기 + 최종 공구 확정 버튼) -->
               <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;align-items:center;">
                 <button class="btn" style="padding:6px 12px;font-size:12px;font-weight:800;background:${isStage345 ? '#7c3aed' : '#2563eb'};color:#fff;" onclick="toggleInlineReply('${s.id}')">
-                  ${isStage345 ? '✉️ 여기서 바로 3차 답변·송장 메일쓰기' : '✉️ 여기서 바로 2차 답장쓰기'}
+                  ${isStage345 ? `✉️ 여기서 바로 ${roundLabel} 답변·송장 메일쓰기` : '✉️ 여기서 바로 2차 답장쓰기'}
                 </button>
-                ${isStage345 ? `
-                  <button class="btn btn-outline" style="padding:5px 10px;font-size:11px;background:#faf5ff;color:#6d28d9;border-color:#c084fc;font-weight:700;" onclick="openThirdReplyWithDraft('${s.id}', '${safeName}')">🎉 3차 신청접수·일정조율 초안으로 바로 열기</button>
-                ` : ''}
+                ${isStage345 ? (
+                  isConfirmedSeller ? `
+                    <button class="btn" style="padding:6px 12px;font-size:12px;font-weight:900;background:#16a34a;color:#ffffff;border:2px solid #15803d;" onclick="toggleConfirmSeller('${s.id}', false)">
+                      ✅ 최종 공구 확정됨 (현재 확정 ${confirmed}명 · 클릭 시 해제)
+                    </button>
+                  ` : `
+                    <button class="btn" style="padding:6px 12px;font-size:12px;font-weight:900;background:#f0fdf4;color:#15803d;border:2px solid #16a34a;" onclick="toggleConfirmSeller('${s.id}', true)">
+                      🎉 최종 공구 확정하기 (현재 확정 ${confirmed}명 ➔ +1)
+                    </button>
+                  `
+                ) : ''}
                 <button class="btn btn-outline" style="padding:5px 9px;font-size:11px;" onclick="updateSeller('${s.id}', {stage: '1_1차제안메일', memo: '[거절/보류제외] ' + (allSellers.find(x=>x.id==='${s.id}')?.memo||'')})">❌ 보류/제외</button>
               </div>
 
-              <!-- 인라인 2차 / 3차 답장 에디터 -->
+              <!-- 인라인 2차 / 3·4·5·6차 답장 에디터 (항상 공란으로 시작하며 AI 버튼 클릭 시 자동 작성) -->
               <div id="inlineReplyBox_${s.id}" style="display:none;margin-top:8px;padding-top:10px;border-top:2px dashed ${isStage345 ? '#a855f7' : '#cbd5e1'};background:#ffffff;padding:10px;border-radius:8px;">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;flex-wrap:wrap;gap:4px;">
                   <span style="font-size:11px;font-weight:800;color:${isStage345 ? '#6d28d9' : '#1d4ed8'};">
-                    📤 ${isStage345 ? '3차 답변 / 진행조율 / 송장안내 메일 받는사람' : '2차 답장 받는사람'}: ${s.email || ''} (${safeName}님)
+                    📤 ${isStage345 ? `${roundLabel} 답변 / 진행조율 / 송장·정산 안내메일 받는사람` : '2차 답장 받는사람'}: ${s.email || ''} (${safeName}님)
                   </span>
                   <div style="display:flex;gap:4px;flex-wrap:wrap;">
                     <button class="btn btn-primary" style="padding:3px 9px;font-size:11px;background:#7c3aed;" onclick="${isStage345 ? `fillGoniThirdDraft('${s.id}', '${safeName}')` : `fillGoniCustomDraft('${s.id}', '${safeName}')`}">
-                      🤖 고니(AI) ${isStage345 ? '3차 맞춤답변' : '셀러맞춤 답변'} 자동작성
+                      🤖 고니(AI) ${isStage345 ? `${roundLabel} 맞춤답변` : '셀러맞춤 답변'} 자동작성
                     </button>
-                    <button class="btn btn-outline" style="padding:2px 8px;font-size:10px;background:#f0fdf4;color:#15803d;border-color:#86efac;font-weight:700;" onclick="fillThirdTemplate('${s.id}', '${safeName}')">🎉 3차 신청접수·샘플출고 초안 넣기</button>
-                    <button class="btn btn-outline" style="padding:2px 8px;font-size:10px;background:#fffbeb;color:#b45309;border-color:#fcd34d;font-weight:800;" onclick="fillTrackingTemplate('${s.id}', '${safeName}', 'cardTrkNum_${s.id}')">📦 송장번호 발송 안내초안 넣기</button>
-                    <button class="btn btn-outline" style="padding:2px 8px;font-size:10px;background:#fefce8;color:#854d0e;border-color:#fde047;" onclick="fillSecondTemplate('${s.id}', '${safeName}')">📋 기본 2차안내문 넣기</button>
+                    <button class="btn btn-outline" style="padding:2px 8px;font-size:10px;background:#f0fdf4;color:#15803d;border-color:#86efac;font-weight:700;" onclick="fillThirdTemplate('${s.id}', '${safeName}')">🎉 3차 신청접수 초안</button>
+                    <button class="btn btn-outline" style="padding:2px 8px;font-size:10px;background:#fffbeb;color:#b45309;border-color:#fcd34d;font-weight:800;" onclick="fillTrackingTemplate('${s.id}', '${safeName}', 'cardTrkNum_${s.id}')">📦 송장번호 안내초안</button>
+                    <button class="btn btn-outline" style="padding:2px 8px;font-size:10px;background:#eff6ff;color:#1d4ed8;border-color:#93c5fd;font-weight:700;" onclick="fillFourthFifthTemplate('${s.id}', '${safeName}')">🔗 4·5차 전용링크·오픈지원</button>
+                    <button class="btn btn-outline" style="padding:2px 8px;font-size:10px;background:#faf5ff;color:#6d28d9;border-color:#d8b4fe;font-weight:700;" onclick="fillSixthSettlementTemplate('${s.id}', '${safeName}')">💰 6차 마감·정산 안내</button>
+                    <button class="btn btn-outline" style="padding:2px 8px;font-size:10px;background:#fefce8;color:#854d0e;border-color:#fde047;" onclick="fillSecondTemplate('${s.id}', '${safeName}')">📋 2차 기본안내문</button>
                   </div>
                 </div>
                 <input type="text" id="replySubj_${s.id}" class="inline-input" style="margin-bottom:6px;font-weight:700;font-size:12px;" value="${editorDefaultSubj.replace(/"/g, '&quot;')}" />
-                <textarea id="replyBody_${s.id}" style="width:100%;height:210px;padding:8px;font-size:12px;line-height:1.45;border:1px solid #cbd5e1;border-radius:6px;resize:vertical;" placeholder="${isStage345 ? '3차 답변 내용을 자유롭게 작성하시거나 위 [🤖 고니 3차 맞춤답변] / [🎉 3차 신청접수 초안] / [📦 송장번호 안내초안] 버튼을 누르세요.' : '셀러의 답장 내용을 확인하신 후 질문에 맞게 답변을 작성하세요.'}">${editorDefaultBody}</textarea>
+                <textarea id="replyBody_${s.id}" style="width:100%;height:210px;padding:8px;font-size:12px;line-height:1.45;border:1px solid #cbd5e1;border-radius:6px;resize:vertical;" placeholder="처음에는 공란으로 비워져 있습니다. 직접 입력하시거나 위 [🤖 고니(AI) 맞춤답변 자동작성] 버튼을 누르시면 셀러의 최신 답장 내용에 맞춘 AI 답변이 작성됩니다.">${editorDefaultBody}</textarea>
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;flex-wrap:wrap;gap:6px;">
                   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
                     <label style="font-size:11px;font-weight:700;color:#334155;display:flex;align-items:center;gap:4px;cursor:pointer;">
@@ -1155,8 +1175,9 @@
                       발송 후 단계:
                       <select id="replyNextStage_${s.id}" class="stage-select" style="padding:2px 6px;font-size:11px;">
                         <option value="3_3차재진행조율" ${!isStage345 || s.stage === '3_3차재진행조율' ? 'selected' : ''}>3. 3차 재진행·샘플</option>
-                        <option value="4_직원오픈채팅이관" ${s.stage === '4_직원오픈채팅이관' ? 'selected' : ''}>4. 👥 신청접수·상담</option>
-                        <option value="5_공구확정" ${s.stage === '5_공구확정' ? 'selected' : ''}>5. 🎉 최종 공구확정</option>
+                        <option value="4_직원오픈채팅이관" ${s.stage === '4_직원오픈채팅이관' ? 'selected' : ''}>4. 👥 4차 신청접수·상담</option>
+                        <option value="5_공구확정" ${s.stage === '5_공구확정' ? 'selected' : ''}>5. 🎉 5차 최종 공구확정</option>
+                        <option value="6_6차정산및재진행" ${s.stage === '6_6차정산및재진행' ? 'selected' : ''}>6. 💰 6차 정산·앵콜재진행</option>
                       </select>
                     </label>
                   </div>
@@ -1165,7 +1186,7 @@
                     <button class="btn btn-outline" style="padding:6px 10px;font-size:11px;background:#eff6ff;color:#1d4ed8;border-color:#93c5fd;font-weight:700;" onclick="openGmailWebCompose('${s.id}', '${s.email || ''}')">🌐 지메일 웹창으로 열기</button>
                     <button class="btn btn-outline" style="padding:6px 10px;font-size:11px;background:#f0fdf4;color:#15803d;border-color:#86efac;font-weight:700;" onclick="markReplySentManual('${s.id}', '${s.email || ''}')">✅ 발송완료 체크</button>
                     <button class="btn btn-primary" id="btnSendInline_${s.id}" style="padding:6px 12px;font-size:12px;background:${isStage345 ? '#7c3aed' : '#2563eb'};" onclick="sendInlineReply('${s.id}', '${s.email || ''}', ${isStage345 ? 3 : 2})">
-                      🚀 지금 바로 ${isStage345 ? '3차 답변메일' : '2차 답장메일'} 발송
+                      🚀 지금 바로 ${isStage345 ? `${roundLabel} 답변메일` : '2차 답장메일'} 발송
                     </button>
                   </div>
                 </div>
@@ -1457,13 +1478,39 @@
       const name = displayName || ((s.display_name || s.seller_id || '셀러').split('(')[0].trim());
       const sid = (s.seller_id || '').toLowerCase();
       const email = (s.email || '').toLowerCase();
+      const stage = s.stage || '2_2차회신도착';
       const r1 = (s.reply_text || '').trim();
       const r2 = (s.reply_2nd_text || '').trim();
-      const combined = `${r2}\n${r1}`.trim();
+      const latest = (s.latest_reply_text || r2 || (r1.includes('──────────────') ? r1.split('──────────────')[0] : r1)).trim();
+      const combined = `${latest}\n${r1}`.trim();
       const combLow = combined.toLowerCase();
 
       const footer = `감사합니다.\n(주)테란 · 테란2(온누리유통) 루나온 공구제안팀 드림\n• 담당자 : 이화식 / 남대현 (010-2807-0174 / 010-4527-8781 / 070-8858-5230)\n• 회신 이메일 : akrrntn1@gmail.com`;
       const stdBlock = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 루나온 그래핀 발열이불 공동구매 핵심 조건 요약\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n• 상품명 : 루나온 그래핀 50% 자가발열 이불 (색상: 연그레이 & 차콜 양면 투톤)\n• 슈퍼싱글(SS) : 공구가 49,000원(무료배송) / 셀러공급가 32,000원 / 1개당 셀러정산금 17,000원 (사업자 세금계산서 17,000원 · 개인 3.3% 공제 후 16,439원)\n• 퀸(Q) : 공구가 59,000원(무료배송) / 셀러공급가 42,000원 / 1개당 셀러정산금 17,000원 (사업자 세금계산서 17,000원 · 개인 3.3% 공제 후 16,439원)\n  ※ 네이버 스마트스토어 결제수수료는 본사가 전액 부담하여 셀러님께 이중 공제되지 않습니다.\n• 진행 가능 채널 : 네이버 블로그를 제외한 전 채널 가능 (인스타그램, 유튜브, 네이버 클립, 틱톡, 카페/밴드, 오픈채팅 등)\n• 정산 및 배송 : 공구 마감 1주일 후 전액 정산 / 평일 1차 오후 1시·2차 오후 4시 마감 CJ대한통운 당일 출고\n• 샘플 기준 : 최초 샘플 1개는 셀러공급가(SS 32,000원 / Q 42,000원, 무료배송)로 구매 후 출고되며, 샘플 포함 5개 이상 판매 시 1개는 무상 제공(정산 시 전액 환급)됩니다.\n  - 샘플 입금 계좌 : 기업은행 534-028152-01-023 (예금주: 주식회사 테란)\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n[진행 신청 회신 양식] — 아래 내용을 적어 답장 주시면 샘플 발송 및 전용 결제창 세팅을 도와드립니다.\n1. 성함 / 연락처 / 카카오톡 ID : \n2. 진행하실 채널 주소 (인스타·유튜브·클립 등) : \n3. 샘플 신청 사이즈(SS 32,000원 / Q 42,000원) 및 수령 주소 : \n4. 샘플비 입금자명 (입금 완료 시 기재) : \n5. 희망 공구 오픈 일정 : \n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+
+      // [A] 6차 / 공구 마감 · 정산 · 세금계산서 · 원천징수 · 샘플환급 · 앵콜 문의
+      if (['정산', '세금계산서', '원천징수', '마감했', '마감되었', '입금계좌', '통장사본', '앵콜', '2차 공구', '판매수량'].some(k => latest.includes(k)) || stage === '6_6차정산및재진행') {
+        return {
+          subj: `Re: [루나온 그래핀 발열이불] ${name}님! 공동구매 마감 수고 많으셨으며, 최종 정산 및 샘플비 환급 안내드립니다 😊`,
+          body: getDefaultSixthSettlementTemplate(name)
+        };
+      }
+
+      // [B] 5차 / 공구 오픈 및 운영 중 문의 (재고, 합포장, 제주도 배송비, 기간연장, 세탁, 교환/반품 CS)
+      if (['합포장', '제주', '도서산간', '재고', '품절', '연장', '오픈했', '오픈합니다', '교환', '불량', '반품', '세탁망', '건조기'].some(k => latest.includes(k))) {
+        return {
+          subj: `Re: [루나온 그래핀 발열이불] ${name}님! 문의주신 공구 진행·배송·CS 운영 기준 상세 답변드립니다 😊`,
+          body: getDefaultFourthFifthTemplate(name, s)
+        };
+      }
+
+      // [C] 4차 / 샘플 입금완료 · 송장문의 · 샘플 수령 후 전용 스마트스토어 링크 요청
+      if (['입금했', '입금완료', '입금 완료', '송장', '운송장', '언제 출고', '언제 발송', '잘 받았', '수령했', '전용 링크', '전용링크', '결제 링크', '결제창 링크'].some(k => latest.includes(k))) {
+        return {
+          subj: `Re: [루나온 그래핀 발열이불] ${name}님! 샘플 출고·송장 확인 및 스마트스토어 전용 구매링크 안내드립니다 😊`,
+          body: getDefaultFourthFifthTemplate(name, s)
+        };
+      }
 
       // 1) 신혼여행 / 여행 / 다녀와서 확인하겠다는 셀러 (예: 매일이하나 nachoo1566)
       if (combined.includes('신혼여행') || combined.includes('다녀와서') || combined.includes('발리')) {
@@ -1547,6 +1594,60 @@
         subj: `Re: [루나온 그래핀 발열이불] ${name}님 회신 감사드리며, 공동구매 진행 및 샘플·전용 링크 안내드립니다 😊`,
         body: s.ai_reply_draft || getSecondReplyText(name)
       };
+    }
+
+    function getDefaultFourthFifthTemplate(displayName, s = {}) {
+      const trk = (s.tracking_number || '').trim();
+      const trkLine = trk ? `CJ대한통운 ${trk} (조회: https://trace.cjlogistics.com/next/tracking.html?wblNo=${trk.replace(/[^0-9]/g, '')})` : '평일 1차(오후 1시) / 2차(오후 4시) 마감 기준 CJ대한통운 당일 칼출고';
+      return `안녕하세요, ${displayName}님!\n루나온 공구제안팀입니다. 회신 주셔서 진심으로 감사드립니다! 😊\n\n말씀해주신 [4·5차 전용 구매링크 세팅 및 공구 오픈·물류 운영] 안내드립니다.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 🔗 1. ${displayName}님 전용 스마트스토어 비노출 구매 링크 & 홍보 자료\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n• 공구 오픈 일정(${s.schedule_start || '희망 오픈일'})에 맞추어 팔로워분들이 공구 최저가(SS 49,000원 / Q 59,000원 무료배송)로 결제하실 수 있는 [${displayName}님 전용 네이버 스마트스토어 비노출 링크]를 세팅해 전달드립니다.\n• 상세페이지 (GIF 버전) : https://always-nam.github.io/lunacool-website/lunaon-detail-v9/\n• 홍보 영상 (15초 CF) : https://always-nam.github.io/lunacool-website/lunaon-cf-v8/\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 🚚 2. 공구 진행 중 물류 당일 출고 & 본사 CS 전담 안내\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n• 물류/재고 : 현재 파주 본사 물류에 SS/Q 전 수량 여유 재고가 확보되어 있으며, ${trkLine}로 발송됩니다.\n• 배송비/합포장 : 전국 기본 무료배송 (제주·도서산간 +3,000원) / 1박스 최대 4개 합포장 기준\n• CS 본사 100% 전담 : 배송 조회·주소 변경·교환·반품 CS는 본사(070-8858-5230)에서 전담 처리하므로 편하게 판매와 소통에만 집중해 주시면 됩니다!\n\n공구 기간 동안 최고의 성과 내실 수 있도록 본사에서 실시간으로 지원하겠습니다. 감사합니다!\n\n(주)테란 · 테란2(온누리유통) 루나온 공구제안팀 드림\n• 담당자 : 이화식 / 남대현 (010-2807-0174 / 010-4527-8781 / 070-8858-5230)\n• 회신 이메일 : akrrntn1@gmail.com`;
+    }
+
+    function getDefaultSixthSettlementTemplate(displayName) {
+      return `안녕하세요, ${displayName}님!\n루나온 공구제안팀입니다. 이번 루나온 그래핀 발열이불 공동구매를 정성껏 진행해 주셔서 진심으로 감사드립니다! 😊\n\n[6차 공동구매 마감 최종 정산 및 샘플비 무상 환급 절차]를 안내드립니다.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 💰 1. 공동구매 최종 정산 금액 산정 및 샘플비 환급\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n• 1개당 셀러 정산금 : 슈퍼싱글(SS) / 퀸(Q) 모두 판매 1개당 17,000원 (스마트스토어 결제수수료 본사 전액 부담)\n• 샘플비 무상 환급 : 샘플 포함 총 5개 이상 판매 달성 시, 최초 결제하신 샘플 1개 금액(SS 32,000원 / Q 42,000원)을 정산금에 전액 합산하여 환급해 드립니다!\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 📋 2. 정산 지급일 및 서류 회신 안내 (공구 마감 1주일 후 전액 입금)\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n• 사업자 셀러님 (세금계산서 발행 시 개당 17,000원 전액 지급) :\n  - 정산 받으실 사업자 통장 계좌번호 및 사업자등록증 사본을 회신해 주세요.\n• 개인 셀러님 (3.3% 원천징수 공제 후 개당 16,439원 실지급) :\n  - 정산 받으실 본인 명의 은행/계좌번호, 성함, 주민등록번호(원천징수 신고용)를 회신해 주세요.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 🔥 3. 한파 시즌 2차(앵콜) 공동구매 우선 지원\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n• 미처 구매하지 못한 팔로워분들의 앵콜 요청이 있을 경우, 원하시는 일정에 언제든 2차 앵콜 공구 오픈을 최우선 지원해 드립니다!\n\n고생 많으셨으며, 회신 주시는 대로 빠르게 정산 도와드리겠습니다. 감사합니다!\n\n(주)테란 · 테란2(온누리유통) 루나온 공구제안팀 드림\n• 담당자 : 이화식 / 남대현 (010-2807-0174 / 010-4527-8781 / 070-8858-5230)\n• 회신 이메일 : akrrntn1@gmail.com`;
+    }
+
+    function fillFourthFifthTemplate(id, displayName, prefix = '') {
+      const el = document.getElementById(prefix + 'replyBody_' + id);
+      const subjEl = document.getElementById(prefix + 'replySubj_' + id);
+      if (!el) return;
+      const s = allSellers.find(x => x.id === id) || {};
+      el.value = getDefaultFourthFifthTemplate(displayName, s);
+      if (subjEl) {
+        subjEl.value = `Re: [루나온 그래핀 발열이불] ${displayName}님 전용 스마트스토어 구매링크 및 공구 오픈·물류 지원(4·5차) 안내드립니다.`;
+      }
+      el.focus();
+      showToast(`🔗 [${displayName}]님 4·5차 전용링크·공구오픈 지원 안내 초안이 입력되었습니다!`);
+    }
+
+    function fillSixthSettlementTemplate(id, displayName, prefix = '') {
+      const el = document.getElementById(prefix + 'replyBody_' + id);
+      const subjEl = document.getElementById(prefix + 'replySubj_' + id);
+      if (!el) return;
+      el.value = getDefaultSixthSettlementTemplate(displayName);
+      if (subjEl) {
+        subjEl.value = `Re: [루나온 그래핀 발열이불] ${displayName}님 공동구매 마감 감사드리며, 최종 정산 및 환급(6차) 안내드립니다.`;
+      }
+      el.focus();
+      showToast(`💰 [${displayName}]님 6차 공구마감·정산·세금계산서 안내 초안이 입력되었습니다!`);
+    }
+
+    async function toggleConfirmSeller(id, makeConfirmed) {
+      const s = allSellers.find(x => x.id === id);
+      if (!s) return;
+      const safeName = (s.display_name || s.seller_id).split('(')[0].trim();
+      const nowStr = new Date().toISOString().slice(0,16).replace('T',' ');
+      const nextStage = makeConfirmed ? '5_공구확정' : '4_직원오픈채팅이관';
+      const patch = {
+        stage: nextStage,
+        is_confirmed: Boolean(makeConfirmed),
+        confirmed_at: makeConfirmed ? nowStr : ''
+      };
+      await updateSeller(id, patch);
+      const totalConfirmed = allSellers.filter(x => x.stage === '5_공구확정' || x.stage === '6_6차정산및재진행' || Boolean(x.is_confirmed)).length;
+      showToast(makeConfirmed
+        ? `🎉 [${safeName}]님이 최종 공구 확정 처리되었습니다! (현재 총 ${totalConfirmed}명 공구 확정!)`
+        : `[${safeName}]님의 공구 확정 상태가 4차 상담 단계로 변경되었습니다. (현재 총 ${totalConfirmed}명 확정)`
+      );
     }
 
     function fillThirdTemplate(id, displayName, prefix = '') {
@@ -1703,18 +1804,27 @@
       const grid = document.getElementById('vipStage345Grid');
       if (!grid) return;
 
-      let vips = allSellers.filter(s => ['3_3차재진행조율', '4_직원오픈채팅이관', '5_공구확정'].includes(s.stage));
+      const confirmedTotal = allSellers.filter(s => s.stage === '5_공구확정' || s.stage === '6_6차정산및재진행' || Boolean(s.is_confirmed)).length;
+      const pct = Math.min(100, Math.round((confirmedTotal / 100) * 100));
+      const vipLiveBadge = document.getElementById('vipConfirmedLiveBadge');
+      if (vipLiveBadge) {
+        vipLiveBadge.textContent = `🎉 현재 최종 공구 확정: ${confirmedTotal}명 (목표 100명 중 ${pct}%)`;
+      }
+
+      let vips = allSellers.filter(s => ['3_3차재진행조율', '4_직원오픈채팅이관', '5_공구확정', '6_6차정산및재진행'].includes(s.stage) || Boolean(s.is_confirmed));
       if (vipBoardFilter === 'PRIORITY') {
         vips = vips.filter(s =>
+          s.stage === '6_6차정산및재진행' ||
           s.stage === '5_공구확정' ||
           s.stage === '4_직원오픈채팅이관' ||
+          Boolean(s.is_confirmed) ||
           Boolean(s.schedule_start) ||
           Boolean(s.reply_2nd_text && !(s.memo || '').includes('거절/사양'))
         );
       }
 
       vips.sort((a, b) => {
-        const order = { '5_공구확정': 0, '4_직원오픈채팅이관': 1, '3_3차재진행조율': 2 };
+        const order = { '6_6차정산및재진행': 0, '5_공구확정': 0, '4_직원오픈채팅이관': 1, '3_3차재진행조율': 2 };
         const oa = order[a.stage] ?? 9;
         const ob = order[b.stage] ?? 9;
         if (oa !== ob) return oa - ob;
@@ -1725,17 +1835,18 @@
       });
 
       if (vips.length === 0) {
-        grid.innerHTML = `<div style="padding:16px;color:#64748b;font-size:13px;">표시할 셀러가 없습니다. 우측 상단 [📋 3차 재진행 조율 전체 모두 크게 펼치기] 버튼을 눌러보세요.</div>`;
+        grid.innerHTML = `<div style="padding:16px;color:#64748b;font-size:13px;">표시할 셀러가 없습니다. 우측 상단 [📋 3차 이후 상담 전체 모두 크게 펼치기] 버튼을 눌러보세요.</div>`;
         return;
       }
 
       grid.innerHTML = vips.map((s, idx) => {
         const safeName = (s.display_name || s.seller_id).split('(')[0].trim().replace(/'/g, "");
         const fullLabel = (s.display_name || s.seller_id).replace(/'/g, "");
-        const isStage45 = (s.stage === '4_직원오픈채팅이관' || s.stage === '5_공구확정');
+        const isConfirmed = (s.stage === '5_공구확정' || s.stage === '6_6차정산및재진행' || Boolean(s.is_confirmed));
         const isSampleShipped = Boolean(s.sample_shipped || s.tracking_number);
-        const cardBg = isSampleShipped ? '#fffbeb' : (s.stage === '5_공구확정' ? '#dcfce7' : (s.stage === '4_직원오픈채팅이관' ? '#f5f3ff' : '#ffffff'));
-        const cardBdr = isSampleShipped ? '2px solid #d97706' : (s.stage === '5_공구확정' ? '2px solid #16a34a' : (s.stage === '4_직원오픈채팅이관' ? '2px solid #7c3aed' : '1px solid #cbd5e1'));
+        const roundLabel = s.stage === '6_6차정산및재진행' ? '6차(정산·앵콜)' : (s.stage === '5_공구확정' ? '5차(공구확정)' : (s.stage === '4_직원오픈채팅이관' ? '4차(링크·출고)' : '3차'));
+        const cardBg = isConfirmed ? '#f0fdf4' : (isSampleShipped ? '#fffbeb' : (s.stage === '4_직원오픈채팅이관' ? '#f5f3ff' : '#ffffff'));
+        const cardBdr = isConfirmed ? '2px solid #16a34a' : (isSampleShipped ? '2px solid #d97706' : (s.stage === '4_직원오픈채팅이관' ? '2px solid #7c3aed' : '1px solid #cbd5e1'));
         const followerTypeLabel = (s.source || '').includes('브랜드커넥트') ? '전채널 합산 구독·팔로워' : '인스타 팔로워';
 
         let igHandle = s.insta_id || '';
@@ -1762,7 +1873,12 @@
         if (blogUrl) {
           btns += `<a href="${blogUrl}" target="_blank" class="btn btn-outline" style="padding:5px 10px;font-size:12px;color:#15803d;border-color:#bbf7d0;">📗 블로그</a>`;
         }
-        btns += `<button class="btn btn-primary" style="padding:5px 11px;font-size:12px;background:#7c3aed;font-weight:800;" onclick="toggleVipInlineReply('${s.id}')">✉️ 여기서 바로 3차 답변·송장 메일쓰기</button>`;
+        btns += `<button class="btn btn-primary" style="padding:5px 11px;font-size:12px;background:#7c3aed;font-weight:800;" onclick="toggleVipInlineReply('${s.id}')">✉️ 여기서 바로 ${roundLabel} 답변·송장 메일쓰기</button>`;
+        if (isConfirmed) {
+          btns += `<button class="btn" style="padding:5px 12px;font-size:12px;font-weight:900;background:#16a34a;color:#fff;border:2px solid #15803d;" onclick="toggleConfirmSeller('${s.id}', false)">✅ 최종 공구 확정됨 (현재 ${confirmedTotal}명 · 해제)</button>`;
+        } else {
+          btns += `<button class="btn" style="padding:5px 12px;font-size:12px;font-weight:900;background:#f0fdf4;color:#15803d;border:2px solid #16a34a;" onclick="toggleConfirmSeller('${s.id}', true)">🎉 최종 공구 확정하기 (현재 ${confirmedTotal}명 ➔ +1)</button>`;
+        }
 
         let stageOpts = '';
         Object.keys(STAGE_LABELS).forEach(k => {
@@ -1770,9 +1886,10 @@
           stageOpts += `<option value="${k}" ${sel}>${STAGE_LABELS[k]}</option>`;
         });
 
+        // VIP 보드 작성창도 처음에는 공란("")으로 비워두고 [🤖 고니(AI) 맞춤답변] 클릭 시에만 채워지도록 설정!
         const vipCtx = generateContextualGoniReplyJS(s, safeName);
-        const vipSubjDefault = (s.sent_3rd_at && s.sent_3rd_subject) ? s.sent_3rd_subject : vipCtx.subj;
-        const vipBodyDefault = (s.sent_3rd_at && s.sent_3rd_body) ? s.sent_3rd_body : vipCtx.body;
+        const vipSubjDefault = vipCtx.subj;
+        const vipBodyDefault = '';
 
         return `
           <div style="border:${cardBdr};border-radius:12px;padding:15px 17px;background:${cardBg};display:flex;flex-direction:column;gap:8px;box-shadow:0 2px 5px rgba(0,0,0,0.05);">
@@ -1780,9 +1897,10 @@
               <span style="font-size:16px;font-weight:900;color:#0f172a;display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
                 <span style="background:#4c1d95;color:#fff;font-size:12px;padding:3px 8px;border-radius:99px;">VIP #${idx + 1}</span>
                 ${fullLabel} <a href="${igUrl || s.profile_url}" target="_blank" class="link-a" style="font-size:13px;">(@${igHandle || s.seller_id})</a>
+                ${isConfirmed ? `<span style="background:#16a34a;color:#fff;font-size:11px;padding:2px 8px;border-radius:6px;font-weight:900;">🎉 최종공구확정</span>` : ''}
                 ${isSampleShipped ? `<span style="background:#d97706;color:#fff;font-size:11px;padding:2px 8px;border-radius:6px;font-weight:900;">📦 실제품 출고완료 ${s.tracking_number ? `(CJ: ${s.tracking_number})` : ''}</span>` : ''}
               </span>
-              <select class="stage-select" style="padding:4px 8px;font-size:12px;font-weight:800;" onchange="updateSeller('${s.id}', {stage: this.value})">
+              <select class="stage-select" style="padding:4px 8px;font-size:12px;font-weight:800;" onchange="updateSeller('${s.id}', {stage: this.value, is_confirmed: (this.value==='5_공구확정'||this.value==='6_6차정산및재진행')})">
                 ${stageOpts}
               </select>
             </div>
@@ -1814,29 +1932,31 @@
             <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">${btns}</div>
 
             <div style="font-size:12px;color:#0f172a;background:#ffffff;border:1px solid #cbd5e1;border-left:4px solid #7c3aed;border-radius:6px;padding:9px 11px;line-height:1.5;max-height:140px;overflow-y:auto;white-space:pre-line;">
-              ${s.reply_2nd_text ? `<div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:4px;padding:5px 7px;margin-bottom:5px;color:#4c1d95;font-weight:700;">🔥 [2차 추가 회신 / 신청서]\n${s.reply_2nd_text}</div>` : ''}
+              ${s.reply_2nd_text ? `<div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:4px;padding:5px 7px;margin-bottom:5px;color:#4c1d95;font-weight:700;">🔥 [최근 추가 회신 / 신청서]\n${s.reply_2nd_text}</div>` : ''}
               <strong style="color:#6d28d9;">📥 [셀러 신청서 / 최근 답장 원문]</strong>\n${s.reply_text || s.memo || ''}
             </div>
 
-            <!-- ✉️ VIP 보드 내 인라인 3차 답변·송장 메일 작성창 -->
+            <!-- ✉️ VIP 보드 내 인라인 3·4·5·6차 답변·송장 메일 작성창 (처음에는 공란으로 시작) -->
             <div id="vipInlineReplyBox_${s.id}" style="display:none;margin-top:4px;padding:10px;background:#ffffff;border:2px dashed #7c3aed;border-radius:8px;">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;flex-wrap:wrap;gap:4px;">
-                <span style="font-size:11px;font-weight:800;color:#6d28d9;">📤 3차 답변/송장 안내메일 받는사람: ${s.email || ''} (${safeName}님)</span>
+                <span style="font-size:11px;font-weight:800;color:#6d28d9;">📤 ${roundLabel} 답변/송장·정산 안내메일 받는사람: ${s.email || ''} (${safeName}님)</span>
                 <div style="display:flex;gap:4px;flex-wrap:wrap;">
-                  <button class="btn btn-primary" style="padding:3px 9px;font-size:11px;background:#7c3aed;" onclick="fillGoniThirdDraft('${s.id}', '${safeName}', 'vip_')">🤖 고니(AI) 3차 맞춤답변</button>
+                  <button class="btn btn-primary" style="padding:3px 9px;font-size:11px;background:#7c3aed;" onclick="fillGoniThirdDraft('${s.id}', '${safeName}', 'vip_')">🤖 고니(AI) ${roundLabel} 맞춤답변</button>
                   <button class="btn btn-outline" style="padding:2px 8px;font-size:10px;background:#f0fdf4;color:#15803d;border-color:#86efac;font-weight:700;" onclick="fillThirdTemplate('${s.id}', '${safeName}', 'vip_')">🎉 3차 신청접수 초안</button>
                   <button class="btn btn-outline" style="padding:2px 8px;font-size:10px;background:#fffbeb;color:#b45309;border-color:#fcd34d;font-weight:800;" onclick="fillTrackingTemplate('${s.id}', '${safeName}', 'vipTrkNum_${s.id}', 'vip_')">📦 송장번호 안내초안</button>
+                  <button class="btn btn-outline" style="padding:2px 8px;font-size:10px;background:#eff6ff;color:#1d4ed8;border-color:#93c5fd;font-weight:700;" onclick="fillFourthFifthTemplate('${s.id}', '${safeName}', 'vip_')">🔗 4·5차 전용링크·오픈지원</button>
+                  <button class="btn btn-outline" style="padding:2px 8px;font-size:10px;background:#faf5ff;color:#6d28d9;border-color:#d8b4fe;font-weight:700;" onclick="fillSixthSettlementTemplate('${s.id}', '${safeName}', 'vip_')">💰 6차 마감·정산 안내</button>
                 </div>
               </div>
               <input type="text" id="vip_replySubj_${s.id}" class="inline-input" style="margin-bottom:6px;font-weight:700;font-size:12px;" value="${vipSubjDefault.replace(/"/g, '&quot;')}" />
-              <textarea id="vip_replyBody_${s.id}" style="width:100%;height:190px;padding:8px;font-size:12px;line-height:1.45;border:1px solid #cbd5e1;border-radius:6px;resize:vertical;" placeholder="3차 답변 또는 샘플 송장 안내 내용을 작성하세요.">${vipBodyDefault}</textarea>
+              <textarea id="vip_replyBody_${s.id}" style="width:100%;height:190px;padding:8px;font-size:12px;line-height:1.45;border:1px solid #cbd5e1;border-radius:6px;resize:vertical;" placeholder="처음에는 공란으로 비워져 있습니다. 직접 작성하시거나 위 [🤖 고니(AI) 맞춤답변] 버튼을 누르시면 셀러의 최신 답장 내용에 맞춘 AI 답변이 자동 입력됩니다.">${vipBodyDefault}</textarea>
               <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;flex-wrap:wrap;gap:6px;">
                 <label style="font-size:11px;font-weight:700;color:#334155;display:flex;align-items:center;gap:4px;cursor:pointer;">
                   <input type="checkbox" id="vip_replyAttach_${s.id}" /> 📎 제안서(v2.xlsx) 함께 첨부
                 </label>
                 <div style="display:flex;gap:6px;">
                   <button class="btn btn-outline" style="padding:5px 10px;font-size:11px;" onclick="toggleVipInlineReply('${s.id}')">닫기</button>
-                  <button class="btn btn-primary" id="vip_btnSendInline_${s.id}" style="padding:5px 12px;font-size:12px;background:#7c3aed;" onclick="sendInlineReply('${s.id}', '${s.email || ''}', 3, 'vip_')">🚀 지금 바로 3차 답변메일 발송</button>
+                  <button class="btn btn-primary" id="vip_btnSendInline_${s.id}" style="padding:5px 12px;font-size:12px;background:#7c3aed;" onclick="sendInlineReply('${s.id}', '${s.email || ''}', 3, 'vip_')">🚀 지금 바로 ${roundLabel} 답변메일 발송</button>
                 </div>
               </div>
             </div>

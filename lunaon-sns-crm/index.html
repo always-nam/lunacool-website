@@ -318,8 +318,52 @@
       </div>
     </div>
 
+    <!-- 🧭 상단 화면 전환 탭 (클릭 즉시 스크롤 없이 해당 단계 화면으로 바로 전환!) -->
+    <div style="background:#1e293b;color:#ffffff;padding:8px 14px;border-radius:10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+      <span style="font-size:13px;font-weight:800;">👆 아래 [1차 / 2차 / 3차 / 4차 / 5차 / 📅달력] 카드를 누르시면 스크롤 없이 해당 화면으로 즉시 전환됩니다!</span>
+      <span id="activeScreenIndicator" style="background:#2563eb;color:#fff;padding:3px 10px;border-radius:6px;font-size:12px;font-weight:800;">현재 화면: 📋 전체 통합 보기</span>
+    </div>
+
+    <div class="pipeline-grid" style="grid-template-columns: repeat(7, 1fr); margin-bottom: 14px;">
+      <div class="stage-card active" onclick="setStageFilter('ALL')" id="stCard_ALL">
+        <div class="st-title">📋 전체 통합화면</div>
+        <div class="st-count" id="cnt_ALL">0</div>
+        <div class="st-sub" id="sub_ALL">전체 요약·DB 보기</div>
+      </div>
+      <div class="stage-card" onclick="setStageFilter('1_1차제안메일')" id="stCard_1_1차제안메일">
+        <div class="st-title">1️⃣ 1차 제안메일</div>
+        <div class="st-count" id="cnt_1_1차제안메일">0</div>
+        <div class="st-sub" id="sub_1_1차제안메일">👉 클릭 시 1차 명단만 전환</div>
+      </div>
+      <div class="stage-card" onclick="setStageFilter('2_2차회신도착')" id="stCard_2_2차회신도착" style="border-left: 4px solid #2563eb;">
+        <div class="st-title">2️⃣ 📩 2차 회신(답장대기)</div>
+        <div class="st-count" id="cnt_2_2차회신도착" style="color:#2563eb;">0</div>
+        <div class="st-sub">👉 클릭 시 2차 답장창만 전환</div>
+      </div>
+      <div class="stage-card" onclick="setStageFilter('3_3차재진행조율')" id="stCard_3_3차재진행조율" style="border-left: 4px solid #7c3aed;">
+        <div class="st-title">3️⃣ 3차 재진행·샘플</div>
+        <div class="st-count" id="cnt_3_3차재진행조율" style="color:#7c3aed;">0</div>
+        <div class="st-sub">👉 클릭 시 3차 조율창만 전환</div>
+      </div>
+      <div class="stage-card st-staff" onclick="setStageFilter('4_직원오픈채팅이관')" id="stCard_4_직원오픈채팅이관">
+        <div class="st-title">4️⃣ 👥 신청접수·상담</div>
+        <div class="st-count" id="cnt_4_직원오픈채팅이관">0</div>
+        <div class="st-sub">👉 클릭 시 신청서 접수자 전환</div>
+      </div>
+      <div class="stage-card st-done" onclick="setStageFilter('5_공구확정')" id="stCard_5_공구확정">
+        <div class="st-title">5️⃣ 🎉 최종 공구확정</div>
+        <div class="st-count" id="cnt_5_공구확정">0</div>
+        <div class="st-sub">👉 클릭 시 최종확정 전환</div>
+      </div>
+      <div class="stage-card" onclick="setStageFilter('CALENDAR')" id="stCard_CALENDAR" style="border-left: 4px solid #059669; background:#f0fdf4;">
+        <div class="st-title" style="color:#166534;">📅 공구 오픈 달력</div>
+        <div class="st-count" id="cnt_CALENDAR" style="color:#15803d;">5</div>
+        <div class="st-sub" style="color:#166534;">👉 클릭 시 월간 스케줄표 전환</div>
+      </div>
+    </div>
+
     <!-- 34만명 마스터 DB 실제 접촉 가능 인원 전수 검수 현황판 -->
-    <div style="background:#ffffff;border-radius:12px;padding:16px 20px;box-shadow:0 1px 4px rgba(0,0,0,0.06);margin-bottom:14px;border-left:6px solid #7c3aed;">
+    <div id="master340kSection" style="background:#ffffff;border-radius:12px;padding:16px 20px;box-shadow:0 1px 4px rgba(0,0,0,0.06);margin-bottom:14px;border-left:6px solid #7c3aed;">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
         <div>
           <h3 style="font-size:16px;font-weight:800;color:#0f172a;">📊 34만 명 수집 마스터DB 전수 검수 — 실제 접촉 가능 인원 및 대량발송 타겟 현황판</h3>
@@ -348,40 +392,6 @@
           <div style="font-size:21px;font-weight:800;color:#0f172a;margin:4px 0;">19,475명 <span style="font-size:12px;color:#b45309;font-weight:700;">(메일발송 제외)</span></div>
           <div style="font-size:11px;color:#475569;line-height:1.4;">• 카카오 오픈채팅 즉시상담: <strong>248명</strong><br>• 인스타그램 DM 전용(블로그없음): <strong>3,579명</strong><br>• 유튜브/클립 단독 채널: <strong>15,648명</strong></div>
         </div>
-      </div>
-    </div>
-
-    <!-- 6단계 진행 파이프라인 -->
-    <div class="pipeline-grid">
-      <div class="stage-card active" onclick="setStageFilter('ALL')" id="stCard_ALL">
-        <div class="st-title">📋 전체 검증 타겟 (주소오류 자동제거)</div>
-        <div class="st-count" id="cnt_ALL">0</div>
-        <div class="st-sub" id="sub_ALL">브랜드커넥트 VIP·인스타·라이브 검증 DB</div>
-      </div>
-      <div class="stage-card" onclick="setStageFilter('1_1차제안메일')" id="stCard_1_1차제안메일">
-        <div class="st-title">1️⃣ 1차 제안메일 (정상도달)</div>
-        <div class="st-count" id="cnt_1_1차제안메일">0</div>
-        <div class="st-sub" id="sub_1_1차제안메일">주소오류/반송분 자동 삭제 완료</div>
-      </div>
-      <div class="stage-card" onclick="setStageFilter('2_2차회신도착')" id="stCard_2_2차회신도착" style="border-left: 4px solid #2563eb;">
-        <div class="st-title">2️⃣ 📩 2차 회신 도착 (답장)</div>
-        <div class="st-count" id="cnt_2_2차회신도착" style="color:#2563eb;">0</div>
-        <div class="st-sub">클릭 시 답장 온 셀러만 즉시 필터</div>
-      </div>
-      <div class="stage-card" onclick="setStageFilter('3_3차재진행조율')" id="stCard_3_3차재진행조율">
-        <div class="st-title">3️⃣ 3차 재진행·샘플발송</div>
-        <div class="st-count" id="cnt_3_3차재진행조율">0</div>
-        <div class="st-sub">샘플 테스트 및 일정 조율</div>
-      </div>
-      <div class="stage-card st-staff" onclick="setStageFilter('4_직원오픈채팅이관')" id="stCard_4_직원오픈채팅이관">
-        <div class="st-title">4️⃣ 👥 직원 오픈채팅 상담</div>
-        <div class="st-count" id="cnt_4_직원오픈채팅이관">0</div>
-        <div class="st-sub">가시화 건 1:1 오픈채팅 밀착상담</div>
-      </div>
-      <div class="stage-card st-done" onclick="setStageFilter('5_공구확정')" id="stCard_5_공구확정">
-        <div class="st-title">5️⃣ 🎉 최종 공구 확정</div>
-        <div class="st-count" id="cnt_5_공구확정">0</div>
-        <div class="st-sub">목표: 100명 돌파!</div>
       </div>
     </div>
 
@@ -480,7 +490,7 @@
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
           <span id="currentStageSortLabel" style="font-size:12px;font-weight:800;color:#2563eb;background:#eff6ff;padding:4px 10px;border-radius:6px;border:1px solid #bfdbfe;">📌 현재 정렬: 진행단계 높은순(3차➔2차) + 먼저 답변한 순</span>
           <label style="font-size:12px;font-weight:700;color:#334155;display:flex;align-items:center;gap:4px;cursor:pointer;">
-            <input type="checkbox" id="chkOnlySelectedStage" onchange="updateCounts();renderTable();" /> 선택한 단계만 단독 보기
+            <input type="checkbox" id="chkOnlySelectedStage" checked onchange="updateCounts();renderTable();" /> 선택한 단계만 단독 보기
           </label>
         </div>
       </div>
@@ -489,7 +499,7 @@
     </div>
 
     <!-- 채널 분류 탭 & 데이터 출처 필터 -->
-    <div class="filter-bar">
+    <div class="filter-bar" id="mainTableFilterBar">
       <div class="channel-tabs">
         <button class="tab-btn active" onclick="setChannelFilter('ALL')" id="tab_ALL">전체 채널</button>
         <button class="tab-btn" onclick="setChannelFilter('인스타')" id="tab_인스타">📸 인스타그램</button>
@@ -513,7 +523,7 @@
     </div>
 
     <!-- 셀러 리스트 테이블 -->
-    <div class="table-card">
+    <div class="table-card" id="mainTableCard">
       <table>
         <thead>
           <tr>
@@ -1051,6 +1061,71 @@
       }
       renderMonthlyCalendar();
       renderVipStage345Board();
+      applyScreenSwitch();
+    }
+
+    function applyScreenSwitch() {
+      const m340 = document.getElementById('master340kSection');
+      const calSec = document.getElementById('calendarScheduleSection');
+      const vipSec = document.getElementById('vipConfirmedBoardSection');
+      const repSec = document.getElementById('replyHighlightBox');
+      const tblBar = document.getElementById('mainTableFilterBar');
+      const tblCard = document.getElementById('mainTableCard');
+      const indEl = document.getElementById('activeScreenIndicator');
+      const calCntEl = document.getElementById('cnt_CALENDAR');
+      if (calCntEl) {
+        calCntEl.textContent = allSellers.filter(s => s.schedule_start).length.toLocaleString();
+      }
+
+      if (currentStage === '1_1차제안메일') {
+        if (m340) m340.style.display = 'none';
+        if (calSec) calSec.style.display = 'none';
+        if (vipSec) vipSec.style.display = 'none';
+        if (repSec) repSec.style.display = 'none';
+        if (tblBar) tblBar.style.display = 'flex';
+        if (tblCard) tblCard.style.display = 'block';
+        if (indEl) indEl.textContent = '현재 화면: 1️⃣ 1차 제안메일 발송 완료 명단 단독 화면';
+      } else if (currentStage === '2_2차회신도착') {
+        if (m340) m340.style.display = 'none';
+        if (calSec) calSec.style.display = 'none';
+        if (vipSec) vipSec.style.display = 'none';
+        if (repSec) repSec.style.display = 'block';
+        if (tblBar) tblBar.style.display = 'none';
+        if (tblCard) tblCard.style.display = 'none';
+        if (indEl) indEl.textContent = '현재 화면: 2️⃣ 📩 2차 회신 도착 (답장 대기) 단독 화면';
+      } else if (currentStage === '3_3차재진행조율') {
+        if (m340) m340.style.display = 'none';
+        if (calSec) calSec.style.display = 'none';
+        if (vipSec) vipSec.style.display = 'none';
+        if (repSec) repSec.style.display = 'block';
+        if (tblBar) tblBar.style.display = 'none';
+        if (tblCard) tblCard.style.display = 'none';
+        if (indEl) indEl.textContent = '현재 화면: 3️⃣ 3차 재진행·샘플발송 조율 단독 화면';
+      } else if (currentStage === '4_직원오픈채팅이관' || currentStage === '5_공구확정') {
+        if (m340) m340.style.display = 'none';
+        if (calSec) calSec.style.display = 'none';
+        if (vipSec) vipSec.style.display = 'block';
+        if (repSec) repSec.style.display = 'block';
+        if (tblBar) tblBar.style.display = 'none';
+        if (tblCard) tblCard.style.display = 'none';
+        if (indEl) indEl.textContent = currentStage === '4_직원오픈채팅이관' ? '현재 화면: 4️⃣ 👥 신청서 접수·오픈채팅 상담 단독 화면' : '현재 화면: 5️⃣ 🎉 최종 공구 확정 단독 화면';
+      } else if (currentStage === 'CALENDAR') {
+        if (m340) m340.style.display = 'none';
+        if (calSec) calSec.style.display = 'block';
+        if (vipSec) vipSec.style.display = 'block';
+        if (repSec) repSec.style.display = 'none';
+        if (tblBar) tblBar.style.display = 'none';
+        if (tblCard) tblCard.style.display = 'none';
+        if (indEl) indEl.textContent = '현재 화면: 📅 월간 공동구매 오픈 캘린더 스케줄러 단독 화면';
+      } else {
+        if (m340) m340.style.display = 'block';
+        if (calSec) calSec.style.display = 'block';
+        if (vipSec) vipSec.style.display = 'block';
+        if (repSec) repSec.style.display = 'block';
+        if (tblBar) tblBar.style.display = 'flex';
+        if (tblCard) tblCard.style.display = 'block';
+        if (indEl) indEl.textContent = '현재 화면: 📋 전체 통합 보기';
+      }
     }
 
     function setChannelFilter(ch) {

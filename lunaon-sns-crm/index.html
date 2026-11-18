@@ -663,7 +663,7 @@
   <div class="toast" id="toastBox"></div>
 
   <script>
-    window.LUNAON_REMOTE_API_URL = "https://bryan-detailed-ladies-harris.trycloudflare.com";
+    window.LUNAON_REMOTE_API_URL = "https://parallel-critics-franchise-brass.trycloudflare.com";
     let allSellers = [];
     let currentChannel = 'ALL';
     let currentStage = 'ALL';
@@ -1610,8 +1610,8 @@
       if (isLocalServer) {
         urls.push(path);
       } else {
-        urls.push('http://localhost:8090' + path);
         urls.push('http://127.0.0.1:8090' + path);
+        urls.push('http://localhost:8090' + path);
         const rem = getApiUrl(path);
         if (!urls.includes(rem)) urls.push(rem);
       }
@@ -1626,6 +1626,28 @@
           lastErr = err;
         }
       }
+      // 만약 캐시된 터널 주소가 만료되었다면 GitHub에서 최신 tunnel_url.txt를 실시간 조회하여 재시도!
+      try {
+        for (const tunSrc of [
+          `./tunnel_url.txt?t=${Date.now()}`,
+          `https://raw.githubusercontent.com/always-nam/lunacool-website/master/lunaon-sns-crm/tunnel_url.txt?t=${Date.now()}`
+        ]) {
+          const tr = await fetch(tunSrc, { cache: 'no-store' });
+          if (tr.ok) {
+            const newTun = (await tr.text()).trim().replace(/\/$/, '');
+            if (newTun && newTun.startsWith('https://')) {
+              window.LUNAON_REMOTE_API_URL = newTun;
+              if (window.LUNAON_CRM_INITIAL_DATA && window.LUNAON_CRM_INITIAL_DATA.meta) {
+                window.LUNAON_CRM_INITIAL_DATA.meta.remote_api_url = newTun;
+              }
+              const retryRes = await fetch(newTun + path, options);
+              if (retryRes.ok || retryRes.status === 400 || retryRes.status === 401 || retryRes.status === 500) {
+                return retryRes;
+              }
+            }
+          }
+        }
+      } catch (e2) {}
       throw lastErr || new Error('Failed to fetch');
     }
 

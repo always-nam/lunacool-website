@@ -921,13 +921,14 @@
           const secondSubj = s.sent_2nd_subject || `Re: [루나온 그래핀 발열이불] ${safeName}님 회신 감사드리며, 공동구매 상세 진행 방식 및 샘플 발송 안내드립니다.`;
           const secondBody = s.sent_2nd_body || getSecondReplyText(safeName);
 
-          // 3차 셀러는 3차 전용 제목과 깨끗한 3차 작성창(또는 기존 3차 발송분)으로 시작!
+          // 3차 셀러는 셀러의 실제 답장 문맥을 분석한 고니 AI 맞춤 제목·본문(또는 기존 3차 발송분)으로 시작!
+          const goniCtx = generateContextualGoniReplyJS(s, safeName);
           const editorDefaultSubj = isStage345
-            ? (s.sent_3rd_subject || `Re: [루나온 그래핀 발열이불] ${safeName}님 공동구매 진행 및 샘플 출고·전용 링크(3차) 안내드립니다.`)
+            ? ((s.sent_3rd_at && s.sent_3rd_subject) ? s.sent_3rd_subject : goniCtx.subj)
             : secondSubj;
           const editorDefaultBody = isStage345
-            ? (s.sent_3rd_body || s.third_reply_draft || '')
-            : (s.sent_2nd_body || '');
+            ? ((s.sent_3rd_at && s.sent_3rd_body) ? s.sent_3rd_body : goniCtx.body)
+            : (s.sent_2nd_body || goniCtx.body);
 
           let cardStageOpts = '';
           Object.keys(STAGE_LABELS).forEach(k => {
@@ -1452,16 +1453,107 @@
       return `안녕하세요, ${displayName}님!\n루나온 공구제안팀입니다. 공동구매 진행 신청 양식과 희망 일정을 회신해 주셔서 진심으로 감사드립니다! 😊\n\n보내주신 신청 내역을 정상 접수하였으며, 빠른 샘플 출고 및 전용 결제창 세팅을 위해 아래 3차 안내를 드립니다.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ [3차 안내] 샘플 입금·당일출고 및 스마트스토어 전용 링크 세팅\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n1. [샘플 입금 및 당일 출고 안내]\n   • 샘플 공급가 : 슈퍼싱글(SS) 32,000원 / 퀸(Q) 42,000원 (VAT·무료배송 포함)\n   • 입금 계좌 : 기업은행 534-028152-01-023 (예금주: 주식회사 테란)\n   • 출고 기준 : 입금 확인 후 평일 1차 오후 1시 / 2차 오후 4시 마감 기준 CJ대한통운으로 당일 출고됩니다.\n   • 무상 전환 : 공구에서 샘플 포함 5개 이상 판매 시 샘플 1개는 무상으로 제공됩니다. (정산 시 샘플 1개 금액을 받지 않고 전액 환급 / 5개 미만 시 단순 구매 처리)\n\n2. [본사 스마트스토어 비노출 전용 링크 및 홍보자료 제공]\n   • 말씀해주신 희망 오픈 일정에 맞추어 셀러님 전용 '네이버 스마트스토어 비노출 구매 링크'를 생성해 전달드립니다.\n   • 상세페이지 (GIF 버전) : https://always-nam.github.io/lunacool-website/lunaon-detail-v9/\n   • 홍보 영상 (15초 CF) : https://always-nam.github.io/lunacool-website/lunaon-cf-v8/\n\n3. [담당자 실시간 카카오톡 소통]\n   • 샘플 송장번호 안내 및 오픈 링크 전달을 위해 남겨주신 연락처/카카오톡으로 담당자(이화식 / 남대현)가 연락드리겠습니다! (샘플비 입금 시 입금자명을 알려주시면 즉시 확인 후 당일 출고해 드립니다.)\n\n이번 공동구매에서 좋은 결과 있으시도록 본사에서 최선을 다해 지원하겠습니다. 감사합니다!\n\n(주)테란 · 테란2(온누리유통) 루나온 공구제안팀 드림\n• 담당자 : 이화식 / 남대현 (010-2807-0174 / 010-4527-8781 / 070-8858-5230)\n• 회신 이메일 : akrrntn1@gmail.com`;
     }
 
+    function generateContextualGoniReplyJS(s, displayName) {
+      const name = displayName || ((s.display_name || s.seller_id || '셀러').split('(')[0].trim());
+      const sid = (s.seller_id || '').toLowerCase();
+      const email = (s.email || '').toLowerCase();
+      const r1 = (s.reply_text || '').trim();
+      const r2 = (s.reply_2nd_text || '').trim();
+      const combined = `${r2}\n${r1}`.trim();
+      const combLow = combined.toLowerCase();
+
+      const footer = `감사합니다.\n(주)테란 · 테란2(온누리유통) 루나온 공구제안팀 드림\n• 담당자 : 이화식 / 남대현 (010-2807-0174 / 010-4527-8781 / 070-8858-5230)\n• 회신 이메일 : akrrntn1@gmail.com`;
+      const stdBlock = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 루나온 그래핀 발열이불 공동구매 핵심 조건 요약\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n• 상품명 : 루나온 그래핀 50% 자가발열 이불 (색상: 연그레이 & 차콜 양면 투톤)\n• 슈퍼싱글(SS) : 공구가 49,000원(무료배송) / 셀러공급가 32,000원 / 1개당 셀러정산금 17,000원 (사업자 세금계산서 17,000원 · 개인 3.3% 공제 후 16,439원)\n• 퀸(Q) : 공구가 59,000원(무료배송) / 셀러공급가 42,000원 / 1개당 셀러정산금 17,000원 (사업자 세금계산서 17,000원 · 개인 3.3% 공제 후 16,439원)\n  ※ 네이버 스마트스토어 결제수수료는 본사가 전액 부담하여 셀러님께 이중 공제되지 않습니다.\n• 진행 가능 채널 : 네이버 블로그를 제외한 전 채널 가능 (인스타그램, 유튜브, 네이버 클립, 틱톡, 카페/밴드, 오픈채팅 등)\n• 정산 및 배송 : 공구 마감 1주일 후 전액 정산 / 평일 1차 오후 1시·2차 오후 4시 마감 CJ대한통운 당일 출고\n• 샘플 기준 : 최초 샘플 1개는 셀러공급가(SS 32,000원 / Q 42,000원, 무료배송)로 구매 후 출고되며, 샘플 포함 5개 이상 판매 시 1개는 무상 제공(정산 시 전액 환급)됩니다.\n  - 샘플 입금 계좌 : 기업은행 534-028152-01-023 (예금주: 주식회사 테란)\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n[진행 신청 회신 양식] — 아래 내용을 적어 답장 주시면 샘플 발송 및 전용 결제창 세팅을 도와드립니다.\n1. 성함 / 연락처 / 카카오톡 ID : \n2. 진행하실 채널 주소 (인스타·유튜브·클립 등) : \n3. 샘플 신청 사이즈(SS 32,000원 / Q 42,000원) 및 수령 주소 : \n4. 샘플비 입금자명 (입금 완료 시 기재) : \n5. 희망 공구 오픈 일정 : \n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+
+      // 1) 신혼여행 / 여행 / 다녀와서 확인하겠다는 셀러 (예: 매일이하나 nachoo1566)
+      if (combined.includes('신혼여행') || combined.includes('다녀와서') || combined.includes('발리')) {
+        return {
+          subj: `Re: [루나온 그래핀 발열이불] ${name}님! 신혼여행 진심으로 축하드리며, 다녀오셔서 편하게 연락 주세요 😊`,
+          body: `안녕하세요, ${name}님!\n루나온 공구제안팀입니다. 바쁘신 일정 중에도 친절하게 먼저 회신 주셔서 진심으로 감사드립니다! 😊\n\n무엇보다 평생에 한 번뿐인 소중한 신혼여행을 진심으로 축하드립니다!! 🎉\n지금 당장 급하게 확인하시거나 샘플을 신청하지 않으셔도 전혀 괜찮습니다.\n\n저희 '루나온 그래핀 50% 자가발열 이불'은 날씨가 본격적으로 추워지는 11월 말~12월, 1월 한겨울 내내 공구 반응이 가장 뜨거운 주력 시즌 아이템입니다.\n따라서 마음 편히 행복한 신혼여행 다녀오신 뒤, 짐 정리 다 하시고 여유 있으실 때 천천히 검토해 보시고 편하게 답장 주시면 됩니다! 😊\n\n저희 일정표에도 '${name}님 신혼여행 복귀 후 11월 말~12월 중 조율'로 메모해 두겠습니다.\n조심히 잘 다녀오시고, 복귀 후에 좋은 인연으로 뵙겠습니다! 행복한 여행 되세요! ✈️🌴\n\n${footer}`
+        };
+      }
+
+      // 2) 11월은 힘들고 12월 초 진행 희망 셀러 (예: ea_yeum1516)
+      if (combined.replace(/\s+/g, '').includes('12월초') || (combined.includes('11월') && combined.includes('12월'))) {
+        return {
+          subj: `Re: [루나온 그래핀 발열이불] ${name}님! 12월 초 공동구매 진행 대환영입니다 😊`,
+          body: `안녕하세요, ${name}님!\n루나온 공구제안팀입니다. 바쁘신 와중에도 일정 관련하여 회신 주셔서 진심으로 감사드립니다! 😊\n\n말씀해주신 12월 초 일정으로 공동구매 진행 100% 가능하며 오히려 대환영입니다!\n12월 초는 기온이 영하로 떨어지면서 겨울 발열이불 수요가 가장 폭발하는 피크 시즌이라 팔로워분들의 구매 전환율이 훨씬 높습니다.\n\n저희 본사 공구 캘린더에 [${name}님 12월 초 오픈 예정]으로 우선 일정을 확보해 두었습니다!\n11월 일정 편하게 먼저 소화하시고, 12월 초 오픈 전에 미리 샘플을 받아 테스트해 보실 수 있도록 준비해 두겠습니다.\n\n나중에 여유 되실 때 아래 양식만 가볍게 회신 주시면 원하시는 날짜에 맞춰 샘플 출고와 전용 링크 세팅을 도와드리겠습니다.\n\n${stdBlock}\n\n${footer}`
+        };
+      }
+
+      // 3) 블로그 검색비허용(이웃전용) + 공구종료 후 삭제 및 클립 병행 문의 (친절한 텔라의 뉴투코)
+      if (combined.includes('검색비허용') || sid.includes('newtoko') || combined.includes('이웃에게만')) {
+        return {
+          subj: `Re: [루나온 그래핀 발열이불] ${name}님! 말씀하신 '블로그 검색비허용(이웃전용) + 클립' 조건으로 진행 가능합니다 😊`,
+          body: `안녕하세요, ${name}님!\n루나온 공구제안팀입니다. 구체적이고 세심하게 진행 방식을 제안해 주셔서 진심으로 감사드립니다! 😊\n\n문의주신 내용에 대해 본사 팀 내부 협의 결과를 바로 안내드립니다.\n\n■ [네이버 블로그 '검색비허용(이웃노출)' + 공구 종료 후 삭제 조건 승인]\n• 저희가 일반 네이버 블로그를 제한했던 이유는 네이버 통합검색(VIEW/쇼핑 탭)에 공구 최저가가 영구 노출되어 기존 온라인 판매가와 충돌하는 문제 때문이었습니다.\n• 하지만 ${name}님께서 말씀해 주신 것처럼 1) 포스팅 시 '검색비허용(블로그 이웃에게만 노출)' 설정, 2) 공구 기간 동안만 게시 후 공구 종료 시 포스팅 삭제(또는 비공개), 그리고 3) 네이버 클립(숏폼) 병행 방식으로 진행해 주신다면 본사가 우려하는 검색 노출 문제가 전혀 발생하지 않으므로 100% 진행 가능합니다!\n\n사업자 셀러이시니 정산 시 세금계산서 발행으로 1개당 17,000원 전액(스마트스토어 결제수수료 본사 부담) 깔끔하게 정산해 드립니다.\n아래 [진행 신청 회신 양식]을 작성해 답장 주시면 샘플 당일 출고 및 전용 결제창을 바로 세팅해 드리겠습니다!\n\n${stdBlock}\n\n${footer}`
+        };
+      }
+
+      // 4) 와니고고(WaniGogo 정석완) — AI 영상 제작이라 샘플 구매 없이 진행 가능한지 & 수수료 17,000원 확인
+      if (sid.includes('wanigogo') || combined.includes('와니고고') || combined.includes('정석완') || combLow.includes('ai로 영상을')) {
+        return {
+          subj: `Re: [루나온 그래핀 발열이불] ${name}님! 신청 접수 완료 및 샘플 구매 생략·정산금(17,000원) 확답 드립니다 😊`,
+          body: `안녕하세요, 와니고고(정석완)님!\n루나온 공구제안팀입니다. 정성스럽게 진행 신청 양식을 작성해 회신 주셔서 진심으로 감사드립니다! 😊\n\n질문 주신 두 가지 핵심 사항에 대해 명확히 답변드립니다.\n\n1. [판매 정산금(수수료) 17,000원 확정 안내]\n   • 네, 맞습니다! 본사가 제공하는 와니고고님 전용 네이버 스마트스토어 비노출 링크를 통해 판매가 이루어지며, 슈퍼싱글(SS, 공구가 49,000원)과 퀸(Q, 공구가 59,000원) 모두 1개 판매될 때마다 셀러 정산금 17,000원이 적립됩니다.\n   • 네이버 스마트스토어 결제 수수료는 본사가 전액 부담하며, 사업자 세금계산서 발행 시 17,000원 그대로(개인일 경우 3.3% 원천징수 후 16,439원) 공구 마감 1주일 뒤 전액 정산됩니다.\n\n2. [AI 영상 제작 시 실물 샘플 구매 생략 가능 여부]\n   • 네! 실물 샘플이 필요 없으시다면 샘플 구매(입금) 없이 바로 공동구매 진행이 100% 가능합니다!\n   • AI 영상 및 쇼츠/클립 제작에 바로 활용하실 수 있도록 본사의 고화질 GIF 상세페이지 및 15초 CF 홍보영상 원본 링크를 아래에 전달드립니다.\n   • 상세페이지 (GIF 버전) : https://always-nam.github.io/lunacool-website/lunaon-detail-v9/\n   • 홍보 영상 (15초 CF) : https://always-nam.github.io/lunacool-website/lunaon-cf-v8/\n\n3. [공구 일정 등록 및 전용 구매링크 전달 안내]\n   • 신청해주신 희망 일정(12월 1일 ~ 12월 15일)을 본사 공구 오픈 캘린더에 정식 등록 완료했습니다.\n   • 남겨주신 연락처(010-2622-8877 / 카톡 ID: wanigogo)로 담당자가 전용 스마트스토어 구매 링크를 생성해 전달드리겠습니다!\n\n${footer}`
+        };
+      }
+
+      // 5) 하니하둥(이연경) 또는 LOVE&YOU(박은정) 등 실제 신청양식 접수 완료자
+      if (combined.includes('이연경') || sid.includes('tlswkdel') || combined.includes('박은정') || combined.includes('kokodiary') || combined.includes('[진행 신청 회신 양식]')) {
+        if (s.third_reply_draft && !s.third_reply_draft.includes('보내주신 신청 내역을 정상 접수하였으며')) {
+          return {
+            subj: s.third_reply_subject || `Re: [루나온 그래핀 발열이불] ${name}님 공동구매 신청 접수 완료 및 샘플·전용 링크 안내드립니다 😊`,
+            body: s.third_reply_draft
+          };
+        }
+        return {
+          subj: `Re: [루나온 그래핀 발열이불] ${name}님 공동구매 신청 접수 및 샘플 출고·전용 결제창(3차) 안내드립니다.`,
+          body: getDefaultThirdReplyTemplate(name)
+        };
+      }
+
+      // 6) 숭늉이 — 무상제공 요청 추가회신
+      if (name.includes('숭늉이') || sid.includes('dqapb') || combined.includes('무상제공으로 진행 시')) {
+        return {
+          subj: `Re: [루나온 그래핀 발열이불] ${name}님! 샘플 무상제공 조건 관련 본사 협의 내용 안내드립니다 😊`,
+          body: `안녕하세요, ${name}님!\n루나온 공구제안팀입니다. 보내드린 2차 안내문을 꼼꼼히 확인해 주시고 다시 회신 주셔서 진심으로 감사드립니다! 😊\n\n말씀해주신 '상품 무상제공 진행 건'에 대해 안내드립니다.\n\n저희가 1차적으로 샘플 선결제 후 '5개 이상 판매 시 100% 무상 전환(전액 환급)' 제도를 둔 이유는, 공구 오픈 의사가 전혀 없으면서 고가의 그래핀 이불만 수령한 뒤 연락이 두절되는 사례를 방지하고 진성 셀러분들께 업계 최고 정산금(개당 17,000원, 결제수수료 본사 부담)을 드리기 위함이었습니다.\n\n다만, ${name}님처럼 실제 공동구매 진행 의사가 확실하신 셀러님의 경우 아래 두 가지 방법 중 편하신 쪽으로 진행이 가능합니다!\n\n1. [5개 판매 시 100% 무상 환급 (기본 방식)]\n   - 최초 셀러공급가(SS 32,000원 / Q 42,000원)로 수령 후, 공구 기간 동안 단 5개(본인 샘플 포함)만 판매하셔도 정산 시 샘플 결제 금액 전액을 그대로 돌려드립니다.\n2. [공구 오픈일 및 피드/릴스 업로드 약정 시 샘플 지원 협의]\n   - 만약 선결제가 부담스러우시다면, 정확한 공구 오픈 일정과 업로드 일정을 확정해 주시고 공구 종료 후 미판매 시에만 반납(또는 공급가 정산)해 주시는 조건으로 협의를 도와드릴 수 있습니다.\n\n원하시는 방식과 함께 아래 신청 양식을 회신 주시면 담당자가 빠르게 진행 도와드리겠습니다!\n\n${stdBlock}\n\n${footer}`
+        };
+      }
+
+      // 7) 정중한 거절 / 사양 셀러
+      if (['정중히 거절', '포기해야 할 것 같습니다', '저와는 많이 맞지 않네요', '죄송합니다', '어려울 것 같습니다', '정중히 사양', '함께 하기 어려워'].some(k => combined.includes(k))) {
+        return {
+          subj: `Re: [루나온 그래핀 발열이불] ${name}님, 바쁘신 중에도 정중히 회신 주셔서 진심으로 감사드립니다 😊`,
+          body: `안녕하세요, ${name}님!\n(주)테란 · 루나온 공구제안팀입니다.\n\n바쁘신 일정 중에도 저희 제안 메일과 안내 내용을 꼼꼼히 검토해 주시고, 정중하고 따뜻하게 회신 주셔서 진심으로 감사드립니다! 😊\n\n말씀해 주신 채널 방향성과 운영 여건을 충분히 이해하며, 아쉽지만 이번 그래핀 발열이불 공동구매는 무리하게 권해드리지 않겠습니다.\n앞으로 저희 (주)테란에서 ${name}님의 채널 성격과 타겟 팔로워분들께 딱 들어맞는 새로운 리빙·라이프스타일 신상품이 출시될 때, 더 좋은 조건으로 다시 한번 인사드리겠습니다.\n\n날씨가 많이 추워지는데 건강 유의하시고, 운영하시는 채널이 더욱 번창하시기를 진심으로 응원하겠습니다!\n\n${footer}`
+        };
+      }
+
+      // 8) 만약 DB에 이미 맞춤 생성된 third_reply_draft가 있으면 그 값을 반환
+      if (s.third_reply_draft && !s.third_reply_draft.includes('보내주신 신청 내역을 정상 접수하였으며')) {
+        return {
+          subj: s.third_reply_subject || `Re: [루나온 그래핀 발열이불] ${name}님 회신 감사드리며, 공동구매 상세 안내드립니다 😊`,
+          body: s.third_reply_draft
+        };
+      }
+
+      // 9) 샘플 구매/무상제공 관련 질문 셀러
+      if (['구입해야', '구매해야', '사야 된다는', '무상 제공', '무상제공', '제품 제공', '제품이 제공', '받아보고 진행', '샘플 제공'].some(k => combined.includes(k))) {
+        return {
+          subj: `Re: [루나온 그래핀 발열이불] ${name}님! 문의주신 샘플 제공 방식(5개 판매 시 100% 무상환급) 및 진행 절차 안내드립니다 😊`,
+          body: `안녕하세요, ${name}님!\n루나온 공구제안팀입니다. 제안 메일을 꼼꼼히 읽어보시고 샘플 및 진행 방식에 대해 솔직하게 문의 주셔서 감사드립니다! 😊\n\n1. [왜 최초 샘플 1개를 공급가로 결제 후 '5개 판매 시 100% 무상 환급' 해드리나요?]\n   • 고가의 기능성 겨울 이불이다 보니 간혹 공구 진행 의사 없이 이불만 수령한 뒤 연락이 두절되는 사례가 있어 최소한의 안전장치로 최초 1개는 셀러 원가(SS 32,000원 / Q 42,000원, 무료배송)로 출고하고 있습니다.\n   • 하지만 셀러님께 이불을 팔려는 목적이 절대 아닙니다! 공구 진행 시 샘플 포함 딱 5개만 판매하셔도 샘플 1개 금액은 100% 무상 처리(정산 시 샘플비 전액 환급)해 드립니다.\n   • 또한 만약 실물 촬영 없이 본사가 제공하는 고화질 GIF 상세페이지와 15초 홍보영상 소스로만 업로드하여 공구를 진행하실 경우에는 샘플 구매 없이도 바로 전용 구매링크를 받아 공구 진행이 가능합니다!\n\n2. [1개당 셀러 정산금 17,000원 보장 (결제수수료 본사 부담)]\n   • 팔로워분들은 공구 최저가(SS 49,000원 / Q 59,000원 무료배송)에 구매하시고, ${name}님께는 판매 1개당 17,000원의 정산금을 드립니다.\n\n${stdBlock}\n\n${footer}`
+        };
+      }
+
+      return {
+        subj: `Re: [루나온 그래핀 발열이불] ${name}님 회신 감사드리며, 공동구매 진행 및 샘플·전용 링크 안내드립니다 😊`,
+        body: s.ai_reply_draft || getSecondReplyText(name)
+      };
+    }
+
     function fillThirdTemplate(id, displayName, prefix = '') {
       const el = document.getElementById(prefix + 'replyBody_' + id);
       const subjEl = document.getElementById(prefix + 'replySubj_' + id);
       if (!el) return;
-      const s = allSellers.find(x => x.id === id);
-      if (s && s.third_reply_draft) {
-        el.value = s.third_reply_draft;
-      } else {
-        el.value = getDefaultThirdReplyTemplate(displayName);
-      }
+      el.value = getDefaultThirdReplyTemplate(displayName);
       if (subjEl) {
         subjEl.value = `Re: [루나온 그래핀 발열이불] ${displayName}님 공동구매 신청 접수 및 샘플 출고·전용 결제창(3차) 안내드립니다.`;
       }
@@ -1472,7 +1564,7 @@
     function openThirdReplyWithDraft(id, displayName) {
       const box = document.getElementById('inlineReplyBox_' + id);
       if (box) box.style.display = 'block';
-      fillThirdTemplate(id, displayName, '');
+      fillGoniThirdDraft(id, displayName, '');
     }
 
     function getTrackingEmailTemplate(displayName, trackingNum, sampleSize) {
@@ -1500,21 +1592,13 @@
       const subjEl = document.getElementById(prefix + 'replySubj_' + id);
       if (!el) return;
       const s = allSellers.find(x => x.id === id) || {};
-      const latestQ = (s.reply_2nd_text || s.reply_text || '').trim();
-      if (s.third_reply_draft) {
-        el.value = s.third_reply_draft;
-      } else if (s.tracking_number) {
-        el.value = getTrackingEmailTemplate(displayName, s.tracking_number, s.sample_size || '');
-      } else if (latestQ) {
-        el.value = `안녕하세요, ${displayName}님!\n루나온 공구제안팀입니다. 추가로 회신해 주신 내용 잘 확인하였습니다! 😊\n\n문의·말씀해주신 부분에 대해 아래와 같이 안내드립니다.\n\n` + getDefaultThirdReplyTemplate(displayName);
-      } else {
-        el.value = getDefaultThirdReplyTemplate(displayName);
-      }
+      const ctx = generateContextualGoniReplyJS(s, displayName);
+      el.value = ctx.body;
       if (subjEl) {
-        subjEl.value = `Re: [루나온 그래핀 발열이불] ${displayName}님 공동구매 진행 및 샘플·전용 링크(3차) 안내드립니다.`;
+        subjEl.value = ctx.subj;
       }
       el.focus();
-      showToast(`🤖 고니가 [${displayName}]님의 3차 진행조율 맞춤 답변을 작성했습니다!`);
+      showToast(`🤖 고니가 [${displayName}]님의 실제 답장 내용을 분석해 1:1 상황맞춤 답변을 작성했습니다!`);
     }
 
     function setCalendarYearMonth(y, m) {
@@ -1686,8 +1770,9 @@
           stageOpts += `<option value="${k}" ${sel}>${STAGE_LABELS[k]}</option>`;
         });
 
-        const vipSubjDefault = s.sent_3rd_subject || `Re: [루나온 그래핀 발열이불] ${safeName}님 공동구매 진행 및 샘플 출고·전용 링크(3차) 안내드립니다.`;
-        const vipBodyDefault = s.sent_3rd_body || s.third_reply_draft || '';
+        const vipCtx = generateContextualGoniReplyJS(s, safeName);
+        const vipSubjDefault = (s.sent_3rd_at && s.sent_3rd_subject) ? s.sent_3rd_subject : vipCtx.subj;
+        const vipBodyDefault = (s.sent_3rd_at && s.sent_3rd_body) ? s.sent_3rd_body : vipCtx.body;
 
         return `
           <div style="border:${cardBdr};border-radius:12px;padding:15px 17px;background:${cardBg};display:flex;flex-direction:column;gap:8px;box-shadow:0 2px 5px rgba(0,0,0,0.05);">
@@ -1870,15 +1955,14 @@
 
     function fillGoniCustomDraft(id, displayName) {
       const el = document.getElementById('replyBody_' + id);
+      const subjEl = document.getElementById('replySubj_' + id);
       if (!el) return;
-      const s = allSellers.find(x => x.id === id);
-      if (s && s.ai_reply_draft) {
-        el.value = s.ai_reply_draft;
-      } else {
-        el.value = getSecondReplyText(displayName);
-      }
+      const s = allSellers.find(x => x.id === id) || {};
+      const ctx = generateContextualGoniReplyJS(s, displayName);
+      el.value = ctx.body;
+      if (subjEl) subjEl.value = ctx.subj;
       el.focus();
-      showToast(`🤖 고니가 [${displayName}]님의 답장 질문을 분석해 1:1 맞춤 답변을 작성했습니다! 확인 후 발송하세요.`);
+      showToast(`🤖 고니가 [${displayName}]님의 답장 질문을 분석해 1:1 상황맞춤 답변을 작성했습니다! 확인 후 발송하세요.`);
     }
 
     function getSecondReplyText(displayName) {

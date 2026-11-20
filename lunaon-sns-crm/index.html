@@ -363,6 +363,7 @@
     <div style="background:#1e293b;color:#ffffff;padding:8px 14px;border-radius:10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
       <span style="font-size:13px;font-weight:800;">👆 [💰은행 입금확인]에 통장 입금내역을 붙여넣으면 자동으로 셀러를 찾아 [🎉공구 확정 + 📅달력 희망일 기입]까지 한 번에 끝납니다!</span>
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <button class="btn" style="background:#059669;color:#ffffff;font-weight:900;padding:5px 12px;font-size:12px;border-radius:6px;box-shadow:0 2px 6px rgba(5,150,105,0.35);" onclick="setStageFilter('CALENDAR')">📅 공구 오픈 달력 (스케줄표 보기)</button>
         <button class="btn" style="background:#16a34a;color:#ffffff;font-weight:900;padding:5px 12px;font-size:12px;border-radius:6px;box-shadow:0 2px 6px rgba(22,163,74,0.35);" onclick="openBankDepositModal()">💰 은행 입금확인 & 자동 공구확정·달력기입</button>
         <button class="btn" style="background:#f59e0b;color:#0f172a;font-weight:900;padding:5px 11px;font-size:12px;border-radius:6px;" onclick="openBulkTrackingModal()">📦 공구확정자 송장번호 업로드 & 안내메일 발송</button>
         <span id="activeScreenIndicator" style="background:#dc2626;color:#fff;padding:3px 10px;border-radius:6px;font-size:12px;font-weight:800;">현재 화면: 🚨 지금 회신 필요 (미회신 우선 처리)</span>
@@ -415,46 +416,6 @@
     <div id="master340kSection" style="display:none;"></div>
     <span id="cnt_ALL" style="display:none;"></span>
     <span id="cnt_1_1차제안메일" style="display:none;"></span>
-
-    <!-- 📅 [신규] 루나온 공동구매 월간 오픈 캘린더 스케줄러 (날짜 클릭 시 셀러 진행·희망 일정 즉시 기입/수정) -->
-    <div id="calendarScheduleSection" style="background:#ffffff;border-radius:12px;padding:18px 20px;box-shadow:0 2px 6px rgba(0,0,0,0.08);margin-bottom:16px;border-left:6px solid #2563eb;">
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
-        <div>
-          <h3 style="font-size:16px;font-weight:800;color:#0f172a;">📅 루나온 공동구매 월간 오픈 캘린더 스케줄러 — [누가 언제 진행·희망하는지 한눈에 관리 & 날짜 클릭 시 바로 기입]</h3>
-          <p style="font-size:12px;color:#475569;margin-top:2px;">달력의 <strong>날짜 칸을 클릭</strong>하시거나 아래 셀러 카드에서 <strong>[📅 일정 기입]</strong>을 누르시면 원하는 날짜에 셀러 공구 희망/확정 일정을 바로 기입·수정할 수 있습니다.</p>
-        </div>
-        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-          <span id="calendarStatsBadge" style="font-size:12px;font-weight:800;color:#1e40af;background:#dbeafe;padding:5px 11px;border-radius:6px;">일정 등록 셀러: 0명</span>
-          <button class="btn btn-outline" style="padding:5px 10px;font-size:12px;font-weight:800;" onclick="changeCalendarMonth(-1)">◀ 이전 달</button>
-          <button class="btn btn-outline" id="calBtn_2026_11" style="padding:5px 10px;font-size:12px;font-weight:800;" onclick="setCalendarYearMonth(2026, 11)">2026년 11월</button>
-          <button class="btn btn-outline" id="calBtn_2026_12" style="padding:5px 10px;font-size:12px;font-weight:800;" onclick="setCalendarYearMonth(2026, 12)">2026년 12월</button>
-          <button class="btn btn-outline" id="calBtn_2027_1" style="padding:5px 10px;font-size:12px;font-weight:800;" onclick="setCalendarYearMonth(2027, 1)">2027년 1월</button>
-          <button class="btn btn-outline" style="padding:5px 10px;font-size:12px;font-weight:800;" onclick="changeCalendarMonth(1)">다음 달 ▶</button>
-          <button class="btn btn-primary" style="padding:6px 12px;font-size:12px;background:#7c3aed;" onclick="openScheduleModal('')">➕ 공구 일정 직접 등록</button>
-        </div>
-      </div>
-
-      <!-- 범례 -->
-      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px;font-size:11px;font-weight:700;color:#334155;background:#f8fafc;padding:7px 12px;border-radius:8px;border:1px solid #e2e8f0;">
-        <span>🟢 <strong style="color:#15803d;">오픈 확정 (5차)</strong>: 결제창 세팅 및 일정 확정</span>
-        <span>🟣 <strong style="color:#6d28d9;">신청양식 접수 완료 (4차)</strong>: 연락처·샘플주소·희망일 접수 완료</span>
-        <span>🔵 <strong style="color:#1d4ed8;">3차 진행·희망일 조율중</strong>: 2차 안내문 발송 후 오픈일 조율 셀러</span>
-        <span style="margin-left:auto;color:#2563eb;">💡 날짜 칸의 [+ 일정 기입] 또는 등록된 셀러 배지를 클릭하면 즉시 수정됩니다!</span>
-      </div>
-
-      <!-- 월간 달력 그리드 -->
-      <div id="monthlyCalendarTitle" style="font-size:15px;font-weight:800;color:#0f172a;margin-bottom:8px;text-align:center;">2026년 11월 공동구매 오픈 스케줄 표</div>
-      <div style="display:grid;grid-template-columns:repeat(7, 1fr);gap:6px;text-align:center;font-size:12px;font-weight:800;color:#475569;margin-bottom:6px;">
-        <div style="color:#dc2626;background:#fef2f2;padding:6px;border-radius:6px;">일 (SUN)</div>
-        <div style="background:#f1f5f9;padding:6px;border-radius:6px;">월 (MON)</div>
-        <div style="background:#f1f5f9;padding:6px;border-radius:6px;">화 (TUE)</div>
-        <div style="background:#f1f5f9;padding:6px;border-radius:6px;">수 (WED)</div>
-        <div style="background:#f1f5f9;padding:6px;border-radius:6px;">목 (THU)</div>
-        <div style="background:#f1f5f9;padding:6px;border-radius:6px;">금 (FRI)</div>
-        <div style="color:#2563eb;background:#eff6ff;padding:6px;border-radius:6px;">토 (SAT)</div>
-      </div>
-      <div id="monthlyCalendarGrid" style="display:grid;grid-template-columns:repeat(7, 1fr);gap:6px;"></div>
-    </div>
 
     <!-- 🌟 [신규] 3차·4차·5차·6차 거의 확정 / 신청접수 셀러 전용 대형 집중 보드 -->
     <div id="vipConfirmedBoardSection" style="background:linear-gradient(180deg, #faf5ff 0%, #ffffff 100%);border-radius:12px;padding:18px 20px;box-shadow:0 2px 8px rgba(124,58,237,0.12);margin-bottom:16px;border:2px solid #c084fc;border-left:8px solid #7c3aed;">
@@ -518,7 +479,9 @@
           <button class="source-btn" id="turnBtn_WAITING_SELLER" style="font-weight:800;padding:8px 14px;font-size:13px;background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd;" onclick="setStageFilter('WAITING_SELLER')">⏳ 답변완료 · 셀러회신 대기 (0명)</button>
           <button class="source-btn" id="turnBtn_FOLLOWUP_3D" style="font-weight:900;padding:8px 14px;font-size:13px;background:#fff7ed;color:#c2410c;border:2px solid #f97316;" onclick="setStageFilter('FOLLOWUP_3D')">⏰ 3일 경과 미회신 · 안부메일 (0명)</button>
           <button class="source-btn" id="turnBtn_CONFIRMED" style="font-weight:900;padding:8px 14px;font-size:13px;background:#f0fdf4;color:#15803d;border:1px solid #86efac;" onclick="setStageFilter('5_공구확정')">🎉 최종 공구 확정 (3명)</button>
-          <button class="source-btn" id="turnBtn_CLOSED" style="font-weight:800;padding:8px 14px;font-size:13px;background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;" onclick="setStageFilter('CLOSED')">⏹️ 상담 종료 · 제외됨 (0명)</button>
+          <button class="source-btn" id="turnBtn_CALENDAR" style="font-weight:900;padding:8px 14px;font-size:13px;background:#ecfdf5;color:#047857;border:2px solid #059669;" onclick="setStageFilter('CALENDAR')">📅 공구 오픈 달력 (스케줄 표)</button>
+          <button class="source-btn" id="turnBtn_SAMPLE_SHIPPED" style="font-weight:800;padding:8px 13px;font-size:12px;background:#fffbeb;color:#b45309;border:1px solid #fcd34d;" onclick="setStageFilter('SAMPLE_SHIPPED')">📦 샘플 출고·송장</button>
+          <button class="source-btn" id="turnBtn_CLOSED" style="font-weight:800;padding:8px 13px;font-size:12px;background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;" onclick="setStageFilter('CLOSED')">⏹️ 상담 종료 · 제외됨 (0명)</button>
           <button class="source-btn" id="turnBtn_ALL" style="font-weight:700;padding:8px 12px;font-size:12px;background:#ffffff;color:#334155;border:1px solid #cbd5e1;" onclick="setStageFilter('ALL_REPLIED')">📋 진행중 전체 (0명)</button>
         </div>
         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
@@ -527,6 +490,47 @@
           <button class="source-btn" id="sortBtn_LATEST_REPLY" style="padding:5px 9px;font-size:11px;" onclick="setReplySortMode('LATEST_REPLY')">⚡ 최근 도착순</button>
           <button class="source-btn" id="sortBtn_FOLLOWERS" style="padding:5px 9px;font-size:11px;" onclick="setReplySortMode('FOLLOWERS')">👑 팔로워순</button>
         </div>
+      </div>
+
+      <!-- 📅 루나온 공동구매 월간 오픈 캘린더 스케줄러 (탭 바 바로 아래에서 언제든 즉시 열림!) -->
+      <div id="calendarScheduleSection" style="display:none;background:#f8fafc;border-radius:12px;padding:16px 18px;box-shadow:0 2px 8px rgba(0,0,0,0.08);margin-bottom:16px;border:2px solid #059669;border-left:7px solid #059669;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+          <div>
+            <h3 style="font-size:16px;font-weight:900;color:#065f46;">📅 루나온 공동구매 월간 오픈 캘린더 스케줄러 — [누가 언제 진행·희망하는지 한눈에 관리 & 날짜 클릭 시 바로 기입]</h3>
+            <p style="font-size:12px;color:#475569;margin-top:2px;">달력의 <strong>날짜 칸을 클릭</strong>하시거나 아래 셀러 카드에서 <strong>[📅 일정 기입]</strong>을 누르시면 원하는 날짜에 셀러 공구 희망/확정 일정을 바로 기입·수정할 수 있습니다.</p>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span id="calendarStatsBadge" style="font-size:12px;font-weight:800;color:#1e40af;background:#dbeafe;padding:5px 11px;border-radius:6px;">일정 등록 셀러: 0명</span>
+            <button class="btn btn-outline" style="padding:5px 10px;font-size:12px;font-weight:800;background:#fff;" onclick="changeCalendarMonth(-1)">◀ 이전 달</button>
+            <button class="btn btn-outline" id="calBtn_2026_11" style="padding:5px 10px;font-size:12px;font-weight:800;background:#fff;" onclick="setCalendarYearMonth(2026, 11)">2026년 11월</button>
+            <button class="btn btn-outline" id="calBtn_2026_12" style="padding:5px 10px;font-size:12px;font-weight:800;background:#fff;" onclick="setCalendarYearMonth(2026, 12)">2026년 12월</button>
+            <button class="btn btn-outline" id="calBtn_2027_1" style="padding:5px 10px;font-size:12px;font-weight:800;background:#fff;" onclick="setCalendarYearMonth(2027, 1)">2027년 1월</button>
+            <button class="btn btn-outline" style="padding:5px 10px;font-size:12px;font-weight:800;background:#fff;" onclick="changeCalendarMonth(1)">다음 달 ▶</button>
+            <button class="btn btn-primary" style="padding:6px 12px;font-size:12px;background:#7c3aed;" onclick="openScheduleModal('')">➕ 공구 일정 직접 등록</button>
+            <button class="btn" style="padding:6px 12px;font-size:12px;background:#dc2626;color:#fff;font-weight:900;" onclick="setStageFilter('NEEDS_REPLY')">✕ 달력 닫고 회신목록 보기</button>
+          </div>
+        </div>
+
+        <!-- 범례 -->
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px;font-size:11px;font-weight:700;color:#334155;background:#ffffff;padding:7px 12px;border-radius:8px;border:1px solid #e2e8f0;">
+          <span>🟢 <strong style="color:#15803d;">오픈 확정 (5차)</strong>: 결제창 세팅 및 일정 확정</span>
+          <span>🟣 <strong style="color:#6d28d9;">신청양식 접수 완료 (4차)</strong>: 연락처·샘플주소·희망일 접수 완료</span>
+          <span>🔵 <strong style="color:#1d4ed8;">3차 진행·희망일 조율중</strong>: 2차 안내문 발송 후 오픈일 조율 셀러</span>
+          <span style="margin-left:auto;color:#2563eb;">💡 날짜 칸의 [+ 일정 기입] 또는 등록된 셀러 배지를 클릭하면 즉시 수정됩니다!</span>
+        </div>
+
+        <!-- 월간 달력 그리드 -->
+        <div id="monthlyCalendarTitle" style="font-size:15px;font-weight:800;color:#0f172a;margin-bottom:8px;text-align:center;">2026년 11월 공동구매 오픈 스케줄 표</div>
+        <div style="display:grid;grid-template-columns:repeat(7, 1fr);gap:6px;text-align:center;font-size:12px;font-weight:800;color:#475569;margin-bottom:6px;">
+          <div style="color:#dc2626;background:#fef2f2;padding:6px;border-radius:6px;">일 (SUN)</div>
+          <div style="background:#f1f5f9;padding:6px;border-radius:6px;">월 (MON)</div>
+          <div style="background:#f1f5f9;padding:6px;border-radius:6px;">화 (TUE)</div>
+          <div style="background:#f1f5f9;padding:6px;border-radius:6px;">수 (WED)</div>
+          <div style="background:#f1f5f9;padding:6px;border-radius:6px;">목 (THU)</div>
+          <div style="background:#f1f5f9;padding:6px;border-radius:6px;">금 (FRI)</div>
+          <div style="color:#2563eb;background:#eff6ff;padding:6px;border-radius:6px;">토 (SAT)</div>
+        </div>
+        <div id="monthlyCalendarGrid" style="display:grid;grid-template-columns:repeat(7, 1fr);gap:6px;"></div>
       </div>
 
       <!-- ⏰ 3일 경과 미회신자 일괄 안부·리마인드 메일 발송 안내 배너 -->
@@ -893,22 +897,30 @@
     function getSellerTurnStatus(s) {
       if (isSellerClosed(s)) return 'CLOSED';
 
-      const r1 = (s.reply_text || '').trim();
       const r2 = (s.reply_2nd_text || '').trim();
       const memo = (s.memo || '').trim();
 
       // 1) 아직 2차 안내메일조차 안 보낸 경우 -> 지금 우리가 회신해야 함!
       const sent2nd = Boolean(s.sent_2nd_at || s.sent_2nd_body || memo.includes('[2차답장 발송완료'));
-      if (!sent2nd) return 'NEEDS_OUR_REPLY';
+      if (!sent2nd && !s.sent_3rd_at) return 'NEEDS_OUR_REPLY';
 
-      // 2) 2차 안내메일 발송 이후 셀러가 추가 답장(reply_2nd_text / latest_reply_text)을 보냈고, 아직 우리가 3차 답변(sent_3rd_at)을 안 보낸 경우 -> 지금 우리가 회신해야 함!
-      const hasFollowupReply = Boolean(r2 || s.latest_reply_text || s.needs_reply);
-      if (hasFollowupReply) {
-        if (!s.sent_3rd_at) return 'NEEDS_OUR_REPLY';
-        if (s.reply_2nd_at && s.sent_3rd_at && s.reply_2nd_at > s.sent_3rd_at) return 'NEEDS_OUR_REPLY';
+      // 2) needs_reply가 명시적으로 false이면 이미 우리가 최신 답장에 회신을 완료한 상태!
+      if (s.needs_reply === false) return 'WAITING_SELLER';
+
+      // 3) 시간 비교: 우리의 가장 최근 발송 시각(sent_3rd_at 또는 sent_2nd_at)이 셀러의 가장 최근 답장 시각(reply_2nd_at 또는 reply_at) 이상이면 이미 답변 완료!
+      const lastOurSent = fixKstDisplay(s.sent_3rd_at || s.sent_2nd_at || '').slice(0, 16);
+      const lastSellerReply = fixKstDisplay(s.reply_2nd_at || s.reply_at || '').slice(0, 16);
+      if (lastOurSent && lastSellerReply && lastOurSent >= lastSellerReply) {
+        return 'WAITING_SELLER';
       }
 
-      // 3) 그 외: 우리가 이미 2차(또는 3차) 답변을 보냈고, 셀러의 다음 답장을 기다리는 중!
+      // 4) 2차 안내메일 발송 이후 셀러가 실제 추가 답장(reply_2nd_text)을 보냈고, 아직 우리가 3차 답변을 안 보냈거나 셀러 답장이 더 최신인 경우 -> 지금 우리가 회신해야 함!
+      if (Boolean(r2 || s.needs_reply === true)) {
+        if (!s.sent_3rd_at) return 'NEEDS_OUR_REPLY';
+        if (lastSellerReply && lastOurSent && lastSellerReply > lastOurSent) return 'NEEDS_OUR_REPLY';
+      }
+
+      // 5) 그 외: 우리가 이미 답변을 보냈고, 셀러의 다음 답장을 기다리는 중!
       return 'WAITING_SELLER';
     }
 
@@ -1220,12 +1232,17 @@
       const tbWait = document.getElementById('turnBtn_WAITING_SELLER');
       const tb3D = document.getElementById('turnBtn_FOLLOWUP_3D');
       const tbConf = document.getElementById('turnBtn_CONFIRMED');
+      const tbCal = document.getElementById('turnBtn_CALENDAR');
+      const tbShip = document.getElementById('turnBtn_SAMPLE_SHIPPED');
       const tbClosed = document.getElementById('turnBtn_CLOSED');
       const tbAll = document.getElementById('turnBtn_ALL');
+      const cntCalendar = allSellers.filter(s => s.schedule_start && !isSellerClosed(s)).length;
       if (tbNeeds) tbNeeds.textContent = `🚨 지금 회신 필요 (${cntNeedsReply}명)`;
       if (tbWait) tbWait.textContent = `⏳ 답변완료 · 셀러회신 대기 (${cntWaitingSeller}명)`;
       if (tb3D) tb3D.textContent = `⏰ 3일 경과 미회신 · 안부메일 (${cntFollowup3D}명)`;
       if (tbConf) tbConf.textContent = `🎉 최종 공구 확정 (${confirmed}명)`;
+      if (tbCal) tbCal.textContent = `📅 공구 오픈 달력 (${cntCalendar}명)`;
+      if (tbShip) tbShip.textContent = `📦 샘플 출고·송장 (${sampleShippedCnt}명)`;
       if (tbClosed) tbClosed.textContent = `⏹️ 상담 종료 · 제외됨 (${cntClosed}명)`;
       if (tbAll) tbAll.textContent = `📋 진행중 전체 (${activeTotalCnt}명)`;
 
@@ -1234,6 +1251,8 @@
         ['WAITING_SELLER', tbWait],
         ['FOLLOWUP_3D', tb3D],
         ['5_공구확정', tbConf],
+        ['CALENDAR', tbCal],
+        ['SAMPLE_SHIPPED', tbShip],
         ['CLOSED', tbClosed],
         ['ALL_REPLIED', tbAll]
       ].forEach(([stKey, btnEl]) => {
@@ -1281,6 +1300,9 @@
         // 공구 확정(입금 완료)된 사람만 송장번호 보내줘야 하므로 공구확정자 및 출고자만 표시!
         repliedSellers = repliedSellers.filter(s => !isSellerClosed(s) && (s.stage === '5_공구확정' || s.stage === '6_6차정산및재진행' || Boolean(s.is_confirmed || s.deposit_confirmed || s.sample_shipped || s.tracking_number)));
         if (titleEl) titleEl.textContent = `📦 공구 확정(입금완료) 셀러 샘플 출고 및 CJ대한통운 송장 안내 (${repliedSellers.length}명)`;
+      } else if (currentStage === 'CALENDAR') {
+        repliedSellers = repliedSellers.filter(s => !isSellerClosed(s) && (s.schedule_start || s.stage === '5_공구확정' || Boolean(s.is_confirmed || s.deposit_confirmed)));
+        if (titleEl) titleEl.textContent = `📅 공구 오픈 달력에 일정이 등록된 셀러 목록 (${repliedSellers.length}명)`;
       } else {
         repliedSellers = repliedSellers.filter(s => !isSellerClosed(s));
         if (titleEl) titleEl.textContent = `📋 진행 중인 전체 상담 셀러 (${repliedSellers.length}명 — 상담종료 ${cntClosed}명 제외됨)`;
@@ -1672,7 +1694,7 @@
 
       if (currentStage === 'CALENDAR') {
         if (calSec) calSec.style.display = 'block';
-        if (repSec) repSec.style.display = 'none';
+        if (repSec) repSec.style.display = 'block';
         if (indEl) indEl.textContent = '현재 화면: 📅 월간 공동구매 오픈 캘린더 스케줄러';
       } else {
         if (calSec) calSec.style.display = 'none';
@@ -3464,6 +3486,7 @@
           const idx = allSellers.findIndex(x => x.id === id);
           if (idx !== -1) {
             allSellers[idx].stage = nextStageVal;
+            allSellers[idx].needs_reply = false;
             if (is3rd) {
               allSellers[idx].sent_3rd_at = nowStr;
               allSellers[idx].sent_3rd_subject = subject;
@@ -3478,6 +3501,7 @@
               }
               saveLocalOverride(id, {
                 stage: nextStageVal,
+                needs_reply: false,
                 memo: allSellers[idx].memo,
                 sent_3rd_at: nowStr,
                 sent_3rd_subject: subject,
@@ -3493,6 +3517,7 @@
               }
               saveLocalOverride(id, {
                 stage: nextStageVal,
+                needs_reply: false,
                 memo: allSellers[idx].memo,
                 sent_2nd_at: nowStr,
                 sent_2nd_subject: subject,

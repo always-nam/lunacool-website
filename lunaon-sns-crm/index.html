@@ -360,14 +360,15 @@
 
     <!-- 🧭 상단 직관적 화면 전환 탭 (오직 회신 온 셀러 64명과 달력만 깔끔하게 관리!) -->
     <div style="background:#1e293b;color:#ffffff;padding:8px 14px;border-radius:10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-      <span style="font-size:13px;font-weight:800;">👆 이 화면에는 [실제로 메일 회신이 온 셀러들]만 표시됩니다! ([🚨지금 회신 필요] ➔ [⏳답변완료·대기] ➔ [🎉최종 공구 확정] 순으로 관리하세요)</span>
+      <span style="font-size:13px;font-weight:800;">👆 [💰은행 입금확인]에 통장 입금내역을 붙여넣으면 자동으로 셀러를 찾아 [🎉공구 확정 + 📅달력 희망일 기입]까지 한 번에 끝납니다!</span>
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-        <button class="btn" style="background:#f59e0b;color:#0f172a;font-weight:900;padding:4px 11px;font-size:12px;border-radius:6px;" onclick="openBulkTrackingModal()">📦 송장번호 일괄 업로드 & 안내메일 자동발송</button>
+        <button class="btn" style="background:#16a34a;color:#ffffff;font-weight:900;padding:5px 12px;font-size:12px;border-radius:6px;box-shadow:0 2px 6px rgba(22,163,74,0.35);" onclick="openBankDepositModal()">💰 은행 입금확인 & 자동 공구확정·달력기입</button>
+        <button class="btn" style="background:#f59e0b;color:#0f172a;font-weight:900;padding:5px 11px;font-size:12px;border-radius:6px;" onclick="openBulkTrackingModal()">📦 공구확정자 송장번호 업로드 & 안내메일 발송</button>
         <span id="activeScreenIndicator" style="background:#dc2626;color:#fff;padding:3px 10px;border-radius:6px;font-size:12px;font-weight:800;">현재 화면: 🚨 지금 회신 필요 (미회신 우선 처리)</span>
       </div>
     </div>
 
-    <div class="pipeline-grid" style="grid-template-columns: repeat(7, 1fr); margin-bottom: 14px;">
+    <div class="pipeline-grid" style="grid-template-columns: repeat(8, 1fr); margin-bottom: 14px;">
       <div class="stage-card active" onclick="setStageFilter('NEEDS_REPLY')" id="stCard_NEEDS_REPLY" style="border-left: 5px solid #dc2626; background:#fff5f5;">
         <div class="st-title" style="color:#dc2626;font-weight:900;">🚨 지금 회신 필요!</div>
         <div class="st-count" id="cnt_NEEDS_REPLY" style="color:#dc2626;">0</div>
@@ -378,10 +379,15 @@
         <div class="st-count" id="cnt_WAITING_SELLER" style="color:#2563eb;">0</div>
         <div class="st-sub" style="color:#1e40af;">👉 우리 답변 후 답장대기중</div>
       </div>
+      <div class="stage-card" onclick="setStageFilter('FOLLOWUP_3D')" id="stCard_FOLLOWUP_3D" style="border-left: 5px solid #ea580c; background:#fff7ed;">
+        <div class="st-title" style="color:#c2410c;font-weight:900;">⏰ 3일 경과 미회신</div>
+        <div class="st-count" id="cnt_FOLLOWUP_3D" style="color:#ea580c;">0</div>
+        <div class="st-sub" style="color:#9a3412;font-weight:700;">👉 3일+ 무응답 안부메일</div>
+      </div>
       <div class="stage-card st-done" onclick="setStageFilter('5_공구확정')" id="stCard_5_공구확정" style="border-left: 5px solid #16a34a; background:#f0fdf4;">
         <div class="st-title" style="color:#15803d;font-weight:900;">🎉 최종 공구 확정</div>
-        <div class="st-count" id="cnt_5_공구확정" style="color:#16a34a;">0</div>
-        <div class="st-sub" style="color:#166534;font-weight:700;">👉 공구 진행 확정 셀러</div>
+        <div class="st-count" id="cnt_5_공구확정" style="color:#16a34a;">3</div>
+        <div class="st-sub" style="color:#166534;font-weight:700;">👉 입금·확정 셀러 (송장대상)</div>
       </div>
       <div class="stage-card" onclick="setStageFilter('CLOSED')" id="stCard_CLOSED" style="border-left: 5px solid #64748b; background:#f8fafc;">
         <div class="st-title" style="color:#475569;font-weight:800;">⏹️ 상담 종료 (제외됨)</div>
@@ -391,7 +397,7 @@
       <div class="stage-card" onclick="setStageFilter('SAMPLE_SHIPPED')" id="stCard_SAMPLE_SHIPPED" style="border-left: 4px solid #d97706; background:#fffbeb;">
         <div class="st-title" style="color:#b45309;">📦 샘플 출고·송장</div>
         <div class="st-count" id="cnt_SAMPLE_SHIPPED" style="color:#d97706;">0</div>
-        <div class="st-sub" style="color:#92400e;">👉 샘플출고·송장메일</div>
+        <div class="st-sub" style="color:#92400e;">👉 확정자 샘플출고·송장</div>
       </div>
       <div class="stage-card" onclick="setStageFilter('CALENDAR')" id="stCard_CALENDAR" style="border-left: 4px solid #059669; background:#f0fdf4;">
         <div class="st-title" style="color:#166534;">📅 공구 오픈 달력</div>
@@ -401,7 +407,7 @@
       <div class="stage-card" onclick="window.open('./finder.html', '_blank')" style="border-left: 5px solid #7c3aed; background:#faf5ff;">
         <div class="st-title" style="color:#6d28d9;font-weight:900;">🔍 인스타 공구 찾기</div>
         <div class="st-count" style="color:#7c3aed;font-size:19px;">268,274명</div>
-        <div class="st-sub" style="color:#5b21b6;font-weight:800;">👉 카테고리별 찾기 웹 열기 ↗</div>
+        <div class="st-sub" style="color:#5b21b6;font-weight:800;">👉 카테고리별 찾기 웹 ↗</div>
       </div>
     </div>
 
@@ -504,12 +510,13 @@
         <button class="btn btn-outline" style="padding:8px 12px;font-size:12px;background:#ffffff;" onclick="clearReplyQuickSearch()">🔄 검색 초기화</button>
       </div>
 
-      <!-- 🚦 4대 직관적 분류 탭 (지금 회신 필요 / 답변완료 대기중 / 최종 공구확정 / 상담 종료) -->
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;background:#f8fafc;border:2px solid #cbd5e1;border-radius:10px;padding:10px 14px;margin-bottom:14px;">
+      <!-- 🚦 직관적 분류 탭 (지금 회신 필요 / 답변완료 대기중 / 3일 경과 미회신 / 최종 공구확정 / 상담 종료) -->
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;background:#f8fafc;border:2px solid #cbd5e1;border-radius:10px;padding:10px 14px;margin-bottom:12px;">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
           <button class="source-btn active" id="turnBtn_NEEDS_OUR_REPLY" style="font-weight:900;padding:8px 14px;font-size:13px;background:#fef2f2;color:#dc2626;border:2px solid #dc2626;" onclick="setStageFilter('NEEDS_REPLY')">🚨 지금 회신 필요 (0명)</button>
           <button class="source-btn" id="turnBtn_WAITING_SELLER" style="font-weight:800;padding:8px 14px;font-size:13px;background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd;" onclick="setStageFilter('WAITING_SELLER')">⏳ 답변완료 · 셀러회신 대기 (0명)</button>
-          <button class="source-btn" id="turnBtn_CONFIRMED" style="font-weight:900;padding:8px 14px;font-size:13px;background:#f0fdf4;color:#15803d;border:1px solid #86efac;" onclick="setStageFilter('5_공구확정')">🎉 최종 공구 확정 (0명)</button>
+          <button class="source-btn" id="turnBtn_FOLLOWUP_3D" style="font-weight:900;padding:8px 14px;font-size:13px;background:#fff7ed;color:#c2410c;border:2px solid #f97316;" onclick="setStageFilter('FOLLOWUP_3D')">⏰ 3일 경과 미회신 · 안부메일 (0명)</button>
+          <button class="source-btn" id="turnBtn_CONFIRMED" style="font-weight:900;padding:8px 14px;font-size:13px;background:#f0fdf4;color:#15803d;border:1px solid #86efac;" onclick="setStageFilter('5_공구확정')">🎉 최종 공구 확정 (3명)</button>
           <button class="source-btn" id="turnBtn_CLOSED" style="font-weight:800;padding:8px 14px;font-size:13px;background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;" onclick="setStageFilter('CLOSED')">⏹️ 상담 종료 · 제외됨 (0명)</button>
           <button class="source-btn" id="turnBtn_ALL" style="font-weight:700;padding:8px 12px;font-size:12px;background:#ffffff;color:#334155;border:1px solid #cbd5e1;" onclick="setStageFilter('ALL_REPLIED')">📋 진행중 전체 (0명)</button>
         </div>
@@ -518,6 +525,17 @@
           <button class="source-btn active" id="sortBtn_FIRST_REPLY" style="padding:5px 9px;font-size:11px;" onclick="setReplySortMode('FIRST_REPLY')">⏳ 먼저 온 순</button>
           <button class="source-btn" id="sortBtn_LATEST_REPLY" style="padding:5px 9px;font-size:11px;" onclick="setReplySortMode('LATEST_REPLY')">⚡ 최근 도착순</button>
           <button class="source-btn" id="sortBtn_FOLLOWERS" style="padding:5px 9px;font-size:11px;" onclick="setReplySortMode('FOLLOWERS')">👑 팔로워순</button>
+        </div>
+      </div>
+
+      <!-- ⏰ 3일 경과 미회신자 일괄 안부·리마인드 메일 발송 안내 배너 -->
+      <div id="followup3dBanner" style="display:none;background:#fff7ed;border:2px solid #f97316;border-radius:10px;padding:12px 16px;margin-bottom:14px;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+        <div>
+          <div style="font-size:14px;font-weight:900;color:#9a3412;">⏰ 우리가 2차 세부조건 답변을 보낸 뒤 3일(72시간) 이상 추가 답장이 없는 셀러 모음입니다.</div>
+          <div style="font-size:12px;color:#c2410c;margin-top:3px;">그냥 두면 잊어버리거나 지나칠 수 있으니, <strong>"혹시 메일이 잘 도착했는지, 샘플 조건이나 일정 조율이 필요하시면 편하게 말씀해 달라"</strong>는 부드러운 안부·리마인드 메일을 보내 다시 답장을 유도하세요!</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn" id="btnBulk3DayReminder" style="background:#ea580c;color:#ffffff;font-weight:900;padding:9px 16px;font-size:13px;box-shadow:0 2px 6px rgba(234,88,12,0.35);" onclick="sendBulk3DayReminders()">🚀 아래 3일 경과 미회신 셀러 전체에게 [안부·리마인드 메일] 일괄 자동발송</button>
         </div>
       </div>
 
@@ -704,6 +722,38 @@
     </div>
   </div>
 
+  <!-- 💰 [신규 핵심] 은행 통장 입금내역 붙여넣기 ➔ 셀러 자동매칭 & 원클릭 공구확정·달력기입 모달 -->
+  <div class="modal-backdrop" id="bankDepositModal">
+    <div class="modal" style="max-width:860px;">
+      <h3>💰 은행 입금자 자동 매칭 & 원클릭 [🎉 공구 확정 + 📅 달력 희망일 자동기입]</h3>
+      <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#14532d;line-height:1.55;">
+        <strong>💡 일일이 입금자 이름을 검색할 필요가 없습니다! (동명이인 자동 구분)</strong><br>
+        • 기업은행 통장 거래내역 표를 그대로 드래그해서 아래 칸에 붙여넣거나 <code>입금자명 금액</code>(예: <code>박은정 42,000</code> / <code>이연경 32,000</code>)을 입력하고 <strong>[🔍 입금자 자동 찾기]</strong>를 누르세요.<br>
+        • 셀러들이 메일로 보낸 신청서 안의 <strong>실명 · 휴대폰 뒷자리 · 신청 사이즈(32,000원=SS / 42,000원=Q) · 희망 오픈 날짜</strong>를 AI가 자동 대조하여 찾아주며, <strong>[🎉 입금확인 & 공구확정]</strong>을 누르면 <strong>달력에 희망 오픈 날짜까지 자동으로 기입</strong>됩니다!
+      </div>
+
+      <div style="background:#eff6ff;border:1px solid #93c5fd;border-radius:8px;padding:10px 12px;margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:6px;">
+          <strong style="font-size:12px;color:#1e3a8a;">📥 은행 입금내역 표 붙여넣기 (은행 화면에서 드래그 복사 후 Ctrl+V 또는 '이름 금액' 입력)</strong>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-primary" style="padding:4px 12px;font-size:12px;background:#2563eb;" onclick="parseAndMatchBankDeposits()">🔍 입금자 자동 찾기 & 매칭</button>
+            <button class="btn btn-green" style="padding:4px 12px;font-size:12px;" onclick="confirmAllMatchedDeposits()">🎉 매칭된 입금자 일괄 [공구확정 + 달력자동기입]</button>
+          </div>
+        </div>
+        <textarea id="bankDepositPasteInput" style="width:100%;height:85px;padding:8px;font-size:12px;border:1px solid #bfdbfe;border-radius:6px;background:#fff;" placeholder="은행 거래내역을 그대로 복사해 붙여넣거나 아래와 같이 입력하세요:&#10;2026-11-18 20:10:33  0  42,000  175,468  박은정  국민은행&#10;2026-11-18 18:55:22  0  32,000  133,468  이연경  신한은행&#10;2026-11-18 15:21:56  0  32,000  101,468  이춘희  케이뱅크"></textarea>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <div style="font-size:13px;font-weight:900;color:#0f172a;margin-bottom:6px;">📋 입금 완료 및 신청서 접수 셀러 매칭 현황 (클릭 시 공구확정 & 달력 자동등록)</div>
+        <div id="bankDepositMatchListBox" style="max-height:280px;overflow-y:auto;border:1px solid #cbd5e1;border-radius:8px;padding:8px;background:#f8fafc;"></div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:8px;">
+        <button class="btn btn-outline" onclick="closeBankDepositModal()">닫기</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 📦 실제품(샘플) 출고 송장번호 일괄 업로드 & 안내메일 자동발송 모달 -->
   <div class="modal-backdrop" id="bulkTrackingModal">
     <div class="modal" style="max-width:780px;">
@@ -798,6 +848,76 @@
 
       // 3) 그 외: 우리가 이미 2차(또는 3차) 답변을 보냈고, 셀러의 다음 답장을 기다리는 중!
       return 'WAITING_SELLER';
+    }
+
+    function getElapsedDaysSinceOurReply(s) {
+      const lastSent = fixKstDisplay(s.sent_3rd_at || s.sent_2nd_at || '');
+      if (!lastSent || lastSent.length < 10) return 0;
+      const dt = new Date(lastSent.slice(0, 16).replace(' ', 'T') + ':00+09:00');
+      if (isNaN(dt.getTime())) return 0;
+      const diffMs = Date.now() - dt.getTime();
+      return Math.max(0, Math.floor(diffMs / (24 * 3600 * 1000)));
+    }
+
+    function isSellerFollowup3D(s) {
+      if (isSellerClosed(s)) return false;
+      if (s.stage === '5_공구확정' || s.stage === '6_6차정산및재진행' || s.is_confirmed || s.deposit_confirmed) return false;
+      if (getSellerTurnStatus(s) !== 'WAITING_SELLER') return false;
+      if (s.reminder_3d_sent_at) return false;
+      // 이미 12월 초나 신혼여행 복귀 후로 일정 조율된 셀러는 제외
+      const comb = `${s.reply_2nd_text || ''}\n${s.reply_text || ''}`;
+      if (comb.includes('신혼여행') || comb.includes('12월 초')) return false;
+      return getElapsedDaysSinceOurReply(s) >= 3;
+    }
+
+    function extractScheduleFromReplyJS(s) {
+      const comb = `${s.reply_2nd_text || ''}\n${s.reply_text || ''}`;
+      let start = s.schedule_start || '';
+      let end = s.schedule_end || '';
+      let sample = s.sample_size || '';
+
+      if (!start) {
+        // 1) YYYY-MM-DD 또는 11/28, 11월 28일, 12월 1일 패턴 자동 추출
+        const mIso = comb.match(/(202[67])[.\-/년\s]+(0?[1-9]|1[0-2])[.\-/월\s]+(0?[1-9]|[12]\d|3[01])/);
+        const mKor = comb.match(/(11|12|1)\s*월\s*(0?[1-9]|[12]\d|3[01])\s*일/);
+        const mSlash = comb.match(/(?:희망|일정|오픈)[^\n]{0,20}?(11|12|1)\s*[./]\s*(0?[1-9]|[12]\d|3[01])/);
+        if (mIso) {
+          const y = mIso[1];
+          const mm = String(mIso[2]).padStart(2, '0');
+          const dd = String(mIso[3]).padStart(2, '0');
+          start = `${y}-${mm}-${dd}`;
+        } else if (mKor) {
+          const mmNum = Number(mKor[1]);
+          const y = mmNum === 1 ? '2027' : '2026';
+          start = `${y}-${String(mmNum).padStart(2, '0')}-${String(mKor[2]).padStart(2, '0')}`;
+        } else if (mSlash) {
+          const mmNum = Number(mSlash[1]);
+          const y = mmNum === 1 ? '2027' : '2026';
+          start = `${y}-${String(mmNum).padStart(2, '0')}-${String(mSlash[2]).padStart(2, '0')}`;
+        } else if (comb.includes('12월 초') || comb.includes('12월초')) {
+          start = '2026-12-02';
+        }
+      }
+      if (start && !end) {
+        const dt = new Date(start + 'T00:00:00');
+        if (!isNaN(dt.getTime())) {
+          dt.setDate(dt.getDate() + 3);
+          end = dt.toISOString().slice(0, 10);
+        } else {
+          end = start;
+        }
+      }
+      if (!sample) {
+        const mAddr = comb.match(/3\.\s*샘플[^\n]*?:\s*([^\n]+)/);
+        if (mAddr && mAddr[1].trim()) {
+          sample = mAddr[1].trim().slice(0, 45);
+        } else if (s.deposit_amount === 42000) {
+          sample = 'Q (퀸 42,000원 입금확인)';
+        } else if (s.deposit_amount === 32000) {
+          sample = 'SS (슈퍼싱글 32,000원 입금확인)';
+        }
+      }
+      return { schedule_start: start, schedule_end: end, sample_size: sample };
     }
 
     function toggleExtraTools(id) {
@@ -963,8 +1083,9 @@
 
       const cntNeedsReply = allRepliedPool.filter(s => !isSellerClosed(s) && getSellerTurnStatus(s) === 'NEEDS_OUR_REPLY').length;
       const cntWaitingSeller = allRepliedPool.filter(s => !isSellerClosed(s) && getSellerTurnStatus(s) === 'WAITING_SELLER').length;
+      const cntFollowup3D = allRepliedPool.filter(s => isSellerFollowup3D(s)).length;
       const cntClosed = allRepliedPool.filter(s => isSellerClosed(s)).length;
-      const confirmed = allRepliedPool.filter(s => !isSellerClosed(s) && (s.stage === '5_공구확정' || s.stage === '6_6차정산및재진행' || Boolean(s.is_confirmed))).length;
+      const confirmed = allRepliedPool.filter(s => !isSellerClosed(s) && (s.stage === '5_공구확정' || s.stage === '6_6차정산및재진행' || Boolean(s.is_confirmed || s.deposit_confirmed))).length;
       const shippedCnt = allRepliedPool.filter(s => Boolean(s.sample_shipped || s.tracking_number)).length;
       const sentCnt = allSellers.filter(s => s.stage === '1_1차제안메일').length;
       const activeTotalCnt = allRepliedPool.filter(s => !isSellerClosed(s)).length;
@@ -974,19 +1095,21 @@
       if (elNeeds) elNeeds.textContent = cntNeedsReply.toLocaleString();
       const elWait = document.getElementById('cnt_WAITING_SELLER');
       if (elWait) elWait.textContent = cntWaitingSeller.toLocaleString();
+      const el3D = document.getElementById('cnt_FOLLOWUP_3D');
+      if (el3D) el3D.textContent = cntFollowup3D.toLocaleString();
       const elConf = document.getElementById('cnt_5_공구확정');
       if (elConf) elConf.textContent = confirmed.toLocaleString();
       const elClosed = document.getElementById('cnt_CLOSED');
       if (elClosed) elClosed.textContent = cntClosed.toLocaleString();
       const elShipped = document.getElementById('cnt_SAMPLE_SHIPPED');
-      if (elShipped) elShipped.textContent = shippedCnt.toLocaleString();
+      if (elShipped) elShipped.textContent = `${shippedCnt}/${confirmed}`;
       const el1st = document.getElementById('cnt_1_1차제안메일');
       if (el1st) el1st.textContent = sentCnt.toLocaleString();
 
       const pct = Math.min(100, Math.round((confirmed / 100) * 100));
       document.getElementById('goalProgressFill').style.width = pct + '%';
       document.getElementById('goalProgressText').textContent = `${confirmed} / 100명 (${pct}%)`;
-      document.getElementById('goalSummaryText').textContent = `🚨 지금 회신 필요 ${cntNeedsReply}명 | ⏳ 답변완료·대기 ${cntWaitingSeller}명 | 🎉 최종 공구확정 ${confirmed}명 | ⏹️ 상담종료(숨김) ${cntClosed}명`;
+      document.getElementById('goalSummaryText').textContent = `🚨 지금 회신 필요 ${cntNeedsReply}명 | ⏰ 3일+ 미회신 ${cntFollowup3D}명 | 🎉 최종 공구확정(입금) ${confirmed}명 | ⏹️ 상담종료 ${cntClosed}명`;
       const vipLiveBadge = document.getElementById('vipConfirmedLiveBadge');
       if (vipLiveBadge) {
         vipLiveBadge.textContent = `🎉 현재 최종 공구 확정: ${confirmed}명 (목표 100명 중 ${pct}%)`;
@@ -1033,11 +1156,13 @@
       // 중단 분류 버튼 텍스트 및 활성 상태 업데이트
       const tbNeeds = document.getElementById('turnBtn_NEEDS_OUR_REPLY');
       const tbWait = document.getElementById('turnBtn_WAITING_SELLER');
+      const tb3D = document.getElementById('turnBtn_FOLLOWUP_3D');
       const tbConf = document.getElementById('turnBtn_CONFIRMED');
       const tbClosed = document.getElementById('turnBtn_CLOSED');
       const tbAll = document.getElementById('turnBtn_ALL');
       if (tbNeeds) tbNeeds.textContent = `🚨 지금 회신 필요 (${cntNeedsReply}명)`;
       if (tbWait) tbWait.textContent = `⏳ 답변완료 · 셀러회신 대기 (${cntWaitingSeller}명)`;
+      if (tb3D) tb3D.textContent = `⏰ 3일 경과 미회신 · 안부메일 (${cntFollowup3D}명)`;
       if (tbConf) tbConf.textContent = `🎉 최종 공구 확정 (${confirmed}명)`;
       if (tbClosed) tbClosed.textContent = `⏹️ 상담 종료 · 제외됨 (${cntClosed}명)`;
       if (tbAll) tbAll.textContent = `📋 진행중 전체 (${activeTotalCnt}명)`;
@@ -1045,6 +1170,7 @@
       [
         ['NEEDS_REPLY', tbNeeds],
         ['WAITING_SELLER', tbWait],
+        ['FOLLOWUP_3D', tb3D],
         ['5_공구확정', tbConf],
         ['CLOSED', tbClosed],
         ['ALL_REPLIED', tbAll]
@@ -1059,13 +1185,18 @@
         }
       });
 
+      const banner3d = document.getElementById('followup3dBanner');
+      if (banner3d) {
+        banner3d.style.display = (currentStage === 'FOLLOWUP_3D' && cntFollowup3D > 0) ? 'flex' : 'none';
+      }
+
       // 현재 선택된 탭에 맞춰 표시할 셀러 필터링
       let repliedSellers = [...allRepliedPool];
       const titleEl = document.getElementById('replyBoardMainTitle');
 
       if (replyQuickQuery) {
         repliedSellers = repliedSellers.filter(s => {
-          const hay = `${s.display_name || ''} ${s.seller_id || ''} ${s.email || ''} ${s.phone || ''} ${s.kakao_url || ''} ${s.insta_id || ''} ${s.reply_text || ''} ${s.reply_2nd_text || ''} ${s.memo || ''} ${s.staff_note || ''} ${s.assigned_staff || ''} ${s.sample_size || ''}`.toLowerCase();
+          const hay = `${s.display_name || ''} ${s.seller_id || ''} ${s.email || ''} ${s.phone || ''} ${s.kakao_url || ''} ${s.insta_id || ''} ${s.reply_text || ''} ${s.reply_2nd_text || ''} ${s.memo || ''} ${s.staff_note || ''} ${s.assigned_staff || ''} ${s.sample_size || ''} ${s.deposit_name || ''}`.toLowerCase();
           return hay.includes(replyQuickQuery);
         });
         if (titleEl) titleEl.textContent = `🔍 '${replyQuickQuery}' 검색 결과 (${repliedSellers.length}명)`;
@@ -1075,18 +1206,20 @@
       } else if (currentStage === 'WAITING_SELLER') {
         repliedSellers = repliedSellers.filter(s => !isSellerClosed(s) && getSellerTurnStatus(s) === 'WAITING_SELLER');
         if (titleEl) titleEl.textContent = `⏳ 우리 답변 발송완료 · 셀러 답장 대기중 (${repliedSellers.length}명)`;
+      } else if (currentStage === 'FOLLOWUP_3D') {
+        repliedSellers = repliedSellers.filter(s => isSellerFollowup3D(s));
+        if (titleEl) titleEl.textContent = `⏰ 우리 2차 답변 후 3일(72시간) 이상 추가 답장이 없는 셀러 (${repliedSellers.length}명) — 안부·리마인드 메일 발송 대상`;
       } else if (currentStage === '5_공구확정') {
-        repliedSellers = repliedSellers.filter(s => !isSellerClosed(s) && (s.stage === '5_공구확정' || s.stage === '6_6차정산및재진행' || Boolean(s.is_confirmed)));
-        if (titleEl) titleEl.textContent = `🎉 최종 공구 확정 셀러 (${repliedSellers.length}명)`;
+        repliedSellers = repliedSellers.filter(s => !isSellerClosed(s) && (s.stage === '5_공구확정' || s.stage === '6_6차정산및재진행' || Boolean(s.is_confirmed || s.deposit_confirmed)));
+        if (titleEl) titleEl.textContent = `🎉 최종 공구 확정 및 입금 완료 셀러 (${repliedSellers.length}명)`;
       } else if (currentStage === 'CLOSED') {
         repliedSellers = repliedSellers.filter(s => isSellerClosed(s));
         if (titleEl) titleEl.textContent = `⏹️ 상담 종료 / 거절 보관함 (${repliedSellers.length}명 — 평소 화면에서는 숨김 처리됨)`;
       } else if (currentStage === 'SAMPLE_SHIPPED') {
-        const shippedList = repliedSellers.filter(s => !isSellerClosed(s) && Boolean(s.sample_shipped || s.tracking_number));
-        repliedSellers = shippedList.length > 0 ? shippedList : repliedSellers.filter(s => !isSellerClosed(s) && ['4_직원오픈채팅이관', '5_공구확정', '6_6차정산및재진행', '3_3차재진행조율'].includes(s.stage));
-        if (titleEl) titleEl.textContent = `📦 실제품(샘플) 출고 및 CJ대한통운 송장 안내 관리 (${repliedSellers.length}명)`;
+        // 공구 확정(입금 완료)된 사람만 송장번호 보내줘야 하므로 공구확정자 및 출고자만 표시!
+        repliedSellers = repliedSellers.filter(s => !isSellerClosed(s) && (s.stage === '5_공구확정' || s.stage === '6_6차정산및재진행' || Boolean(s.is_confirmed || s.deposit_confirmed || s.sample_shipped || s.tracking_number)));
+        if (titleEl) titleEl.textContent = `📦 공구 확정(입금완료) 셀러 샘플 출고 및 CJ대한통운 송장 안내 (${repliedSellers.length}명)`;
       } else {
-        // ALL 또는 ALL_REPLIED 등에서는 상담 종료(CLOSED)된 사람은 숨기고 진행중인 사람만 표시!
         repliedSellers = repliedSellers.filter(s => !isSellerClosed(s));
         if (titleEl) titleEl.textContent = `📋 진행 중인 전체 상담 셀러 (${repliedSellers.length}명 — 상담종료 ${cntClosed}명 제외됨)`;
       }
@@ -1147,12 +1280,14 @@
             const safeName = (s.display_name || s.seller_id).split('(')[0].trim().replace(/'/g, "");
             const fullLabel = (s.display_name || s.seller_id).replace(/'/g, "");
             const isStage345 = ['3_3차재진행조율', '4_직원오픈채팅이관', '5_공구확정', '6_6차정산및재진행'].includes(s.stage);
-            const isConfirmedSeller = (s.stage === '5_공구확정' || s.stage === '6_6차정산및재진행' || Boolean(s.is_confirmed));
+            const isConfirmedSeller = (s.stage === '5_공구확정' || s.stage === '6_6차정산및재진행' || Boolean(s.is_confirmed || s.deposit_confirmed));
             const isClosedSeller = isSellerClosed(s);
             const alreadyReplied2nd = Boolean(s.sent_2nd_body) || (s.memo || '').includes('[2차답장 발송완료') || isStage345;
             const alreadyReplied3rd = Boolean(s.sent_3rd_body) || (s.memo || '').includes('[3차답장 발송완료') || (s.memo || '').includes('[송장안내 발송완료');
             const isSampleShipped = Boolean(s.sample_shipped || s.tracking_number);
             const turnState = getSellerTurnStatus(s); // NEEDS_OUR_REPLY, WAITING_SELLER, CLOSED
+            const elapsedDays = getElapsedDaysSinceOurReply(s);
+            const isFollowup3D = isSellerFollowup3D(s);
 
             const roundLabel = s.stage === '6_6차정산및재진행' ? '6차' : (s.stage === '5_공구확정' ? '5차' : (s.stage === '4_직원오픈채팅이관' ? '4차' : (isStage345 ? '3차' : '2차')));
             const secondSubj = s.sent_2nd_subject || `Re: [루나온 그래핀 발열이불] ${safeName}님 회신 감사드리며, 공동구매 상세 진행 방식 및 샘플 발송 안내드립니다.`;
@@ -1208,12 +1343,15 @@
                   <!-- 1. 심플 상단 헤더: 셀러명 + 상태배지 + 우측 [🎉 공구 확정] & [⏹️ 상담 종료] 원클릭 버튼 -->
                   <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
                     <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-                      <span style="display:inline-block;background:${turnState === 'NEEDS_OUR_REPLY' ? '#dc2626' : '#0f172a'};color:#fff;font-size:12px;font-weight:900;padding:3px 9px;border-radius:99px;">#${orderIdx + 1}</span>
+                      <span style="display:inline-block;background:${turnState === 'NEEDS_OUR_REPLY' ? '#dc2626' : (isFollowup3D ? '#ea580c' : '#0f172a')};color:#fff;font-size:12px;font-weight:900;padding:3px 9px;border-radius:99px;">#${orderIdx + 1}</span>
                       <span style="font-weight:900;font-size:16px;color:#0f172a;">${fullLabel}</span>
                       ${turnState === 'NEEDS_OUR_REPLY' ? `<span style="background:#dc2626;color:#fff;font-size:12px;padding:3px 9px;border-radius:6px;font-weight:900;">🚨 지금 회신 필요 (${roundLabel})</span>` : ''}
                       ${turnState === 'WAITING_SELLER' ? `<span style="background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd;font-size:12px;padding:3px 9px;border-radius:6px;font-weight:800;">⏳ 우리 답변완료 (${lastOurSentTime})</span>` : ''}
+                      ${isFollowup3D ? `<span style="background:#fff7ed;color:#c2410c;border:2px solid #f97316;font-size:12px;padding:3px 9px;border-radius:6px;font-weight:900;">⏰ 답변 후 ${elapsedDays}일 경과 (안부메일 대상)</span>` : ''}
+                      ${s.reminder_3d_sent_at ? `<span style="background:#fef3c7;color:#92400e;border:1px solid #f59e0b;font-size:11px;padding:2px 8px;border-radius:6px;font-weight:800;">🔔 3일차 안부메일 발송됨</span>` : ''}
                       ${isConfirmedSeller ? `<span style="background:#16a34a;color:#fff;font-size:12px;padding:3px 9px;border-radius:6px;font-weight:900;">🎉 공구확정</span>` : ''}
-                      ${isSampleShipped ? `<span style="background:#d97706;color:#fff;font-size:11px;padding:2px 8px;border-radius:6px;font-weight:900;">📦 샘플출고</span>` : ''}
+                      ${(s.deposit_confirmed || s.deposit_amount) ? `<span style="background:#059669;color:#fff;font-size:12px;padding:3px 9px;border-radius:6px;font-weight:900;">💰 ${Number(s.deposit_amount || 32000).toLocaleString()}원 입금완료(${s.deposit_name || '확인'})</span>` : ''}
+                      ${isSampleShipped ? `<span style="background:#d97706;color:#fff;font-size:11px;padding:2px 8px;border-radius:6px;font-weight:900;">📦 샘플출고 ${s.tracking_number ? `(${s.tracking_number})` : ''}</span>` : ''}
                     </div>
                     <div style="display:flex;align-items:center;gap:6px;">
                       ${isConfirmedSeller ? `
@@ -1253,11 +1391,15 @@
                       <button class="btn" style="padding:8px 15px;font-size:13px;font-weight:900;background:#dc2626;color:#fff;box-shadow:0 2px 6px rgba(220,38,38,0.25);" onclick="toggleInlineReply('${s.id}')">
                         ✉️ 지금 바로 ${roundLabel} 답변 쓰기
                       </button>
+                    ` : (isFollowup3D ? `
+                      <button class="btn" style="padding:8px 14px;font-size:12px;font-weight:900;background:#ea580c;color:#fff;box-shadow:0 2px 6px rgba(234,88,12,0.3);" onclick="openThreeDayReminderBox('${s.id}', '${safeName}')">
+                        🔔 ${elapsedDays}일 경과 안부·리마인드 메일 보내기
+                      </button>
                     ` : `
                       <button class="btn btn-outline" style="padding:7px 13px;font-size:12px;font-weight:800;background:#ffffff;color:#334155;border-color:#94a3b8;" onclick="toggleInlineReply('${s.id}')">
                         ✉️ 추가/송장 메일 쓰기
                       </button>
-                    `}
+                    `)}
                     <button class="btn btn-outline" style="padding:7px 12px;font-size:12px;font-weight:800;color:#1e3a8a;border-color:#93c5fd;background:#eff6ff;" onclick="toggleFullHistory('${s.id}')">
                       📜 주고받은 메일 내역 (${alreadyReplied2nd ? (alreadyReplied3rd ? '3차완료' : '2차완료') : '1차만'})
                     </button>
@@ -1301,8 +1443,8 @@
                     </div>
                   </div>
 
-                  <!-- ⚙️ [토글 2] 상세 설정 (샘플 송장발송 / 공구 달력일정 / 연락처 / 메모장 — 평소엔 접어두어 눈 피로도 제거) -->
-                  <div id="extraToolsBox_${s.id}" style="display:none;margin-top:10px;background:#f8fafc;border:1px solid #cbd5e1;border-radius:10px;padding:12px;font-size:12px;">
+                  <!-- ⚙️ [토글 2] 상세 설정 (샘플 송장발송 / 공구 달력일정 / 연락처 / 메모장 — 샘플출고 탭에서는 자동 펼침) -->
+                  <div id="extraToolsBox_${s.id}" style="display:${currentStage === 'SAMPLE_SHIPPED' || isConfirmedSeller ? 'block' : 'none'};margin-top:10px;background:#f8fafc;border:1px solid #cbd5e1;border-radius:10px;padding:12px;font-size:12px;">
                     ${s.seller_traits ? `<div style="font-size:11px;color:#4338ca;background:#eef2ff;border:1px solid #c7d2fe;border-radius:6px;padding:6px 9px;margin-bottom:8px;font-weight:600;">📊 ${s.seller_traits}</div>` : ''}
                     <!-- 실제품 출고 & 송장번호 발송 -->
                     <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px;padding:7px 10px;background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;">
@@ -1352,6 +1494,7 @@
                       <button class="btn btn-primary" style="padding:4px 10px;font-size:12px;background:#7c3aed;" onclick="${isStage345 ? `fillGoniThirdDraft('${s.id}', '${safeName}')` : `fillGoniCustomDraft('${s.id}', '${safeName}')`}">
                         🤖 고니(AI) 맞춤답변 자동작성
                       </button>
+                      <button class="btn btn-outline" style="padding:3px 8px;font-size:11px;background:#fff7ed;color:#c2410c;border-color:#f97316;font-weight:800;" onclick="fillThreeDayReminderTemplate('${s.id}', '${safeName}')">🔔 3일 경과 안부·리마인드</button>
                       <button class="btn btn-outline" style="padding:3px 8px;font-size:11px;background:#f0fdf4;color:#15803d;border-color:#86efac;font-weight:700;" onclick="fillThirdTemplate('${s.id}', '${safeName}')">🎉 3차 신청접수</button>
                       <button class="btn btn-outline" style="padding:3px 8px;font-size:11px;background:#fffbeb;color:#b45309;border-color:#fcd34d;font-weight:800;" onclick="fillTrackingTemplate('${s.id}', '${safeName}', 'cardTrkNum_${s.id}')">📦 송장안내</button>
                       <button class="btn btn-outline" style="padding:3px 8px;font-size:11px;background:#eff6ff;color:#1d4ed8;border-color:#93c5fd;font-weight:700;" onclick="fillFourthFifthTemplate('${s.id}', '${safeName}')">🔗 4·5차 링크</button>

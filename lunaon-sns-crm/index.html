@@ -772,11 +772,17 @@
       </div>
 
       <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:10px 12px;margin-bottom:12px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
-          <strong style="font-size:12px;color:#92400e;">📥 엑셀/택배 송장 대량 붙여넣기 (한 줄에 한 명씩: <code>셀러명 또는 이메일 또는 연락처   송장번호</code>)</strong>
-          <button class="btn btn-outline" style="padding:3px 9px;font-size:11px;background:#fff;" onclick="applyPastedTrackingToRows()">🔍 붙여넣은 송장번호 자동 매칭하기</button>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:6px;">
+          <strong style="font-size:12px;color:#92400e;">📥 엑셀(.csv/.txt) 파일 업로드 또는 송장 대량 붙여넣기 (<code>셀러명/이메일/연락처   송장번호</code>)</strong>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <label class="btn btn-outline" style="padding:3px 10px;font-size:11px;background:#fff;border-color:#d97706;color:#b45309;cursor:pointer;">
+              📂 엑셀(CSV) 송장파일 선택 업로드
+              <input type="file" accept=".csv,.txt,.tsv" style="display:none;" onchange="onUploadTrackingFile(this)" />
+            </label>
+            <button class="btn btn-outline" style="padding:3px 9px;font-size:11px;background:#fff;" onclick="applyPastedTrackingToRows()">🔍 붙여넣은 송장번호 자동 매칭하기</button>
+          </div>
         </div>
-        <textarea id="bulkTrackingPasteInput" style="width:100%;height:90px;padding:8px;font-size:12px;border:1px solid #fde68a;border-radius:6px;background:#fff;" placeholder="예시:&#10;박은정 651234567890&#10;이연경 651234567891&#10;wlsgml850@naver.com 651234567892"></textarea>
+        <textarea id="bulkTrackingPasteInput" style="width:100%;height:90px;padding:8px;font-size:12px;border:1px solid #fde68a;border-radius:6px;background:#fff;" placeholder="몇 건 없으면 위 표에 바로 입력하시고, 많으면 엑셀에서 [이름  송장번호] 열을 복사해 붙여넣거나 엑셀(CSV) 파일을 업로드하세요:&#10;박은정 651234567890&#10;이연경 651234567891&#10;이춘희 651234567892"></textarea>
       </div>
 
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
@@ -1372,8 +1378,17 @@
                     <span>📧 <strong>${s.email || ''}</strong></span>
                     <span>· 구독·팔로워 <strong>${Number(s.followers || 0).toLocaleString()}명</strong></span>
                     ${s.phone ? `<span>· 📞 <strong>${s.phone}</strong></span>` : ''}
-                    ${s.schedule_start ? `<span style="color:#6d28d9;font-weight:800;">· 📅 희망/오픈일: ${s.schedule_start}</span>` : ''}
+                    ${s.schedule_start ? `<span style="color:#6d28d9;font-weight:800;">· 📅 공구 오픈일: ${s.schedule_start} ~ ${s.schedule_end || s.schedule_start}</span>` : ''}
                   </div>
+                  ${s.gonggu_link ? `
+                    <div style="margin-top:6px;background:#ecfdf5;border:1px solid #10b981;border-radius:8px;padding:6px 10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;font-size:12px;">
+                      <span style="font-weight:900;color:#065f46;">🔗 전용 스마트스토어 비노출 결제페이지: <a href="${s.gonggu_link}" target="_blank" class="link-a" style="color:#047857;">${s.gonggu_link}</a></span>
+                      <div style="display:flex;gap:5px;">
+                        <button class="btn btn-outline" style="padding:3px 8px;font-size:11px;background:#fff;color:#047857;border-color:#10b981;font-weight:800;" onclick="copyTextWithToast('${s.gonggu_link}', '셀러 전용 스마트스토어 결제링크 복사 완료!')">📋 링크 복사</button>
+                        <a href="${s.gonggu_link}" target="_blank" class="btn btn-green" style="padding:3px 8px;font-size:11px;">↗ 결제창 열기</a>
+                      </div>
+                    </div>
+                  ` : ''}
 
                   <!-- 2. 중앙 핵심 메시지 박스 (글자 크기 14px, 넉넉한 여백, 흰색 바탕으로 눈의 피로도 제로!) -->
                   <div style="margin-top:10px;background:#ffffff;border:2px solid ${turnState === 'NEEDS_OUR_REPLY' ? '#fca5a5' : '#e2e8f0'};border-left:5px solid ${turnState === 'NEEDS_OUR_REPLY' ? '#dc2626' : '#2563eb'};border-radius:10px;padding:12px 14px;">
@@ -1747,19 +1762,27 @@
       updateCounts();
 
       try {
-        await smartApiFetch('/api/update_seller', {
+        const res = await smartApiFetch('/api/update_seller', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({id, ...patch})
         });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.ok && data.seller && idx !== -1) {
+            allSellers[idx] = { ...allSellers[idx], ...data.seller };
+            saveLocalOverride(id, data.seller);
+            updateCounts();
+          }
+        }
       } catch (e) {}
       showToast('저장되었습니다.');
     }
 
-    const SECOND_TEMPLATE_KEY = 'LUNAON_SECOND_REPLY_TEMPLATE_V10';
+    const SECOND_TEMPLATE_KEY = 'LUNAON_SECOND_REPLY_TEMPLATE_V11';
 
     function getDefaultSecondReplyTemplate() {
-      return `안녕하세요, {{셀러명}}님!\n루나온 그래핀 발열이불 공구 안내드립니다.\n\n-상품-\n• 상품명 : 루나온 그래핀 발열이불 (슈퍼싱글 SS / 퀸 Q)\n• 색상 : 양면 (연그레이, 차콜)\n\n*필수사항 (공동구매 판매가 및 셀러 공급가 · 정산금)\n• 슈퍼싱글 SS\n  - 공동구매 판매가 : 49,000원 + 무료배송\n  - 셀러 공급가(VAT 포함) : 32,000원 + 무료배송\n  - 셀러 정산금(1개당) : 17,000원 (사업자 세금계산서 발행 시 17,000원 / 개인 3.3% 공제 후 16,439원)\n• 퀸 Q\n  - 공동구매 판매가 : 59,000원 + 무료배송\n  - 셀러 공급가(VAT 포함) : 42,000원 + 무료배송\n  - 셀러 정산금(1개당) : 17,000원 (사업자 세금계산서 발행 시 17,000원 / 개인 3.3% 공제 후 16,439원)\n\n• 진행 채널 기준 :\n  - 네이버 블로그는 키워드 네이버 검색영역 노출로 인해 진행하지 않습니다.\n  - 네이버 블로그를 제외한 모든 채널(인스타그램, 유튜브, 네이버 클립, 틱톡, 카페/밴드, 오픈채팅 등)은 가능합니다.\n\n• 정산 안내 :\n  - 공구를 진행 후 정산은 공구 마감 후 1주일 후에 전액 지급됩니다. (반품이나 환불 요청 확인 후 정산)\n  - 개인 판매이시면 원천징수 3.3% 공제이며, 사업자일 경우 세금계산서가 발행됩니다. (정산 시 서류 요청)\n\n• 결제창 · 샘플 · 배송 안내 :\n  - 결제창은 본사가 제공하는 스마트스토어(셀러별 비노출 전용 링크)로 진행됩니다.\n  - 최초 제품 샘플 1개는 셀러공급가(SS 32,000원 / Q 42,000원, 무료배송)로 구매 후 출고되며, 샘플 포함 5개 이상 판매 시 1개는 무상으로 제공됩니다. (정산 시 샘플 1개 금액을 받지 않고 환급 / 5개 미만 판매 시에는 단순 구매 처리)\n  - 샘플 입금 계좌 : 기업은행 534-028152-01-023 (예금주: 주식회사 테란)\n  - 입금 확인 후 평일 1차 오후 1시 / 2차 오후 4시까지 신청양식(발주서) 주시면 당일 발송됩니다.\n  - 택배사 : CJ대한통운 (기본 무료배송 / 제주·도서산간 +3,000원)\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n[진행 신청 회신 양식] — 아래 내용을 적어 답장 주시면 샘플 당일 발송 및 스마트스토어 결제창 세팅을 도와드립니다.\n1. 성함 / 연락처 / 카카오톡 ID : \n2. 진행하실 채널 주소 (인스타 등) : \n3. 샘플 신청 사이즈(SS 32,000원 / Q 42,000원) 및 수령 주소 : \n4. 샘플비 입금자명 (입금 완료 시 기재) : \n5. 희망 공구 오픈 일정 : \n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n감사합니다.\n(주)테란 · 테란2(온누리유통) 루나온 공구제안팀 드림\n• 담당자 : 이화식 / 남대현 (010-2807-0174 / 010-4527-8781 / 070-8858-5230)\n• 회신 이메일 : akrrntn1@gmail.com`;
+      return `안녕하세요, {{셀러명}}님!\n루나온 그래핀 발열이불 공구 안내드립니다.\n\n-상품-\n• 상품명 : 루나온 그래핀 발열이불 (슈퍼싱글 SS / 퀸 Q)\n• 색상 : 양면 (연그레이, 차콜)\n\n*필수사항 (공동구매 판매가 및 셀러 공급가 · 정산금)\n• 슈퍼싱글 SS\n  - 공동구매 판매가 : 49,000원 + 무료배송\n  - 셀러 공급가(VAT 포함) : 32,000원 + 무료배송\n  - 셀러 정산금(1개당) : 17,000원 (사업자 세금계산서 발행 시 17,000원 / 개인 3.3% 공제 후 16,439원)\n• 퀸 Q\n  - 공동구매 판매가 : 59,000원 + 무료배송\n  - 셀러 공급가(VAT 포함) : 42,000원 + 무료배송\n  - 셀러 정산금(1개당) : 17,000원 (사업자 세금계산서 발행 시 17,000원 / 개인 3.3% 공제 후 16,439원)\n\n• 진행 채널 기준 :\n  - 네이버 블로그는 키워드 네이버 검색영역 노출로 인해 진행하지 않습니다.\n  - 네이버 블로그를 제외한 모든 채널(인스타그램, 유튜브, 네이버 클립, 틱톡, 카페/밴드, 오픈채팅 등)은 가능합니다.\n\n• 정산 안내 :\n  - 공구를 진행 후 정산은 공구 마감 후 1주일 후에 전액 지급됩니다. (반품이나 환불 요청 확인 후 정산)\n  - 개인 판매이시면 원천징수 3.3% 공제이며, 사업자일 경우 세금계산서가 발행됩니다. (정산 시 서류 요청)\n\n• 결제창 · 샘플 · 배송 안내 :\n  - 결제창은 본사가 제공하는 스마트스토어(셀러별 비노출 전용 링크)로 진행됩니다.\n  - 최초 제품 샘플 1개는 셀러공급가(SS 32,000원 / Q 42,000원, 무료배송)로 구매 후 출고되며, 샘플 포함 5개 이상 판매 시 1개는 무상으로 제공됩니다. (정산 시 샘플 1개 금액을 받지 않고 환급 / 5개 미만 판매 시에는 단순 구매 처리)\n  - 샘플 입금 계좌 : 기업은행 534-028152-01-023 (예금주: 주식회사 테란)\n  - ※ 빠른 입금 확인 및 동명이인 구분을 위해 입금자명에 [성함+휴대폰뒷4자리] (예: 홍길동1234)로 입금해 주시면 즉시 확인됩니다.\n  - 입금 확인 후 평일 1차 오후 1시 / 2차 오후 4시까지 신청양식(발주서) 주시면 당일 발송됩니다.\n  - 택배사 : CJ대한통운 (기본 무료배송 / 제주·도서산간 +3,000원)\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n[진행 신청 회신 양식] — 아래 내용을 적어 답장 주시면 샘플 당일 발송 및 스마트스토어 결제창 세팅을 도와드립니다.\n1. 성함 / 연락처 / 카카오톡 ID : \n2. 진행하실 채널 주소 (인스타 등) : \n3. 샘플 신청 사이즈(SS 32,000원 / Q 42,000원) 및 수령 주소 : \n4. 샘플비 입금자명 (예: 홍길동1234 — 성함+휴대폰뒷4자리 권장) : \n5. 희망 공구 오픈 일정 : \n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n감사합니다.\n(주)테란 · 테란2(온누리유통) 루나온 공구제안팀 드림\n• 담당자 : 이화식 / 남대현 (010-2807-0174 / 010-4527-8781 / 070-8858-5230)\n• 회신 이메일 : akrrntn1@gmail.com`;
     }
 
     function getDefaultThirdReplyTemplate(displayName) {
@@ -1874,6 +1897,14 @@
         };
       }
 
+      // 6-B) 알망마켓(@almang_market) 등 무전원 발열 원리 / 물세탁 / A/S 질문 셀러
+      if (['전기없이', '물세탁', '세탁이 가능', 'a/s', '작동되는'].some(k => combined.toLowerCase().includes(k))) {
+        return {
+          subj: `Re: [루나온 그래핀 발열이불] ${name}님! 문의주신 무전원 자가발열 원리·물세탁·본사 A/S 및 공구 진행 안내드립니다 😊`,
+          body: `안녕하세요, ${name}님!\n루나온 공구제안팀입니다. 제품에 관심을 가져주시고 핵심 포인트를 꼼꼼하게 질문해 주셔서 진심으로 감사드립니다! 😊\n\n문의해 주신 3가지 사항에 대해 명확히 답변드립니다.\n\n1. [전기 없이 작동되는 100% 무전원 그래핀 자가발열 이불인가요?]\n   • 네, 맞습니다! 전기장판이나 온수매트처럼 전기 코드나 열선을 전혀 사용하지 않는 '100% 무전원 침구(겨울 차렵이불)'입니다.\n   • 열전도율과 원적외선 방사율이 뛰어난 '그래핀(Graphene) 복합 발열섬유 50%'가 충전재로 들어가 있어, 덮는 즉시 체온을 빠르게 흡수·복사하여 38.8°C까지 따뜻하게 보존해 줍니다. 전자파 걱정이 전혀 없고 화재 위험도 제로(0)입니다!\n\n2. [물세탁(세탁기 통세탁)이 가능한 제품인가요?]\n   • 네, 100% 물세탁이 가능합니다! 전기 부품이나 열선이 전혀 없는 순수 그래핀 기능성 섬유 침구이므로, 가정용 세탁기(울코스/중성세제 권장)로 통째로 편하게 물세탁하실 수 있으며 세탁 후에도 그래핀 고유 발열·항균 기능은 반영구적으로 유지됩니다.\n\n3. [추후 불량 교환 및 본사 A/S·CS 처리가 가능한가요?]\n   • 네, 당연합니다! 저희 (주)테란 파주 본사 물류 및 전담 CS센터(070-8858-5230)에서 제품 초기 불량 시 100% 무상 맞교환 및 사후 CS/A/S를 본사가 직접 책임지고 전담 처리해 드립니다. 셀러님께서는 CS 부담 없이 판매와 소통에만 집중하시면 됩니다.\n\n${stdBlock}\n\n${footer}`
+        };
+      }
+
       // 7) 정중한 거절 / 사양 셀러
       if (['정중히 거절', '포기해야 할 것 같습니다', '저와는 많이 맞지 않네요', '죄송합니다', '어려울 것 같습니다', '정중히 사양', '함께 하기 어려워'].some(k => combined.includes(k))) {
         return {
@@ -1907,11 +1938,80 @@
     function getDefaultFourthFifthTemplate(displayName, s = {}) {
       const trk = (s.tracking_number || '').trim();
       const trkLine = trk ? `CJ대한통운 ${trk} (조회: https://trace.cjlogistics.com/next/tracking.html?wblNo=${trk.replace(/[^0-9]/g, '')})` : '평일 1차(오후 1시) / 2차(오후 4시) 마감 기준 CJ대한통운 당일 칼출고';
-      return `안녕하세요, ${displayName}님!\n루나온 공구제안팀입니다. 회신 주셔서 진심으로 감사드립니다! 😊\n\n말씀해주신 [4·5차 전용 구매링크 세팅 및 공구 오픈·물류 운영] 안내드립니다.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 🔗 1. ${displayName}님 전용 스마트스토어 비노출 구매 링크 & 홍보 자료\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n• 공구 오픈 일정(${s.schedule_start || '희망 오픈일'})에 맞추어 팔로워분들이 공구 최저가(SS 49,000원 / Q 59,000원 무료배송)로 결제하실 수 있는 [${displayName}님 전용 네이버 스마트스토어 비노출 링크]를 세팅해 전달드립니다.\n• 상세페이지 (GIF 버전) : https://always-nam.github.io/lunacool-website/lunaon-detail-v9/\n• 홍보 영상 (15초 CF) : https://always-nam.github.io/lunacool-website/lunaon-cf-v8/\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 🚚 2. 공구 진행 중 물류 당일 출고 & 본사 CS 전담 안내\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n• 물류/재고 : 현재 파주 본사 물류에 SS/Q 전 수량 여유 재고가 확보되어 있으며, ${trkLine}로 발송됩니다.\n• 배송비/합포장 : 전국 기본 무료배송 (제주·도서산간 +3,000원) / 1박스 최대 4개 합포장 기준\n• CS 본사 100% 전담 : 배송 조회·주소 변경·교환·반품 CS는 본사(070-8858-5230)에서 전담 처리하므로 편하게 판매와 소통에만 집중해 주시면 됩니다!\n\n공구 기간 동안 최고의 성과 내실 수 있도록 본사에서 실시간으로 지원하겠습니다. 감사합니다!\n\n(주)테란 · 테란2(온누리유통) 루나온 공구제안팀 드림\n• 담당자 : 이화식 / 남대현 (010-2807-0174 / 010-4527-8781 / 070-8858-5230)\n• 회신 이메일 : akrrntn1@gmail.com`;
+      const gLink = (s.gonggu_link || '').trim() || '[전용 스마트스토어 비노출 링크 자동 생성됨]';
+      return `안녕하세요, ${displayName}님!\n루나온 공구제안팀입니다. 회신 주셔서 진심으로 감사드립니다! 😊\n\n말씀해주신 [4·5차 전용 구매링크 세팅 및 공구 오픈·물류 운영] 안내드립니다.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 🔗 1. ${displayName}님 전용 스마트스토어 비노출 구매 링크 & 홍보 자료\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n• ${displayName}님 전용 스마트스토어 비노출 결제 링크 :\n  👉 ${gLink}\n  (팔로워분들이 공구 최저가 SS 49,000원 / Q 59,000원 무료배송으로 바로 결제하실 수 있도록 세팅 완료되었습니다!)\n• 공구 오픈 일정 : ${s.schedule_start || '희망 오픈일'} ~ ${s.schedule_end || ''}\n• 상세페이지 (GIF 버전) : https://always-nam.github.io/lunacool-website/lunaon-detail-v9/\n• 홍보 영상 (15초 CF) : https://always-nam.github.io/lunacool-website/lunaon-cf-v8/\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 🚚 2. 공구 진행 중 물류 당일 출고 & 본사 CS 전담 안내\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n• 물류/재고 : 현재 파주 본사 물류에 SS/Q 전 수량 여유 재고가 확보되어 있으며, ${trkLine}로 발송됩니다.\n• 배송비/합포장 : 전국 기본 무료배송 (제주·도서산간 +3,000원) / 1박스 최대 4개 합포장 기준\n• CS 본사 100% 전담 : 배송 조회·주소 변경·교환·반품 CS는 본사(070-8858-5230)에서 전담 처리하므로 편하게 판매와 소통에만 집중해 주시면 됩니다!\n\n공구 기간 동안 최고의 성과 내실 수 있도록 본사에서 실시간으로 지원하겠습니다. 감사합니다!\n\n(주)테란 · 테란2(온누리유통) 루나온 공구제안팀 드림\n• 담당자 : 이화식 / 남대현 (010-2807-0174 / 010-4527-8781 / 070-8858-5230)\n• 회신 이메일 : akrrntn1@gmail.com`;
     }
 
     function getDefaultSixthSettlementTemplate(displayName) {
       return `안녕하세요, ${displayName}님!\n루나온 공구제안팀입니다. 이번 루나온 그래핀 발열이불 공동구매를 정성껏 진행해 주셔서 진심으로 감사드립니다! 😊\n\n[6차 공동구매 마감 최종 정산 및 샘플비 무상 환급 절차]를 안내드립니다.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 💰 1. 공동구매 최종 정산 금액 산정 및 샘플비 환급\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n• 1개당 셀러 정산금 : 슈퍼싱글(SS) / 퀸(Q) 모두 판매 1개당 17,000원 (스마트스토어 결제수수료 본사 전액 부담)\n• 샘플비 무상 환급 : 샘플 포함 총 5개 이상 판매 달성 시, 최초 결제하신 샘플 1개 금액(SS 32,000원 / Q 42,000원)을 정산금에 전액 합산하여 환급해 드립니다!\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 📋 2. 정산 지급일 및 서류 회신 안내 (공구 마감 1주일 후 전액 입금)\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n• 사업자 셀러님 (세금계산서 발행 시 개당 17,000원 전액 지급) :\n  - 정산 받으실 사업자 통장 계좌번호 및 사업자등록증 사본을 회신해 주세요.\n• 개인 셀러님 (3.3% 원천징수 공제 후 개당 16,439원 실지급) :\n  - 정산 받으실 본인 명의 은행/계좌번호, 성함, 주민등록번호(원천징수 신고용)를 회신해 주세요.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 🔥 3. 한파 시즌 2차(앵콜) 공동구매 우선 지원\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n• 미처 구매하지 못한 팔로워분들의 앵콜 요청이 있을 경우, 원하시는 일정에 언제든 2차 앵콜 공구 오픈을 최우선 지원해 드립니다!\n\n고생 많으셨으며, 회신 주시는 대로 빠르게 정산 도와드리겠습니다. 감사합니다!\n\n(주)테란 · 테란2(온누리유통) 루나온 공구제안팀 드림\n• 담당자 : 이화식 / 남대현 (010-2807-0174 / 010-4527-8781 / 070-8858-5230)\n• 회신 이메일 : akrrntn1@gmail.com`;
+    }
+
+    function getThreeDayReminderTemplate(displayName) {
+      return `안녕하세요, ${displayName}님!\n루나온 공구제안팀입니다. 날씨가 부쩍 추워졌는데 따뜻한 한 주 보내고 계신지요? 😊\n\n지난번 문의 주셔서 보내드린 [루나온 그래핀 50% 자가발열 이불 공동구매 세부 조건 및 샘플 안내 메일]이 혹시 스팸함으로 분류되거나 바쁘신 일정 중에 누락되었을까 염려되어 가볍게 안부차 다시 안내 말씀 드립니다!\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 💡 혹시 샘플 선결제나 일정 때문에 고민 중이신가요?\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n1. [샘플 포함 딱 5개만 판매하셔도 샘플비 100% 전액 무상 환급!]\n   • 최초 샘플 1개는 셀러 원가(SS 32,000원 / Q 42,000원 무료배송)로 발송되지만, 공구 진행 시 샘플 포함 5개만 판매하셔도 정산 시 샘플 비용을 100% 전액 환급(무상 지원)해 드립니다.\n2. [샘플 없이도 본사 GIF·15초 홍보영상 소스로 즉시 공구 오픈 가능!]\n   • 별도 샘플 촬영 없이 본사가 제작한 고화질 GIF 상세페이지와 15초 릴스/쇼츠 영상만으로 가볍게 테스트 공구를 진행하고 싶으신 경우, 샘플 결제 없이도 바로 [${displayName}님 전용 스마트스토어 비노출 구매 링크]를 생성해 드립니다.\n3. [판매 1개당 17,000원 정산 (수수료 본사 전액 부담 + 본사 CS·당일출고 전담)]\n   • 팔로워분들은 공구 최저가(SS 49,000원 / Q 59,000원 무료배송)로 구매하시고, ${displayName}님께는 1개당 17,000원을 정산해 드립니다.\n\n■ 🎬 홍보용 GIF 상세페이지 & 15초 CF 영상 미리보기\n• 상세페이지 (GIF 버전) : https://always-nam.github.io/lunacool-website/lunaon-detail-v9/\n• 홍보 영상 (15초 CF) : https://always-nam.github.io/lunacool-website/lunaon-cf-v8/\n\n이번 시즌 일정이 여의치 않으시다면 전혀 부담 갖지 마시고 편하게 말씀해 주셔도 괜찮습니다! 😊\n진행을 원하시거나 조율이 필요하신 부분이 있다면 본 메일로 가볍게 회신 부탁드립니다. 감사합니다!\n\n(주)테란 · 테란2(온누리유통) 루나온 공구제안팀 드림\n• 담당자 : 이화식 / 남대현 (010-2807-0174 / 010-4527-8781 / 070-8858-5230)\n• 회신 이메일 : akrrntn1@gmail.com`;
+    }
+
+    function fillThreeDayReminderTemplate(id, displayName, prefix = '') {
+      const el = document.getElementById(prefix + 'replyBody_' + id);
+      const subjEl = document.getElementById(prefix + 'replySubj_' + id);
+      if (!el) return;
+      el.value = getThreeDayReminderTemplate(displayName);
+      if (subjEl) {
+        subjEl.value = `Re: [루나온 그래핀 발열이불] ${displayName}님, 지난번 안내드린 공동구매 조건 관련 가볍게 안부 및 추가 안내드립니다 😊`;
+      }
+      el.focus();
+      showToast(`⏰ [${displayName}]님 3일 경과 안부·리마인드 메일 초안이 입력되었습니다!`);
+    }
+
+    function openThreeDayReminderBox(id, displayName) {
+      const box = document.getElementById('inlineReplyBox_' + id);
+      if (box) box.style.display = 'block';
+      fillThreeDayReminderTemplate(id, displayName, '');
+    }
+
+    async function sendBulk3DayReminders() {
+      const targets = allSellers.filter(s => isSellerFollowup3D(s) && s.email && s.email.includes('@'));
+      if (targets.length === 0) {
+        alert('현재 3일 이상 경과한 미회신 리마인드 대상 셀러가 없습니다.');
+        return;
+      }
+      if (!confirm(`2차 답변 발송 후 3일 이상 추가 답장이 없는 셀러 총 ${targets.length}명에게\n정중한 [3일 경과 안부 & 리마인드 안내 메일]을 일괄 발송하시겠습니까?`)) return;
+
+      showToast(`⏰ 총 ${targets.length}명에게 3일 경과 안부 리마인드 메일 발송 시작...`);
+      let sentCnt = 0;
+      const nowStr = getKstNowStr();
+      for (const s of targets) {
+        const nm = (s.display_name || s.seller_id).split('(')[0].trim();
+        const subject = `Re: [루나온 그래핀 발열이불] ${nm}님, 지난번 안내드린 공동구매 조건 관련 가볍게 안부 및 추가 안내드립니다 😊`;
+        const body = getThreeDayReminderTemplate(nm);
+        try {
+          const res = await smartApiFetch('/api/send_custom_reply', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+              id: s.id,
+              to_email: s.email,
+              subject,
+              body,
+              attach_proposal: false,
+              reply_round: 2,
+              next_stage: s.stage
+            })
+          });
+          const data = await res.json();
+          if (data.ok && data.sent > 0) {
+            sentCnt += 1;
+            await updateSeller(s.id, {
+              followup_3d_sent_at: nowStr,
+              memo: `[3일경과 안부메일 발송완료 ${nowStr}] ` + (s.memo || '')
+            });
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      }
+      showToast(`✅ 총 ${sentCnt}명에게 3일 경과 안부·리마인드 메일 발송이 완료되었습니다!`);
+      updateCounts();
+      renderTable();
     }
 
     function fillFourthFifthTemplate(id, displayName, prefix = '') {
@@ -1945,17 +2045,26 @@
       const safeName = (s.display_name || s.seller_id).split('(')[0].trim();
       const nowStr = getKstNowStr();
       const nextStage = makeConfirmed ? '5_공구확정' : '4_직원오픈채팅이관';
+      const autoSch = makeConfirmed ? extractScheduleFromReplyJS(s) : {};
       const patch = {
         stage: nextStage,
         is_confirmed: Boolean(makeConfirmed),
         confirmed_at: makeConfirmed ? nowStr : '',
-        ...(makeConfirmed ? { is_closed: false } : {})
+        ...(makeConfirmed ? {
+          is_closed: false,
+          schedule_start: s.schedule_start || autoSch.schedule_start || '',
+          schedule_end: s.schedule_end || autoSch.schedule_end || '',
+          sample_size: s.sample_size || autoSch.sample_size || ''
+        } : {})
       };
+      showToast(makeConfirmed ? `🎉 [${safeName}] 공구 확정 & 달력 일정 자동기입 & 스마트스토어 전용 결제창 생성 중...` : `[${safeName}] 상태 변경 중...`);
       await updateSeller(id, patch);
+      await loadData();
+      const updated = allSellers.find(x => x.id === id) || s;
       const totalConfirmed = allSellers.filter(x => !isSellerClosed(x) && (x.stage === '5_공구확정' || x.stage === '6_6차정산및재진행' || Boolean(x.is_confirmed))).length;
       showToast(makeConfirmed
-        ? `🎉 [${safeName}]님이 최종 공구 확정 처리되었습니다! (현재 총 ${totalConfirmed}명 공구 확정!)`
-        : `[${safeName}]님의 공구 확정 상태가 4차 상담 단계로 변경되었습니다. (현재 총 ${totalConfirmed}명 확정)`
+        ? `🎉 [${safeName}] 최종 공구 확정 완료! (달력: ${updated.schedule_start || '일정기입'} / 전용결제창 자동생성 / 총 ${totalConfirmed}명 확정)`
+        : `[${safeName}]님의 공구 확정 상태가 4차 상담 단계로 변경되었습니다.`
       );
     }
 
@@ -1977,10 +2086,13 @@
       fillGoniThirdDraft(id, displayName, '');
     }
 
-    function getTrackingEmailTemplate(displayName, trackingNum, sampleSize) {
+    function getTrackingEmailTemplate(displayName, trackingNum, sampleSize, gongguLink = '') {
       const trk = (trackingNum || '').trim() || '[송장번호 입력]';
       const sz = (sampleSize || '').trim() ? ` (${sampleSize})` : '';
-      return `안녕하세요, ${displayName}님!\n루나온 공구제안팀입니다. 😊\n\n요청하신 '루나온 그래핀 50% 자가발열 이불'${sz} 실제품(샘플)이 파주 본사 물류센터에서 정상 출고되어 송장번호를 안내드립니다.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 📦 [루나온 그래핀 발열이불] 실제품(샘플) 출고 및 송장 안내\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n• 택배사 : CJ대한통운\n• 운송장번호 : ${trk}\n• 배송조회 링크 : https://trace.cjlogistics.com/next/tracking.html?wblNo=${trk.replace(/[^0-9]/g, '')}\n• 출고 제품 : 루나온 그래핀 50% 자가발열 이불 (차콜 & 연그레이 양면 투톤)${sz}\n\n■ 🎬 공동구매 홍보용 고화질 GIF 상세페이지 & 15초 영상 링크\n• 상세페이지 (GIF 버전) : https://always-nam.github.io/lunacool-website/lunaon-detail-v9/\n• 홍보 영상 (15초 CF) : https://always-nam.github.io/lunacool-website/lunaon-cf-v8/\n\n■ 💡 안내사항\n• 제품 수령 후 직접 덮어보시며 가벼운 무게감과 빠른 자가발열 보온력을 편하게 테스트해 보시기 바랍니다.\n• 공구 오픈 일정에 맞추어 셀러님 전용 '네이버 스마트스토어 비노출 구매 링크'를 세팅해 전달드리며, 샘플 포함 5개 이상 판매 시 본 샘플 1개 비용은 정산 시 전액 무상(환급) 처리됩니다.\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n제품 수령 후 궁금하신 점이나 오픈 일정 조율이 필요하시면 언제든 본 메일(akrrntn1@gmail.com) 또는 담당자 연락처로 말씀해 주세요.\n감사합니다!\n\n(주)테란 · 테란2(온누리유통) 루나온 공구제안팀 드림\n• 담당자 : 이화식 / 남대현 (010-2807-0174 / 010-4527-8781 / 070-8858-5230)\n• 회신 이메일 : akrrntn1@gmail.com`;
+      const linkBlock = gongguLink
+        ? `\n■ 🔗 ${displayName}님 전용 스마트스토어 비노출 결제 링크 (세팅 완료)\n• 전용 구매 링크 : ${gongguLink}\n  (팔로워분들이 공구 최저가 SS 49,000원 / Q 59,000원 무료배송으로 결제하실 수 있는 전용 페이지입니다!)\n`
+        : '';
+      return `안녕하세요, ${displayName}님!\n루나온 공구제안팀입니다. 😊\n\n요청하신 '루나온 그래핀 50% 자가발열 이불'${sz} 실제품(샘플)이 파주 본사 물류센터에서 정상 출고되어 송장번호를 안내드립니다.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 📦 [루나온 그래핀 발열이불] 실제품(샘플) 출고 및 송장 안내\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n• 택배사 : CJ대한통운\n• 운송장번호 : ${trk}\n• 배송조회 링크 : https://trace.cjlogistics.com/next/tracking.html?wblNo=${trk.replace(/[^0-9]/g, '')}\n• 출고 제품 : 루나온 그래핀 50% 자가발열 이불 (차콜 & 연그레이 양면 투톤)${sz}\n${linkBlock}\n■ 🎬 공동구매 홍보용 고화질 GIF 상세페이지 & 15초 영상 링크\n• 상세페이지 (GIF 버전) : https://always-nam.github.io/lunacool-website/lunaon-detail-v9/\n• 홍보 영상 (15초 CF) : https://always-nam.github.io/lunacool-website/lunaon-cf-v8/\n\n■ 💡 안내사항\n• 제품 수령 후 직접 덮어보시며 가벼운 무게감과 빠른 자가발열 보온력을 편하게 테스트해 보시기 바랍니다.\n• 공구 오픈 일정에 맞추어 셀러님 전용 '네이버 스마트스토어 비노출 구매 링크'를 통해 판매가 진행되며, 샘플 포함 5개 이상 판매 시 본 샘플 1개 비용은 정산 시 전액 무상(환급) 처리됩니다.\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n제품 수령 후 궁금하신 점이나 오픈 일정 조율이 필요하시면 언제든 본 메일(akrrntn1@gmail.com) 또는 담당자 연락처로 말씀해 주세요.\n감사합니다!\n\n(주)테란 · 테란2(온누리유통) 루나온 공구제안팀 드림\n• 담당자 : 이화식 / 남대현 (010-2807-0174 / 010-4527-8781 / 070-8858-5230)\n• 회신 이메일 : akrrntn1@gmail.com`;
     }
 
     function fillTrackingTemplate(id, displayName, inputId, prefix = '') {
@@ -1989,7 +2101,7 @@
       if (!el) return;
       const s = allSellers.find(x => x.id === id) || {};
       const trkVal = (document.getElementById(inputId)?.value || s.tracking_number || '').trim();
-      el.value = getTrackingEmailTemplate(displayName, trkVal, s.sample_size || '');
+      el.value = getTrackingEmailTemplate(displayName, trkVal, s.sample_size || '', s.gonggu_link || '');
       if (subjEl) {
         subjEl.value = `[루나온 그래핀 발열이불] ${displayName}님 실제품(샘플) CJ대한통운 출고 및 송장번호(${trkVal || '출고완료'}) 안내드립니다.`;
       }
@@ -2523,7 +2635,7 @@
       }
       const s = allSellers.find(x => x.id === id) || {};
       const subject = `[루나온 그래핀 발열이불] ${displayName}님 실제품(샘플) CJ대한통운 출고 및 송장번호(${trkVal}) 안내드립니다.`;
-      const body = getTrackingEmailTemplate(displayName, trkVal, s.sample_size || '');
+      const body = getTrackingEmailTemplate(displayName, trkVal, s.sample_size || '', s.gonggu_link || '');
 
       if (!confirm(`[${displayName} (${toEmail})] 님께 실제품 출고 표시와 함께\nCJ대한통운 송장번호 [${trkVal}] 안내 메일을 즉시 발송하시겠습니까?`)) return;
 
@@ -2596,22 +2708,30 @@
     function renderBulkTrackingTable() {
       const box = document.getElementById('bulkTrackingTableBox');
       if (!box) return;
-      const targets = allSellers.filter(s => ['4_직원오픈채팅이관', '5_공구확정', '3_3차재진행조율'].includes(s.stage) || Boolean(s.sample_shipped || s.tracking_number));
+      const targets = allSellers.filter(s => !isSellerClosed(s) && (['5_공구확정', '4_직원오픈채팅이관', '3_3차재진행조율'].includes(s.stage) || Boolean(s.is_confirmed || s.deposit_confirmed || s.sample_shipped || s.tracking_number)));
       targets.sort((a, b) => {
+        const aConf = (a.stage === '5_공구확정' || a.is_confirmed || a.deposit_confirmed) ? 0 : 1;
+        const bConf = (b.stage === '5_공구확정' || b.is_confirmed || b.deposit_confirmed) ? 0 : 1;
+        if (aConf !== bConf) return aConf - bConf;
         const aSh = (a.sample_shipped || a.tracking_number) ? 0 : 1;
         const bSh = (b.sample_shipped || b.tracking_number) ? 0 : 1;
         if (aSh !== bSh) return aSh - bSh;
-        const ord = { '4_직원오픈채팅이관': 0, '5_공구확정': 1, '3_3차재진행조율': 2 };
+        const ord = { '5_공구확정': 0, '4_직원오픈채팅이관': 1, '3_3차재진행조율': 2 };
         return (ord[a.stage] ?? 9) - (ord[b.stage] ?? 9);
       });
 
       box.innerHTML = targets.map(s => {
         const nm = (s.display_name || s.seller_id).replace(/'/g, "");
         const shipped = Boolean(s.sample_shipped || s.tracking_number);
+        const isConf = (s.stage === '5_공구확정' || s.is_confirmed || s.deposit_confirmed);
+        const depBadge = s.depositor_name ? `<span style="font-size:10px;background:#047857;color:#fff;padding:2px 6px;border-radius:4px;font-weight:800;">💰 입금자: ${s.depositor_name}${s.deposit_amount ? ` (${Number(s.deposit_amount).toLocaleString()}원)` : ''}</span>` : '';
+        const confBadge = isConf ? `<span style="font-size:10px;background:#dcfce7;color:#166534;padding:2px 6px;border-radius:4px;font-weight:900;border:1px solid #16a34a;">🎉 공구확정</span>` : '';
         return `
-          <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;background:${shipped ? '#fffbeb' : '#ffffff'};border:1px solid ${shipped ? '#f59e0b' : '#e2e8f0'};border-radius:6px;margin-bottom:4px;font-size:12px;flex-wrap:wrap;">
-            <input type="checkbox" class="bulk-trk-chk" data-id="${s.id}" ${shipped ? 'checked' : ''} />
+          <div style="display:flex;align-items:center;gap:6px;padding:7px 8px;background:${isConf ? '#ecfdf5' : (shipped ? '#fffbeb' : '#ffffff')};border:1.5px solid ${isConf ? '#10b981' : (shipped ? '#f59e0b' : '#e2e8f0')};border-radius:6px;margin-bottom:4px;font-size:12px;flex-wrap:wrap;">
+            <input type="checkbox" class="bulk-trk-chk" data-id="${s.id}" ${(shipped || isConf) ? 'checked' : ''} />
             <span style="min-width:170px;font-weight:800;color:#0f172a;">${nm}</span>
+            ${confBadge}
+            ${depBadge}
             <span style="min-width:155px;color:#475569;font-size:11px;">${s.email || ''} ${s.phone ? `(${s.phone})` : ''}</span>
             <span style="font-size:11px;color:#6d28d9;font-weight:700;min-width:90px;">${s.sample_size || ''}</span>
             <input type="text" class="inline-input bulk-trk-input" data-id="${s.id}" id="bulkTrkRow_${s.id}" style="flex:1;min-width:150px;padding:4px 8px;font-size:12px;font-weight:800;border-color:#f59e0b;" placeholder="CJ대한통운 송장번호 입력" value="${(s.tracking_number || '').replace(/"/g, '&quot;')}" oninput="if(this.value.trim()) this.parentElement.querySelector('.bulk-trk-chk').checked=true;" />
@@ -2619,6 +2739,184 @@
           </div>
         `;
       }).join('');
+    }
+
+    function onUploadTrackingFile(inputEl) {
+      const file = inputEl?.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const text = String(evt.target?.result || '');
+        const pasteEl = document.getElementById('bulkTrackingPasteInput');
+        if (pasteEl) {
+          pasteEl.value = text;
+          applyPastedTrackingToRows();
+        }
+      };
+      reader.readAsText(file, 'UTF-8');
+    }
+
+    function openBankDepositModal() {
+      document.getElementById('bankDepositModal').style.display = 'flex';
+      parseAndMatchBankDeposits();
+    }
+
+    function closeBankDepositModal() {
+      document.getElementById('bankDepositModal').style.display = 'none';
+    }
+
+    let lastMatchedDeposits = [];
+
+    function parseAndMatchBankDeposits() {
+      const raw = (document.getElementById('bankDepositPasteInput')?.value || '').trim();
+      const box = document.getElementById('bankDepositMatchResultBox');
+      if (!box) return;
+      if (!raw) {
+        box.innerHTML = '<div style="font-size:12px;color:#64748b;padding:8px;">위에 은행 입금내역을 붙여넣거나 입력하시면 셀러와 1:1 자동 매칭 결과가 여기에 표시됩니다.</div>';
+        return;
+      }
+
+      const ignoreNames = ['스마트스토어정', '11st', '쿠팡', '지마켓', '옥션', '롯데온', '카카오', '네이버페이', '토스', '이자'];
+      const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      const parsedRows = [];
+
+      lines.forEach(line => {
+        if (line.includes('거래일시') && line.includes('거래내용')) return;
+        // 날짜 추출
+        const dateMatch = line.match(/(202[0-9]-[0-9]{2}-[0-9]{2}(?:\s+[0-9]{2}:[0-9]{2}(?::[0-9]{2})?)?)/);
+        const txDate = dateMatch ? dateMatch[1] : getKstNowStr();
+        // 금액 추출 (32,000 / 42,000 / 32000 / 42000 등)
+        const amtMatches = Array.from(line.matchAll(/\b([1-9][0-9]{0,2}(?:,[0-9]{3})+|[1-9][0-9]{4,5})\b/g)).map(m => Number(m[1].replace(/,/g, '')));
+        let depositAmt = amtMatches.find(a => a === 32000 || a === 42000 || a === 64000 || a === 74000 || a === 84000) || amtMatches[0] || 0;
+        // 한글 이름 (2~5글자) 추출 (은행명 제외)
+        const bankKeywords = ['기업은행', '신한은행', '국민은행', '케이뱅크', '카카오뱅크', '우리은행', '하나은행', '농협은행', '농협', '토스뱅크', '새마을금고', '우체국', '대구은행', '부산은행', '경남은행', '광주은행', '수협'];
+        let bankName = bankKeywords.find(b => line.includes(b)) || '';
+        let cleaned = line;
+        bankKeywords.forEach(b => { cleaned = cleaned.replace(new RegExp(b, 'g'), ' '); });
+        const korTokens = Array.from(cleaned.matchAll(/([가-힣]{2,6})/g)).map(m => m[1]);
+        const depositor = korTokens.find(t => !ignoreNames.some(ig => t.toLowerCase().includes(ig))) || '';
+        if (!depositor) return;
+        if (ignoreNames.some(ig => depositor.toLowerCase().includes(ig))) return;
+        parsedRows.push({ txDate, depositAmt, depositor, bankName, rawLine: line });
+      });
+
+      lastMatchedDeposits = parsedRows.map((row, idx) => {
+        // 셀러 DB에서 입금자명 매칭 (depositor_name, reply_body, memo, display_name, phone 등 전수 스캔)
+        const candidates = allSellers.filter(s => {
+          if (!s.replied && !s.deposit_confirmed && s.stage === '1_1차발송완료') return false;
+          const hay = `${s.depositor_name || ''} ${s.display_name || ''} ${s.seller_id || ''} ${s.reply_body || ''} ${s.reply_history || ''} ${s.memo || ''}`;
+          return hay.includes(row.depositor);
+        });
+        return {
+          ...row,
+          idx,
+          candidates,
+          selectedSellerId: candidates[0]?.id || ''
+        };
+      });
+
+      if (lastMatchedDeposits.length === 0) {
+        box.innerHTML = '<div style="font-size:12px;color:#dc2626;font-weight:800;padding:8px;">⚠️ 입금자 성함(한글 2~5자)이 포함된 입금 내역을 찾지 못했습니다. (예: 이춘희 32,000)</div>';
+        return;
+      }
+
+      box.innerHTML = lastMatchedDeposits.map((item, i) => {
+        const matchedSeller = allSellers.find(x => x.id === item.selectedSellerId);
+        const autoSch = matchedSeller ? extractScheduleFromReplyJS(matchedSeller) : {};
+        const schText = matchedSeller ? (matchedSeller.schedule_start || autoSch.schedule_start || '미기입') : '-';
+        const sizeText = matchedSeller ? (matchedSeller.sample_size || autoSch.sample_size || (item.depositAmt === 42000 ? '퀸(Q)' : '슈퍼싱글(SS)')) : '';
+        const alreadyConfirmed = matchedSeller && (matchedSeller.stage === '5_공구확정' || matchedSeller.is_confirmed);
+
+        // 후보 선택 드롭다운 (동명이인이나 입금자명 미기재 셀러 대비 전체 회신 셀러 선택 가능)
+        const repliedPool = allSellers.filter(s => s.replied || s.is_confirmed || s.deposit_confirmed);
+        const optionsHtml = repliedPool.map(s => {
+          const isCand = item.candidates.some(c => c.id === s.id);
+          const label = `${isCand ? '🎯 [자동매칭] ' : ''}${s.display_name || s.seller_id} (${s.email || ''}) ${s.schedule_start ? `[일정:${s.schedule_start}]` : ''}`;
+          return `<option value="${s.id}" ${s.id === item.selectedSellerId ? 'selected' : ''}>${label}</option>`;
+        }).join('');
+
+        return `
+          <div style="padding:10px 12px;border-radius:8px;border:2px solid ${matchedSeller ? '#10b981' : '#f59e0b'};background:${matchedSeller ? '#f0fdf4' : '#fffbeb'};margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <span style="background:#047857;color:#fff;font-size:12px;font-weight:900;padding:3px 9px;border-radius:6px;">💰 입금자: ${item.depositor}</span>
+              <span style="font-size:12px;font-weight:900;color:#065f46;">${item.depositAmt ? item.depositAmt.toLocaleString() + '원' : ''}</span>
+              ${item.bankName ? `<span style="font-size:11px;color:#475569;font-weight:700;">(${item.bankName} · ${item.txDate})</span>` : ''}
+              <span style="font-size:12px;font-weight:900;color:#0f172a;">➔ 매칭 셀러:</span>
+              <select id="depSelect_${i}" onchange="lastMatchedDeposits[${i}].selectedSellerId=this.value;" style="padding:5px 8px;border-radius:6px;border:1.5px solid #059669;font-size:12px;font-weight:800;color:#0f172a;background:#fff;max-width:340px;">
+                <option value="">-- 입금한 셀러 직접 선택 (동명이인/차명입금 시) --</option>
+                ${optionsHtml}
+              </select>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              ${matchedSeller ? `<span style="font-size:11px;color:#0369a1;font-weight:800;background:#e0f2fe;padding:3px 8px;border-radius:5px;">📅 희망오픈일: ${schText} / 🛏️ ${sizeText}</span>` : ''}
+              ${alreadyConfirmed && matchedSeller?.gonggu_link ? `<a href="${matchedSeller.gonggu_link}" target="_blank" style="font-size:11px;background:#fef3c7;color:#92400e;padding:3px 8px;border-radius:5px;font-weight:900;text-decoration:none;border:1px solid #f59e0b;">🛒 전용결제창 열기</a>` : ''}
+              <button class="btn" style="background:#059669;color:#fff;font-size:11px;padding:5px 10px;font-weight:900;" onclick="confirmSingleDepositSeller(${i})">${alreadyConfirmed ? '✅ 확정·결제창 재동기화' : '🎉 즉시 공구확정 & 달력·결제창 생성'}</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function confirmSingleDepositSeller(idx) {
+      const item = lastMatchedDeposits[idx];
+      if (!item) return;
+      const selEl = document.getElementById('depSelect_' + idx);
+      const sellerId = selEl ? selEl.value : item.selectedSellerId;
+      if (!sellerId) {
+        alert('매칭할 셀러를 드롭다운에서 선택해주세요!');
+        return;
+      }
+      const s = allSellers.find(x => x.id === sellerId);
+      if (!s) return;
+      const autoSch = extractScheduleFromReplyJS(s);
+      const defaultSize = item.depositAmt === 42000 ? '퀸(Q)' : (item.depositAmt === 32000 ? '슈퍼싱글(SS)' : '');
+      const nowStr = getKstNowStr();
+      showToast(`🎉 [${s.display_name}] 입금 확인 + 공구 확정 + 달력 기입 + 스마트스토어 전용 결제창 자동 생성 중...`);
+      await updateSeller(sellerId, {
+        stage: '5_공구확정',
+        is_confirmed: true,
+        is_closed: false,
+        confirmed_at: s.confirmed_at || nowStr,
+        deposit_confirmed: true,
+        depositor_name: item.depositor,
+        deposit_amount: item.depositAmt || s.deposit_amount || 32000,
+        deposit_bank: item.bankName || s.deposit_bank || '',
+        deposit_date: item.txDate || nowStr,
+        schedule_start: s.schedule_start || autoSch.schedule_start || '',
+        schedule_end: s.schedule_end || autoSch.schedule_end || '',
+        sample_size: s.sample_size || autoSch.sample_size || defaultSize,
+        memo: `[입금확인완료: ${item.depositor} ${item.depositAmt ? item.depositAmt.toLocaleString() + '원' : ''} (${item.bankName} ${item.txDate})] ` + (s.memo || '')
+      });
+      await loadData();
+      parseAndMatchBankDeposits();
+      showToast(`✅ [${s.display_name}] 공구 확정 & 달력 자동 기입 & 스마트스토어 전용 결제창 생성 완료!`);
+    }
+
+    async function confirmAllMatchedDeposits() {
+      if (lastMatchedDeposits.length === 0) {
+        parseAndMatchBankDeposits();
+      }
+      let targets = [];
+      lastMatchedDeposits.forEach((item, i) => {
+        const selEl = document.getElementById('depSelect_' + i);
+        const sid = selEl ? selEl.value : item.selectedSellerId;
+        if (sid) targets.push({ idx: i, sid, item });
+      });
+      if (targets.length === 0) {
+        alert('매칭된 셀러가 없습니다. 입금내역을 먼저 매칭해주세요.');
+        return;
+      }
+      const btn = document.getElementById('btnConfirmAllDeposits');
+      if (btn) { btn.disabled = true; btn.textContent = '⏳ 공구확정 & 달력기입 & 스마트스토어 결제창 생성 중...'; }
+      try {
+        for (const t of targets) {
+          await confirmSingleDepositSeller(t.idx);
+        }
+        alert(`🎉 총 ${targets.length}명의 입금 셀러가 [최종 공구 확정] 처리되었으며,\n희망 오픈일이 [📅 공구 오픈 달력]에 자동 기입되고 [스마트스토어 전용 비노출 결제창]이 자동 생성되었습니다!`);
+        closeBankDepositModal();
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = '🎉 매칭된 입금 셀러 일괄 [공구 확정 + 달력 기입 + 스마트스토어 결제창 자동생성]'; }
+      }
     }
 
     function applyPastedTrackingToRows() {
@@ -2694,7 +2992,7 @@
           id: s.id,
           to_email: s.email,
           subject: `[루나온 그래핀 발열이불] ${safeName}님 실제품(샘플) CJ대한통운 출고 및 송장번호(${trk}) 안내드립니다.`,
-          body: getTrackingEmailTemplate(safeName, trk, s.sample_size || ''),
+          body: getTrackingEmailTemplate(safeName, trk, s.sample_size || '', s.gonggu_link || ''),
           attach_proposal: false,
           reply_round: 3,
           sample_shipped: true,

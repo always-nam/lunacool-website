@@ -742,7 +742,7 @@
   <div class="toast" id="toastBox"></div>
 
   <script>
-    window.LUNAON_REMOTE_API_URL = "https://myself-tablets-pill-tree.trycloudflare.com";
+    window.LUNAON_REMOTE_API_URL = "https://labs-equality-replaced-bradford.trycloudflare.com";
     let allSellers = [];
     let currentChannel = 'ALL';
     let currentStage = 'NEEDS_REPLY'; // 기본 화면: 지금 회신이 필요한 사람만 바로 표시!
@@ -2721,7 +2721,10 @@
           }
         }
       } catch (e) {
-        alert('발송 서버(http://localhost:8090) 연결을 확인해주세요: ' + e);
+        if (confirm('⚡ 현재 원격 발송 터널이 재연결 중이거나 PC가 절전 상태입니다.\n\n[확인]을 누르시면 기다릴 필요 없이 [Gmail 웹 발송창]이 바로 열려 즉시 메일을 보내실 수 있습니다!')) {
+          await openGmailWebCompose(id, toEmail, prefix);
+          await markReplySentManual(id, toEmail);
+        }
       } finally {
         if (btnEl) {
           btnEl.disabled = false;

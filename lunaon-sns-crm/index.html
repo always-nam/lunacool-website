@@ -296,6 +296,7 @@
       </div>
       <div class="header-right">
         <a href="./finder.html" target="_blank" class="btn" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;font-weight:900;box-shadow:0 2px 8px rgba(79,70,229,0.35);">🔍 인스타 공구 찾기 (34만명 카테고리별 탐색 웹 열기)</a>
+        <button class="btn" id="btnTerranApiHeader" style="background:#047857;color:#fff;font-weight:900;box-shadow:0 2px 6px rgba(4,120,87,0.3);" onclick="openTerranApiModal()">🔑 테란유통 스마트스토어 API & 판매집계</button>
         <button class="btn btn-outline" id="btnManageUsers" style="display:none;border-color:#7c3aed;color:#6d28d9;background:#faf5ff;" onclick="openAuthAdminModal()">🔐 직원 계정 승인·관리</button>
         <a href="https://always-nam.github.io/lunacool-website/lunaon-detail-v9/" target="_blank" class="btn btn-outline">🖼️ 상세페이지 열기</a>
         <a href="https://always-nam.github.io/lunacool-website/lunaon-cf-v8/" target="_blank" class="btn btn-outline">🎬 15초 CF영상</a>
@@ -537,6 +538,26 @@
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <button class="btn" id="btnBulk3DayReminder" style="background:#ea580c;color:#ffffff;font-weight:900;padding:9px 16px;font-size:13px;box-shadow:0 2px 6px rgba(234,88,12,0.35);" onclick="sendBulk3DayReminders()">🚀 아래 3일 경과 미회신 셀러 전체에게 [안부·리마인드 메일] 일괄 자동발송</button>
         </div>
+      </div>
+
+      <!-- 📊 공구 확정 셀러별 [테란유통 스마트스토어 실시간 판매수량 · 매출 · 정산금 · 샘플비 환급] 종합 상황판 -->
+      <div id="confirmedSalesSummaryBanner" style="background:linear-gradient(90deg,#ecfdf5 0%,#f0fdf4 100%);border:2px solid #10b981;border-radius:12px;padding:14px 18px;margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px;">
+          <div>
+            <div style="font-size:15px;font-weight:900;color:#065f46;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <span>🛒 (주)테란(테란유통) 스마트스토어 비노출 공구 전용 결제창 & 셀러별 실시간 판매·정산 현황판</span>
+              <span id="terranApiStatusBadge" style="font-size:11px;background:#fef3c7;color:#92400e;border:1px solid #f59e0b;padding:2px 8px;border-radius:6px;font-weight:900;">🔑 테란유통 API 키 등록 대기중 (온누리유통 분리 완료)</span>
+            </div>
+            <div style="font-size:12px;color:#047857;margin-top:3px;">
+              온누리유통과 사업자·통장이 분리되어 있으므로 <strong>[테란유통 스마트스토어]</strong>에 셀러별 비노출 결제창(SS 49,000원 / Q 59,000원 무료배송)이 생성되며, 팔로워가 결제할 때마다 셀러별 판매수량과 정산금(개당 17,000원 + 5개 달성 시 샘플비 100% 환급)이 실시간 집계됩니다.
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn" style="background:#047857;color:#fff;font-weight:900;padding:8px 14px;font-size:12px;" onclick="openTerranApiModal()">🔑 테란유통 API 키 등록 / 비노출 결제창 일괄생성</button>
+            <button class="btn btn-outline" id="btnSyncSalesNow" style="background:#fff;color:#065f46;border:1.5px solid #059669;font-weight:900;padding:8px 14px;font-size:12px;" onclick="syncGongguSalesNow()">🔄 실시간 판매수량·매출 새로고침</button>
+          </div>
+        </div>
+        <div id="confirmedSalesCardsRow" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:10px;"></div>
       </div>
 
       <div id="replyCardsGrid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(520px, 1fr));gap:14px;"></div>
@@ -791,6 +812,41 @@
           <button class="btn btn-outline" onclick="closeBulkTrackingModal()">닫기</button>
           <button class="btn btn-primary" id="btnBulkSendTracking" style="background:#d97706;font-weight:800;" onclick="sendBulkTrackingEmails()">🚀 송장 저장 & 송장번호 안내메일 일괄 발송</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔑 (주)테란(테란유통) 스마트스토어 커머스 API 등록 & 셀러별 비노출 결제창/실시간 판매집계 모달 -->
+  <div class="modal-overlay" id="terranApiModal">
+    <div class="modal" style="width:680px;max-width:95vw;">
+      <h3 style="color:#065f46;font-size:17px;">🔑 (주)테란(테란유통) 네이버 스마트스토어 API 설정 & 비노출 결제창 자동생성</h3>
+      <p style="font-size:12px;color:#334155;line-height:1.55;margin-bottom:12px;">
+        • 온누리유통(onnuribiz)과 사업자 및 입금 통장이 분리되어 있으므로, <strong>오직 (주)테란(테란유통) 스마트스토어 커머스 API 키</strong>만 사용합니다.<br>
+        • 아래에 테란유통의 <strong>애플리케이션 ID (Client ID)</strong>와 <strong>애플리케이션 시크릿 (Client Secret)</strong>을 입력하고 저장하시면:<br>
+        &nbsp;&nbsp;① 현재 공구 확정된 3명(<strong>소은맘 · 하니하둥 · LOVE&YOU</strong>)과 앞으로 확정되는 모든 셀러의 <strong>테란유통 스마트스토어 비노출 결제 페이지(SS 49,000원 / Q 59,000원 무료배송)</strong>가 자동 생성됩니다.<br>
+        &nbsp;&nbsp;② 셀러별 전용 상품번호로 들어오는 <strong>실시간 판매수량(SS/Q), 매출액, 셀러 정산금(개당 17,000원), 5개 달성 시 샘플비 100% 환급 여부</strong>가 대시보드에 자동 표시됩니다.
+      </p>
+      <div style="background:#f0fdf4;border:1.5px solid #10b981;border-radius:10px;padding:14px;margin-bottom:14px;">
+        <div style="margin-bottom:10px;">
+          <label style="display:block;font-size:12px;font-weight:900;color:#065f46;margin-bottom:4px;">1. 테란유통 커머스 API 애플리케이션 ID (Client ID)</label>
+          <input type="text" id="inpTerranClientId" class="inline-input" style="width:100%;padding:8px 10px;font-size:13px;font-weight:800;background:#fff;border:1.5px solid #059669;" placeholder="예: 7AbCdEfGhIjKlMnOpQrStU (네이버 커머스API센터 > 내 애플리케이션)" />
+        </div>
+        <div style="margin-bottom:10px;">
+          <label style="display:block;font-size:12px;font-weight:900;color:#065f46;margin-bottom:4px;">2. 테란유통 커머스 API 애플리케이션 시크릿 (Client Secret)</label>
+          <input type="text" id="inpTerranClientSecret" class="inline-input" style="width:100%;padding:8px 10px;font-size:13px;font-weight:800;background:#fff;border:1.5px solid #059669;" placeholder="예: $2a$04$xxxxxxxxxxxxxxxxxxxxxx" />
+        </div>
+        <div>
+          <label style="display:block;font-size:12px;font-weight:800;color:#047857;margin-bottom:4px;">3. 테란유통 스마트스토어 영문 URL ID (선택 — 비워두시면 API가 자동 조회합니다)</label>
+          <input type="text" id="inpTerranStoreUrlId" class="inline-input" style="width:100%;padding:7px 10px;font-size:12px;background:#fff;border:1px solid #6ee7b7;" placeholder="예: smartstore.naver.com/뒤에 붙는 스토어 영문 아이디" />
+        </div>
+      </div>
+      <div style="background:#fffbeb;border:1px solid #f59e0b;border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:#92400e;line-height:1.5;">
+        💡 <strong>참고 (마스터 권한으로 테란유통 커머스 API 발급 시 IP 등록 안내)</strong>:<br>
+        네이버 커머스API센터(apicenter.commerce.naver.com)에서 테란유통 계정으로 로그인 ➔ <strong>[계정관리 > API 호출 IP 관리]</strong>에 현재 PC 공인 IP를 등록하신 뒤 발급된 Client ID와 Secret을 넣어주시면 1초 만에 연동됩니다!
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;">
+        <button class="btn btn-outline" onclick="closeTerranApiModal()">닫기</button>
+        <button class="btn" id="btnSaveTerranApi" style="background:#047857;color:#fff;font-weight:900;padding:8px 16px;" onclick="saveTerranSmartstoreApi()">🚀 테란유통 API 저장 & 공구확정 셀러 비노출 결제창 일괄 자동생성</button>
       </div>
     </div>
   </div>
@@ -1271,6 +1327,7 @@
       const box = document.getElementById('replyHighlightBox');
       const grid = document.getElementById('replyCardsGrid');
       const badge = document.getElementById('replySummaryBadge');
+      renderConfirmedSalesSummaryBoard();
       if (box && grid) {
         box.style.display = 'block';
         badge.textContent = `현재 목록 ${repliedSellers.length}명 (🚨회신필요 ${cntNeedsReply} / ⏳대기중 ${cntWaitingSeller} / 🎉공구확정 ${confirmed} / ⏹️상담종료 ${cntClosed})`;
@@ -1381,14 +1438,60 @@
                     ${s.schedule_start ? `<span style="color:#6d28d9;font-weight:800;">· 📅 공구 오픈일: ${s.schedule_start} ~ ${s.schedule_end || s.schedule_start}</span>` : ''}
                   </div>
                   ${s.gonggu_link ? `
-                    <div style="margin-top:6px;background:#ecfdf5;border:1px solid #10b981;border-radius:8px;padding:6px 10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;font-size:12px;">
-                      <span style="font-weight:900;color:#065f46;">🔗 전용 스마트스토어 비노출 결제페이지: <a href="${s.gonggu_link}" target="_blank" class="link-a" style="color:#047857;">${s.gonggu_link}</a></span>
+                    <div style="margin-top:6px;background:#ecfdf5;border:1.5px solid #10b981;border-radius:8px;padding:7px 10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;font-size:12px;">
+                      <span style="font-weight:900;color:#065f46;">🔗 (주)테란 전용 스마트스토어 비노출 결제창: <a href="${s.gonggu_link}" target="_blank" class="link-a" style="color:#047857;">${s.gonggu_link}</a></span>
                       <div style="display:flex;gap:5px;">
                         <button class="btn btn-outline" style="padding:3px 8px;font-size:11px;background:#fff;color:#047857;border-color:#10b981;font-weight:800;" onclick="copyTextWithToast('${s.gonggu_link}', '셀러 전용 스마트스토어 결제링크 복사 완료!')">📋 링크 복사</button>
                         <a href="${s.gonggu_link}" target="_blank" class="btn btn-green" style="padding:3px 8px;font-size:11px;">↗ 결제창 열기</a>
                       </div>
                     </div>
-                  ` : ''}
+                  ` : (isConfirmedSeller ? `
+                    <div style="margin-top:6px;background:#fffbeb;border:1.5px dashed #f59e0b;border-radius:8px;padding:7px 10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;font-size:12px;">
+                      <span style="font-weight:900;color:#92400e;">⏳ (주)테란 스마트스토어 전용 비노출 결제창 생성 대기중 (테란유통 API 키 입력 즉시 자동생성)</span>
+                      <button class="btn" style="padding:3px 9px;font-size:11px;background:#047857;color:#fff;font-weight:800;" onclick="openTerranApiModal()">🔑 테란유통 API 키 등록 & 즉시 생성</button>
+                    </div>
+                  ` : '')}
+                  ${isConfirmedSeller ? (() => {
+                    const soldSS = Number(s.sold_ss_count || 0);
+                    const soldQ = Number(s.sold_q_count || 0);
+                    const soldTot = Number(s.sold_total_count || (soldSS + soldQ));
+                    const salesAmt = Number(s.sales_total_amount || (soldSS * 49000 + soldQ * 59000));
+                    const commAmt = soldTot * 17000;
+                    const depAmt = Number(s.deposit_amount || ((s.sample_size || '').includes('퀸') ? 42000 : 32000));
+                    const refundOk = soldTot >= 5;
+                    const totalPayout = commAmt + (refundOk ? depAmt : 0);
+                    return `
+                      <div style="margin-top:6px;background:#f0fdf4;border:2px solid #059669;border-radius:9px;padding:8px 12px;font-size:12px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:6px;">
+                          <strong style="color:#065f46;font-size:13px;">📊 [${safeName}] 실시간 판매수량 · 매출 · 정산 집계 ${s.sales_synced_at ? `<span style="font-size:11px;color:#047857;font-weight:700;">(업데이트: ${s.sales_synced_at})</span>` : ''}</strong>
+                          <div style="display:flex;gap:5px;">
+                            <button class="btn btn-outline" style="padding:2px 8px;font-size:11px;background:#fff;color:#065f46;border-color:#10b981;font-weight:800;" onclick="syncGongguSalesNow()">🔄 실시간 주문 조회</button>
+                            <button class="btn btn-outline" style="padding:2px 8px;font-size:11px;background:#fff;color:#475569;border-color:#cbd5e1;font-weight:700;" onclick="openManualSalesPrompt('${s.id}', '${safeName}')">✏️ 판매량 수동입력</button>
+                          </div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(115px, 1fr));gap:6px;">
+                          <div style="background:#ffffff;border:1px solid #a7f3d0;border-radius:6px;padding:6px 8px;">
+                            <div style="font-size:11px;color:#475569;font-weight:700;">🛒 누적 판매수량</div>
+                            <div style="font-size:15px;font-weight:900;color:#0f172a;margin-top:2px;">총 ${soldTot}개 <span style="font-size:11px;color:#047857;">(SS ${soldSS} / Q ${soldQ})</span></div>
+                          </div>
+                          <div style="background:#ffffff;border:1px solid #a7f3d0;border-radius:6px;padding:6px 8px;">
+                            <div style="font-size:11px;color:#475569;font-weight:700;">💰 누적 판매매출</div>
+                            <div style="font-size:15px;font-weight:900;color:#1d4ed8;margin-top:2px;">${salesAmt.toLocaleString()}원</div>
+                          </div>
+                          <div style="background:#ffffff;border:1px solid #a7f3d0;border-radius:6px;padding:6px 8px;">
+                            <div style="font-size:11px;color:#475569;font-weight:700;">💎 셀러 정산금(1.7만×${soldTot})</div>
+                            <div style="font-size:15px;font-weight:900;color:#7c3aed;margin-top:2px;">${commAmt.toLocaleString()}원</div>
+                          </div>
+                          <div style="background:${refundOk ? '#dcfce7' : '#fffbeb'};border:1px solid ${refundOk ? '#16a34a' : '#f59e0b'};border-radius:6px;padding:6px 8px;">
+                            <div style="font-size:11px;color:${refundOk ? '#166534' : '#92400e'};font-weight:800;">🎁 5개 달성 샘플비 환급</div>
+                            <div style="font-size:12px;font-weight:900;color:${refundOk ? '#15803d' : '#b45309'};margin-top:2px;">
+                              ${refundOk ? `🎉 달성! (+${depAmt.toLocaleString()}원 환급 / 총지급 ${totalPayout.toLocaleString()}원)` : `진행중 ${soldTot}/5개 (${5 - soldTot}개 남음)`}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    `;
+                  })() : ''}
 
                   <!-- 2. 중앙 핵심 메시지 박스 (글자 크기 14px, 넉넉한 여백, 흰색 바탕으로 눈의 피로도 제로!) -->
                   <div style="margin-top:10px;background:#ffffff;border:2px solid ${turnState === 'NEEDS_OUR_REPLY' ? '#fca5a5' : '#e2e8f0'};border-left:5px solid ${turnState === 'NEEDS_OUR_REPLY' ? '#dc2626' : '#2563eb'};border-radius:10px;padding:12px 14px;">
@@ -2763,6 +2866,187 @@
 
     function closeBankDepositModal() {
       document.getElementById('bankDepositModal').style.display = 'none';
+    }
+
+    function renderConfirmedSalesSummaryBoard() {
+      const rowEl = document.getElementById('confirmedSalesCardsRow');
+      const badgeEl = document.getElementById('terranApiStatusBadge');
+      if (!rowEl) return;
+
+      const confirmedSellers = allSellers.filter(s => !isSellerClosed(s) && (s.stage === '5_공구확정' || s.stage === '6_6차정산및재진행' || Boolean(s.is_confirmed || s.deposit_confirmed)));
+      let totSS = 0, totQ = 0, totQty = 0, totSales = 0, totComm = 0, totPayout = 0, refundAchievedCnt = 0;
+
+      confirmedSellers.forEach(s => {
+        const ss = Number(s.sold_ss_count || 0);
+        const q = Number(s.sold_q_count || 0);
+        const qty = Number(s.sold_total_count || (ss + q));
+        const sales = Number(s.sales_total_amount || (ss * 49000 + q * 59000));
+        const comm = qty * 17000;
+        const depAmt = Number(s.deposit_amount || ((s.sample_size || '').includes('퀸') ? 42000 : 32000));
+        const refOk = qty >= 5;
+        totSS += ss;
+        totQ += q;
+        totQty += qty;
+        totSales += sales;
+        totComm += comm;
+        totPayout += comm + (refOk ? depAmt : 0);
+        if (refOk) refundAchievedCnt += 1;
+      });
+
+      const meta = (window.LUNAON_CRM_INITIAL_DATA && window.LUNAON_CRM_INITIAL_DATA.meta) || {};
+      if (badgeEl) {
+        if (meta.terran_api_ready) {
+          badgeEl.style.background = '#dcfce7';
+          badgeEl.style.color = '#166534';
+          badgeEl.style.borderColor = '#16a34a';
+          badgeEl.textContent = `✅ 테란유통 스마트스토어 API 연동됨 (${meta.terran_store_url_id || '실시간 동기화'})`;
+        } else {
+          badgeEl.style.background = '#fef3c7';
+          badgeEl.style.color = '#92400e';
+          badgeEl.style.borderColor = '#f59e0b';
+          badgeEl.textContent = `🔑 테란유통 API 키 등록 대기중 (온누리유통 분리 완료)`;
+        }
+      }
+
+      const sellerMiniList = confirmedSellers.map(s => {
+        const nm = (s.display_name || s.seller_id).split('(')[0].trim();
+        const ss = Number(s.sold_ss_count || 0);
+        const q = Number(s.sold_q_count || 0);
+        const qty = Number(s.sold_total_count || (ss + q));
+        const sales = Number(s.sales_total_amount || (ss * 49000 + q * 59000));
+        return `<span style="display:inline-flex;align-items:center;gap:4px;background:#fff;border:1px solid #6ee7b7;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:800;color:#065f46;">🎉 ${nm}: <strong style="color:#0f172a;">${qty}개</strong> (${sales.toLocaleString()}원)</span>`;
+      }).join(' ');
+
+      rowEl.innerHTML = `
+        <div style="background:#ffffff;border:1.5px solid #6ee7b7;border-radius:9px;padding:10px 12px;">
+          <div style="font-size:11px;font-weight:800;color:#047857;">① 공구 확정 셀러 (입금·일정 확정)</div>
+          <div style="font-size:20px;font-weight:900;color:#065f46;margin:3px 0;">총 ${confirmedSellers.length}명 확정</div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">${sellerMiniList || '<span style="font-size:11px;color:#64748b;">확정 셀러 없음</span>'}</div>
+        </div>
+        <div style="background:#ffffff;border:1.5px solid #6ee7b7;border-radius:9px;padding:10px 12px;">
+          <div style="font-size:11px;font-weight:800;color:#047857;">② 공구 누적 판매수량 (SS / Q)</div>
+          <div style="font-size:20px;font-weight:900;color:#0f172a;margin:3px 0;">총 ${totQty.toLocaleString()}개 <span style="font-size:12px;color:#059669;">(SS ${totSS} / Q ${totQ})</span></div>
+          <div style="font-size:11px;color:#475569;font-weight:700;">5개 달성(샘플비 무상환급): <strong>${refundAchievedCnt}명</strong> 달성</div>
+        </div>
+        <div style="background:#ffffff;border:1.5px solid #6ee7b7;border-radius:9px;padding:10px 12px;">
+          <div style="font-size:11px;font-weight:800;color:#1e40af;">③ 공구 누적 판매 매출액</div>
+          <div style="font-size:20px;font-weight:900;color:#1d4ed8;margin:3px 0;">${totSales.toLocaleString()}원</div>
+          <div style="font-size:11px;color:#475569;font-weight:700;">SS 49,000원 / Q 59,000원 무료배송 기준</div>
+        </div>
+        <div style="background:#ffffff;border:1.5px solid #6ee7b7;border-radius:9px;padding:10px 12px;">
+          <div style="font-size:11px;font-weight:800;color:#6d28d9;">④ 셀러 정산예정금 & 본사 순매출</div>
+          <div style="font-size:20px;font-weight:900;color:#7c3aed;margin:3px 0;">정산 ${totPayout.toLocaleString()}원</div>
+          <div style="font-size:11px;color:#065f46;font-weight:800;">본사 실수령 매출: <strong>${Math.max(0, totSales - totPayout).toLocaleString()}원</strong></div>
+        </div>
+      `;
+    }
+
+    async function openTerranApiModal() {
+      document.getElementById('terranApiModal').style.display = 'flex';
+      try {
+        const res = await smartApiFetch('/api/terran_smartstore_status');
+        const data = await res.json();
+        if (data.ok && data.store_url_id) {
+          const el = document.getElementById('inpTerranStoreUrlId');
+          if (el && !el.value) el.value = data.store_url_id;
+        }
+      } catch (e) {}
+    }
+
+    function closeTerranApiModal() {
+      document.getElementById('terranApiModal').style.display = 'none';
+    }
+
+    async function saveTerranSmartstoreApi() {
+      const client_id = (document.getElementById('inpTerranClientId')?.value || '').trim();
+      const client_secret = (document.getElementById('inpTerranClientSecret')?.value || '').trim();
+      const store_url_id = (document.getElementById('inpTerranStoreUrlId')?.value || '').trim();
+      if (!client_id || !client_secret) {
+        alert('테란유통 스마트스토어 커머스 API의 애플리케이션 ID(Client ID)와 시크릿(Client Secret)을 입력해주세요.');
+        return;
+      }
+      const btn = document.getElementById('btnSaveTerranApi');
+      if (btn) { btn.disabled = true; btn.textContent = '⏳ 테란유통 API 인증 및 비노출 결제창 자동생성 중...'; }
+      try {
+        const res = await smartApiFetch('/api/save_terran_smartstore_api', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ client_id, client_secret, store_url_id })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          if (window.LUNAON_CRM_INITIAL_DATA && window.LUNAON_CRM_INITIAL_DATA.meta) {
+            window.LUNAON_CRM_INITIAL_DATA.meta.terran_api_ready = true;
+            window.LUNAON_CRM_INITIAL_DATA.meta.terran_store_url_id = data.store_url_id || store_url_id;
+          }
+          const createdList = (data.sync_result?.created_pages || []).map(p => `• ${p[0]}: ${p[1]}`).join('\n');
+          alert(`🎉 테란유통 스마트스토어 API 연동 및 비노출 결제창 생성 완료!\n\n${createdList || '모든 확정 셀러의 결제창 및 실시간 주문 연동이 완료되었습니다.'}`);
+          closeTerranApiModal();
+          await loadData();
+        } else {
+          alert('테란유통 API 연동 오류:\n' + (data.msg || '입력하신 키 또는 커머스API센터 IP 허용 설정을 확인해주세요.'));
+        }
+      } catch (e) {
+        alert('서버 통신 오류: ' + e);
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = '🚀 테란유통 API 저장 & 공구확정 셀러 비노출 결제창 일괄 자동생성'; }
+      }
+    }
+
+    async function syncGongguSalesNow() {
+      const btn = document.getElementById('btnSyncSalesNow');
+      if (btn) { btn.disabled = true; btn.textContent = '⏳ 실시간 주문 조회 중...'; }
+      try {
+        const res = await smartApiFetch('/api/sync_gonggu_sales', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({})
+        });
+        const data = await res.json();
+        if (data.ok) {
+          await loadData();
+          showToast(`✅ 테란유통 스마트스토어 실시간 주문 동기화 완료! (누적 판매 ${data.total_qty_all || 0}개 / 매출 ${(data.total_sales_all || 0).toLocaleString()}원)`);
+        } else if (data.reason === 'TERRAN_API_KEY_MISSING') {
+          alert('아직 테란유통 스마트스토어 API 키가 등록되지 않았습니다.\n열리는 창에서 테란유통 API 키를 등록해 주시면 실시간 판매수량이 자동 집계됩니다!');
+          openTerranApiModal();
+        } else {
+          alert('판매수량 조회 안내: ' + (data.msg || '오류 발생'));
+        }
+      } catch (e) {
+        alert('서버 통신 오류: ' + e);
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = '🔄 실시간 판매수량·매출 새로고침'; }
+      }
+    }
+
+    async function openManualSalesPrompt(id, displayName) {
+      const s = allSellers.find(x => x.id === id);
+      if (!s) return;
+      const curSS = Number(s.sold_ss_count || 0);
+      const curQ = Number(s.sold_q_count || 0);
+      const inpSS = prompt(`[${displayName}] 슈퍼싱글(SS, 공구가 49,000원) 판매 수량을 입력하세요:`, String(curSS));
+      if (inpSS === null) return;
+      const inpQ = prompt(`[${displayName}] 퀸(Q, 공구가 59,000원) 판매 수량을 입력하세요:`, String(curQ));
+      if (inpQ === null) return;
+      const ss = Math.max(0, parseInt(inpSS, 10) || 0);
+      const q = Math.max(0, parseInt(inpQ, 10) || 0);
+      const tot = ss + q;
+      const sales = ss * 49000 + q * 59000;
+      const comm = tot * 17000;
+      const depAmt = Number(s.deposit_amount || ((s.sample_size || '').includes('퀸') ? 42000 : 32000));
+      const refOk = tot >= 5;
+      const nowStr = getKstNowStr();
+      await updateSeller(id, {
+        sold_ss_count: ss,
+        sold_q_count: q,
+        sold_total_count: tot,
+        sales_total_amount: sales,
+        seller_commission_amount: comm,
+        sample_refund_achieved: refOk,
+        total_payout_to_seller: comm + (refOk ? depAmt : 0),
+        sales_synced_at: nowStr
+      });
+      showToast(`📊 [${displayName}] 판매실적(SS ${ss}개 / Q ${q}개 / 총 ${tot}개 / 매출 ${sales.toLocaleString()}원) 저장 완료!`);
     }
 
     let lastMatchedDeposits = [];

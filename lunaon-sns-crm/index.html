@@ -324,10 +324,13 @@
           <div style="font-size:22px;font-weight:900;color:#0f172a;margin:4px 0;">249,047명</div>
           <div style="font-size:11px;color:#64748b;font-weight:700;">고유 268,274명 (원본 343,767행)</div>
         </div>
-        <div style="background:#eff6ff;border:1px solid #93c5fd;border-radius:10px;padding:12px 14px;">
-          <div style="font-size:12px;font-weight:800;color:#1e40af;">② 누적 메일 발송 (노출 진척률)</div>
-          <div style="font-size:22px;font-weight:900;color:#1d4ed8;margin:4px 0;" id="fnl_TotalAttempt">1,695명 <span style="font-size:13px;color:#2563eb;">(0.68%)</span></div>
-          <div style="font-size:11px;color:#1e3a8a;font-weight:700;" id="fnl_AttemptSub">24.9만 명 중 1,695명에게 발송 시도</div>
+        <div style="background:#eff6ff;border:1.5px solid #60a5fa;border-radius:10px;padding:12px 14px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:4px;">
+            <div style="font-size:12px;font-weight:900;color:#1e40af;">② 오늘 발송 & 누적 메일 발송</div>
+            <span id="fnl_TodaySentBadge" style="background:#2563eb;color:#ffffff;font-size:11px;font-weight:900;padding:2px 8px;border-radius:99px;">🔥 오늘 100건 발송</span>
+          </div>
+          <div style="font-size:21px;font-weight:900;color:#1d4ed8;margin:4px 0;" id="fnl_TotalAttempt">누적 2,074명 <span style="font-size:12px;color:#2563eb;">(0.83%)</span></div>
+          <div style="font-size:11px;color:#1e3a8a;font-weight:800;" id="fnl_AttemptSub">📅 2026-11-13 ~ 현재 누적 (오늘 100건)</div>
         </div>
         <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:12px 14px;">
           <div style="font-size:12px;font-weight:800;color:#166534;">③ 실제 메일 도달률 (반송 제외)</div>
@@ -1203,10 +1206,16 @@
       const replyRatePct = totalDelivered > 0 ? ((totalRepliedEver / totalDelivered) * 100).toFixed(2) : '0.00';
       const positiveRatePct = totalRepliedEver > 0 ? ((activeTotalCnt / totalRepliedEver) * 100).toFixed(1) : '0.0';
 
+      const todaySentCnt = Number(metaStats.today_sent_count) || 0;
+      const startDateStr = metaStats.campaign_start_date || '2026-11-13';
+      const todayDateStr = metaStats.today_date || getKstNowStr().slice(0, 10);
+      const elTodayBadge = document.getElementById('fnl_TodaySentBadge');
+      if (elTodayBadge) elTodayBadge.textContent = `🔥 오늘(${todayDateStr.slice(5)}) ${todaySentCnt.toLocaleString()}건 발송`;
+
       const elAtt = document.getElementById('fnl_TotalAttempt');
-      if (elAtt) elAtt.innerHTML = `${totalAttempted.toLocaleString()}명 <span style="font-size:13px;color:#2563eb;">(${reachOfMasterPct}%)</span>`;
+      if (elAtt) elAtt.innerHTML = `누적 ${totalAttempted.toLocaleString()}명 <span style="font-size:12px;color:#2563eb;">(${reachOfMasterPct}%)</span>`;
       const elAttSub = document.getElementById('fnl_AttemptSub');
-      if (elAttSub) elAttSub.textContent = `24.9만 명 중 ${totalAttempted.toLocaleString()}명에게 메일 노출 완료`;
+      if (elAttSub) elAttSub.textContent = `📅 ${startDateStr} ~ ${todayDateStr} 누적 (오늘 ${todaySentCnt.toLocaleString()}건 발송)`;
 
       const elDel = document.getElementById('fnl_Delivered');
       if (elDel) elDel.innerHTML = `${totalDelivered.toLocaleString()}명 <span style="font-size:13px;background:#dcfce7;padding:2px 6px;border-radius:6px;">도달률 ${deliveryRatePct}%</span>`;

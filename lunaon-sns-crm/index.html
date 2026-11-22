@@ -2235,9 +2235,7 @@
     }
 
     function openThreeDayReminderBox(id, displayName) {
-      const box = document.getElementById('inlineReplyBox_' + id);
-      if (box) box.style.display = 'block';
-      fillThreeDayReminderTemplate(id, displayName, '');
+      toggleInlineReply(id);
     }
 
     async function sendBulk3DayReminders() {
@@ -2353,9 +2351,7 @@
     }
 
     function openThirdReplyWithDraft(id, displayName) {
-      const box = document.getElementById('inlineReplyBox_' + id);
-      if (box) box.style.display = 'block';
-      fillGoniThirdDraft(id, displayName, '');
+      toggleInlineReply(id);
     }
 
     function getTrackingEmailTemplate(displayName, trackingNum, sampleSize, gongguLink = '') {
@@ -2861,15 +2857,34 @@
       const isOpening = (box.style.display === 'none' || !box.style.display);
       box.style.display = isOpening ? 'block' : 'none';
       if (isOpening) {
+        const subjEl = document.getElementById('replySubj_' + id);
         const bodyEl = document.getElementById('replyBody_' + id);
-        if (bodyEl) bodyEl.focus();
+        const thoughtBoxEl = document.getElementById('goniThoughtBox_' + id);
+        if (subjEl) subjEl.value = '';
+        if (bodyEl) {
+          bodyEl.value = '';
+          bodyEl.focus();
+        }
+        if (thoughtBoxEl) thoughtBoxEl.style.display = 'none';
       }
     }
 
     function toggleVipInlineReply(id) {
       const box = document.getElementById('vipInlineReplyBox_' + id);
       if (!box) return;
-      box.style.display = (box.style.display === 'none' || !box.style.display) ? 'block' : 'none';
+      const isOpening = (box.style.display === 'none' || !box.style.display);
+      box.style.display = isOpening ? 'block' : 'none';
+      if (isOpening) {
+        const subjEl = document.getElementById('vip_replySubj_' + id);
+        const bodyEl = document.getElementById('vip_replyBody_' + id);
+        const thoughtBoxEl = document.getElementById('vip_goniThoughtBox_' + id);
+        if (subjEl) subjEl.value = '';
+        if (bodyEl) {
+          bodyEl.value = '';
+          bodyEl.focus();
+        }
+        if (thoughtBoxEl) thoughtBoxEl.style.display = 'none';
+      }
     }
 
     function toggleFirstMail(id) {

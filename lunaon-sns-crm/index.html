@@ -1646,6 +1646,9 @@
                       <button class="btn btn-primary" style="padding:4px 10px;font-size:12px;background:#7c3aed;" onclick="${isStage345 ? `fillGoniThirdDraft('${s.id}', '${safeName}')` : `fillGoniCustomDraft('${s.id}', '${safeName}')`}">
                         🤖 고니(AI) 맞춤답변 자동작성
                       </button>
+                      <button class="btn" style="padding:4px 10px;font-size:12px;font-weight:900;background:#4c1d95;color:#fff;border:1.5px solid #a855f7;" onclick="runLiveGoniAnalyze('${s.id}', '${safeName}', '', true)">
+                        🧠 고니의 생각 즉각 AI 독해
+                      </button>
                       <button class="btn btn-outline" style="padding:3px 8px;font-size:11px;background:#fff7ed;color:#c2410c;border-color:#f97316;font-weight:800;" onclick="fillThreeDayReminderTemplate('${s.id}', '${safeName}')">🔔 3일 경과 안부·리마인드</button>
                       <button class="btn btn-outline" style="padding:3px 8px;font-size:11px;background:#f0fdf4;color:#15803d;border-color:#86efac;font-weight:700;" onclick="fillThirdTemplate('${s.id}', '${safeName}')">🎉 3차 신청접수</button>
                       <button class="btn btn-outline" style="padding:3px 8px;font-size:11px;background:#fffbeb;color:#b45309;border-color:#fcd34d;font-weight:800;" onclick="fillTrackingTemplate('${s.id}', '${safeName}', 'cardTrkNum_${s.id}')">📦 송장안내</button>
@@ -2413,29 +2416,56 @@
       showToast(`📦 [${displayName}]님 실제품 출고·송장번호 안내메일 초안이 입력되었습니다!`);
     }
 
-    function fillGoniThirdDraft(id, displayName, prefix = '') {
+    async function runLiveGoniAnalyze(id, displayName, prefix = '', forceRefresh = false) {
       const el = document.getElementById(prefix + 'replyBody_' + id);
       const subjEl = document.getElementById(prefix + 'replySubj_' + id);
       const thoughtEl = document.getElementById(prefix + 'goniThoughtText_' + id);
       const thoughtBoxEl = document.getElementById(prefix + 'goniThoughtBox_' + id);
       if (!el) return;
+
       const s = allSellers.find(x => x.id === id) || {};
       const ctx = generateContextualGoniReplyJS(s, displayName);
+      if (thoughtBoxEl) thoughtBoxEl.style.display = 'block';
+      if (thoughtEl) thoughtEl.innerText = `⏳ 고니(AI)가 [${displayName}]님의 최신 답장 문장을 한 줄씩 실시간 정밀 독해 중입니다...`;
+
+      try {
+        const res = await smartApiFetch('/api/goni_live_analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, force_refresh: Boolean(forceRefresh) })
+        });
+        if (res && res.ok) {
+          const data = await res.json();
+          if (data && data.ok) {
+            s.goni_thought = data.thought;
+            s.goni_subject = data.subject;
+            s.goni_body = data.body;
+            s.goni_analyzed_reply_at = data.analyzed_at || s.reply_at;
+            el.value = data.body;
+            if (subjEl) subjEl.value = data.subject;
+            if (thoughtEl) thoughtEl.innerText = data.thought || ctx.thought;
+            if (thoughtBoxEl) thoughtBoxEl.style.display = 'block';
+            el.focus();
+            showToast(`🧠 [${displayName}]님 답장 실시간 AI 문장단위 정밀독해 완료! (${data.engine || '울트라 고니'})`);
+            return;
+          }
+        }
+      } catch (e) {}
+
+      // 오프라인 폴백: 이미 DB에 저장된 울트라 고니 독해본 우선 사용
       const finalBody = (s.goni_analyzed_reply_at && s.goni_analyzed_reply_at === s.reply_at && s.goni_body) ? s.goni_body : ctx.body;
       const finalSubj = (s.goni_analyzed_reply_at && s.goni_analyzed_reply_at === s.reply_at && s.goni_subject) ? s.goni_subject : ctx.subj;
       const finalThought = (s.goni_analyzed_reply_at && s.goni_analyzed_reply_at === s.reply_at && s.goni_thought) ? s.goni_thought : ctx.thought;
       el.value = finalBody;
-      if (subjEl) {
-        subjEl.value = finalSubj;
-      }
-      if (thoughtEl && finalThought) {
-        thoughtEl.innerText = finalThought;
-      }
-      if (thoughtBoxEl) {
-        thoughtBoxEl.style.display = 'block';
-      }
+      if (subjEl) subjEl.value = finalSubj;
+      if (thoughtEl && finalThought) thoughtEl.innerText = finalThought;
+      if (thoughtBoxEl) thoughtBoxEl.style.display = 'block';
       el.focus();
-      showToast(`🧠 울트라 고니(AI)가 [${displayName}]님의 실제 답장 맥락을 직접 읽고 설계한 1:1 답변을 입력했습니다!`);
+      showToast(`🧠 울트라 고니(AI)가 [${displayName}]님의 실제 답장 맥락을 읽고 설계한 1:1 답변을 입력했습니다!`);
+    }
+
+    function fillGoniThirdDraft(id, displayName, prefix = '') {
+      runLiveGoniAnalyze(id, displayName, prefix, false);
     }
 
     function setCalendarYearMonth(y, m) {
@@ -2678,6 +2708,7 @@
                 <span style="font-size:11px;font-weight:800;color:#6d28d9;">📤 ${roundLabel} 답변/송장·정산 안내메일 받는사람: ${s.email || ''} (${safeName}님)</span>
                 <div style="display:flex;gap:4px;flex-wrap:wrap;">
                   <button class="btn btn-primary" style="padding:3px 9px;font-size:11px;background:#7c3aed;" onclick="fillGoniThirdDraft('${s.id}', '${safeName}', 'vip_')">🤖 고니(AI) ${roundLabel} 맞춤답변</button>
+                  <button class="btn" style="padding:3px 9px;font-size:11px;font-weight:900;background:#4c1d95;color:#fff;border:1px solid #a855f7;" onclick="runLiveGoniAnalyze('${s.id}', '${safeName}', 'vip_', true)">🧠 고니의 생각 즉각 AI 독해</button>
                   <button class="btn btn-outline" style="padding:2px 8px;font-size:10px;background:#f0fdf4;color:#15803d;border-color:#86efac;font-weight:700;" onclick="fillThirdTemplate('${s.id}', '${safeName}', 'vip_')">🎉 3차 신청접수 초안</button>
                   <button class="btn btn-outline" style="padding:2px 8px;font-size:10px;background:#fffbeb;color:#b45309;border-color:#fcd34d;font-weight:800;" onclick="fillTrackingTemplate('${s.id}', '${safeName}', 'vipTrkNum_${s.id}', 'vip_')">📦 송장번호 안내초안</button>
                   <button class="btn btn-outline" style="padding:2px 8px;font-size:10px;background:#eff6ff;color:#1d4ed8;border-color:#93c5fd;font-weight:700;" onclick="fillFourthFifthTemplate('${s.id}', '${safeName}', 'vip_')">🔗 4·5차 전용링크·오픈지원</button>
@@ -2818,22 +2849,7 @@
     }
 
     function fillGoniCustomDraft(id, displayName) {
-      const el = document.getElementById('replyBody_' + id);
-      const subjEl = document.getElementById('replySubj_' + id);
-      const thoughtEl = document.getElementById('goniThoughtText_' + id);
-      const thoughtBoxEl = document.getElementById('goniThoughtBox_' + id);
-      if (!el) return;
-      const s = allSellers.find(x => x.id === id) || {};
-      const ctx = generateContextualGoniReplyJS(s, displayName);
-      const finalBody = (s.goni_analyzed_reply_at && s.goni_analyzed_reply_at === s.reply_at && s.goni_body) ? s.goni_body : ctx.body;
-      const finalSubj = (s.goni_analyzed_reply_at && s.goni_analyzed_reply_at === s.reply_at && s.goni_subject) ? s.goni_subject : ctx.subj;
-      const finalThought = (s.goni_analyzed_reply_at && s.goni_analyzed_reply_at === s.reply_at && s.goni_thought) ? s.goni_thought : ctx.thought;
-      el.value = finalBody;
-      if (subjEl) subjEl.value = finalSubj;
-      if (thoughtEl && finalThought) thoughtEl.innerText = finalThought;
-      if (thoughtBoxEl) thoughtBoxEl.style.display = 'block';
-      el.focus();
-      showToast(`🧠 울트라 고니(AI)가 [${displayName}]님의 실제 답장 맥락을 직접 읽고 설계한 [고니 생각 + 1:1 맞춤답변]을 입력했습니다!`);
+      runLiveGoniAnalyze(id, displayName, '', false);
     }
 
     function getSecondReplyText(displayName) {

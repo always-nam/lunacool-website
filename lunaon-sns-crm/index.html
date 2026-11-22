@@ -295,6 +295,7 @@
         </span>
       </div>
       <div class="header-right">
+        <button class="btn" id="btnRunScheduleNowHeader" style="background:linear-gradient(135deg,#dc2626,#7c3aed);color:#fff;font-weight:900;box-shadow:0 3px 10px rgba(220,38,38,0.38);border:1.5px solid #fde047;" onclick="runGoniScheduleNow()">⚡ 스케줄 즉시 실행 (회신수집 & 고니AI 전수독해)</button>
         <a href="./finder.html" target="_blank" class="btn" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;font-weight:900;box-shadow:0 2px 8px rgba(79,70,229,0.35);">🔍 인스타 공구 찾기 (34만명 카테고리별 탐색 웹 열기)</a>
         <button class="btn" id="btnTerranApiHeader" style="background:#047857;color:#fff;font-weight:900;box-shadow:0 2px 6px rgba(4,120,87,0.3);" onclick="openTerranApiModal()">🔑 테란유통 스마트스토어 API & 판매집계</button>
         <button class="btn btn-outline" id="btnManageUsers" style="display:none;border-color:#7c3aed;color:#6d28d9;background:#faf5ff;" onclick="openAuthAdminModal()">🔐 직원 계정 승인·관리</button>
@@ -1657,9 +1658,6 @@
                       <button class="btn btn-primary" style="padding:4px 10px;font-size:12px;background:#7c3aed;" onclick="${isStage345 ? `fillGoniThirdDraft('${s.id}', '${safeName}')` : `fillGoniCustomDraft('${s.id}', '${safeName}')`}">
                         🤖 고니(AI) 맞춤답변 자동작성
                       </button>
-                      <button class="btn" style="padding:4px 10px;font-size:12px;font-weight:900;background:#4c1d95;color:#fff;border:1.5px solid #a855f7;" onclick="runLiveGoniAnalyze('${s.id}', '${safeName}', '', true)">
-                        🧠 고니의 생각 즉각 AI 독해
-                      </button>
                       <button class="btn btn-outline" style="padding:3px 8px;font-size:11px;background:#fff7ed;color:#c2410c;border-color:#f97316;font-weight:800;" onclick="fillThreeDayReminderTemplate('${s.id}', '${safeName}')">🔔 3일 경과 안부·리마인드</button>
                       <button class="btn btn-outline" style="padding:3px 8px;font-size:11px;background:#f0fdf4;color:#15803d;border-color:#86efac;font-weight:700;" onclick="fillThirdTemplate('${s.id}', '${safeName}')">🎉 3차 신청접수</button>
                       <button class="btn btn-outline" style="padding:3px 8px;font-size:11px;background:#fffbeb;color:#b45309;border-color:#fcd34d;font-weight:800;" onclick="fillTrackingTemplate('${s.id}', '${safeName}', 'cardTrkNum_${s.id}')">📦 송장안내</button>
@@ -2510,6 +2508,39 @@
       showToast(`📦 [${displayName}]님 실제품 출고·송장번호 안내메일 초안이 입력되었습니다!`);
     }
 
+    async function runGoniScheduleNow() {
+      const btn = document.getElementById('btnRunScheduleNowHeader');
+      const oldText = btn ? btn.innerText : '';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ 스케줄 즉시 실행 중 (회신수집 & 고니AI 독해)...';
+      }
+      showToast('⚡ 30분 스케줄을 즉시 실행합니다! (수신함 신규 회신 스캔 & 고니 AI 전수 문장 독해 중...)');
+      try {
+        const res = await smartApiFetch('/api/run_goni_schedule_now', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        if (res && res.ok) {
+          const data = await res.json();
+          if (data && data.ok) {
+            await loadData();
+            showToast(`✅ 스케줄 즉시 실행 완료! (신규 회신 ${data.new_replies || 0}건 수집 · 총 ${data.analyzed_count || 0}명 고니 AI 생각/답변 갱신)`);
+            return;
+          }
+        }
+        await checkGmailReplies();
+      } catch (e) {
+        alert('로컬 서버(8090) 연결을 확인해주세요: ' + e);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerText = oldText || '⚡ 스케줄 즉시 실행 (회신수집 & 고니AI 전수독해)';
+        }
+      }
+    }
+
     async function runLiveGoniAnalyze(id, displayName, prefix = '', forceRefresh = false) {
       const el = document.getElementById(prefix + 'replyBody_' + id);
       const subjEl = document.getElementById(prefix + 'replySubj_' + id);
@@ -2812,7 +2843,6 @@
                 <span style="font-size:11px;font-weight:800;color:#6d28d9;">📤 ${roundLabel} 답변/송장·정산 안내메일 받는사람: ${s.email || ''} (${safeName}님)</span>
                 <div style="display:flex;gap:4px;flex-wrap:wrap;">
                   <button class="btn btn-primary" style="padding:3px 9px;font-size:11px;background:#7c3aed;" onclick="fillGoniThirdDraft('${s.id}', '${safeName}', 'vip_')">🤖 고니(AI) ${roundLabel} 맞춤답변</button>
-                  <button class="btn" style="padding:3px 9px;font-size:11px;font-weight:900;background:#4c1d95;color:#fff;border:1px solid #a855f7;" onclick="runLiveGoniAnalyze('${s.id}', '${safeName}', 'vip_', true)">🧠 고니의 생각 즉각 AI 독해</button>
                   <button class="btn btn-outline" style="padding:2px 8px;font-size:10px;background:#f0fdf4;color:#15803d;border-color:#86efac;font-weight:700;" onclick="fillThirdTemplate('${s.id}', '${safeName}', 'vip_')">🎉 3차 신청접수 초안</button>
                   <button class="btn btn-outline" style="padding:2px 8px;font-size:10px;background:#fffbeb;color:#b45309;border-color:#fcd34d;font-weight:800;" onclick="fillTrackingTemplate('${s.id}', '${safeName}', 'vipTrkNum_${s.id}', 'vip_')">📦 송장번호 안내초안</button>
                   <button class="btn btn-outline" style="padding:2px 8px;font-size:10px;background:#eff6ff;color:#1d4ed8;border-color:#93c5fd;font-weight:700;" onclick="fillFourthFifthTemplate('${s.id}', '${safeName}', 'vip_')">🔗 4·5차 전용링크·오픈지원</button>

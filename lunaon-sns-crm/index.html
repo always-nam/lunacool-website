@@ -2349,20 +2349,13 @@
       return `안녕하세요, ${displayName}님!\n루나온 공구제안팀입니다. 이번 루나온 그래핀 발열이불 공동구매를 정성껏 진행해 주셔서 진심으로 감사드립니다! 😊\n\n[6차 공동구매 마감 최종 정산 및 샘플비 무상 환급 절차]를 안내드립니다.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 💰 1. 공동구매 최종 정산 금액 산정 및 샘플비 환급\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n• 1개당 셀러 정산금 : 슈퍼싱글(SS) / 퀸(Q) 모두 판매 1개당 17,000원 (스마트스토어 결제수수료 본사 전액 부담)\n• 샘플비 무상 환급 : 샘플 포함 총 5개 이상 판매 달성 시, 최초 결제하신 샘플 1개 금액(SS 32,000원 / Q 42,000원)을 정산금에 전액 합산하여 환급해 드립니다!\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 📋 2. 정산 지급일 및 서류 회신 안내 (공구 마감 1주일 후 전액 입금)\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n• 사업자 셀러님 (세금계산서 발행 시 개당 17,000원 전액 지급) :\n  - 정산 받으실 사업자 통장 계좌번호 및 사업자등록증 사본을 회신해 주세요.\n• 개인 셀러님 (3.3% 원천징수 공제 후 개당 16,439원 실지급) :\n  - 정산 받으실 본인 명의 은행/계좌번호, 성함, 주민등록번호(원천징수 신고용)를 회신해 주세요.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 🔥 3. 한파 시즌 2차(앵콜) 공동구매 우선 지원\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n• 미처 구매하지 못한 팔로워분들의 앵콜 요청이 있을 경우, 원하시는 일정에 언제든 2차 앵콜 공구 오픈을 최우선 지원해 드립니다!\n\n고생 많으셨으며, 회신 주시는 대로 빠르게 정산 도와드리겠습니다. 감사합니다!\n\n(주)테란 · 테란2(온누리유통) 루나온 공구제안팀 드림\n• 담당자 : 이화식 / 남대현 (010-2807-0174 / 010-4527-8781 / 070-8858-5230)\n• 회신 이메일 : akrrntn1@gmail.com`;
     }
 
-    function getThreeDayReminderTemplate(displayName) {
+    function getThreeDayReminderTemplate(displayName, s = {}) {
+      if (s && s.goni_reminder_body) return s.goni_reminder_body;
       return `안녕하세요, ${displayName}님!\n루나온 공구제안팀입니다. 날씨가 부쩍 추워졌는데 따뜻한 한 주 보내고 계신지요? 😊\n\n지난번 문의 주셔서 보내드린 [루나온 그래핀 50% 자가발열 이불 공동구매 세부 조건 및 샘플 안내 메일]이 혹시 스팸함으로 분류되거나 바쁘신 일정 중에 누락되었을까 염려되어 가볍게 안부차 다시 안내 말씀 드립니다!\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n■ 💡 혹시 샘플 선결제나 일정 때문에 고민 중이신가요?\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n1. [샘플 포함 딱 5개만 판매하셔도 샘플비 100% 전액 무상 환급!]\n   • 최초 샘플 1개는 셀러 원가(SS 32,000원 / Q 42,000원 무료배송)로 발송되지만, 공구 진행 시 샘플 포함 5개만 판매하셔도 정산 시 샘플 비용을 100% 전액 환급(무상 지원)해 드립니다.\n2. [샘플 없이도 본사 GIF·15초 홍보영상 소스로 즉시 공구 오픈 가능!]\n   • 별도 샘플 촬영 없이 본사가 제작한 고화질 GIF 상세페이지와 15초 릴스/쇼츠 영상만으로 가볍게 테스트 공구를 진행하고 싶으신 경우, 샘플 결제 없이도 바로 [${displayName}님 전용 스마트스토어 비노출 구매 링크]를 생성해 드립니다.\n3. [판매 1개당 17,000원 정산 (수수료 본사 전액 부담 + 본사 CS·당일출고 전담)]\n   • 팔로워분들은 공구 최저가(SS 49,000원 / Q 59,000원 무료배송)로 구매하시고, ${displayName}님께는 1개당 17,000원을 정산해 드립니다.\n\n■ 🎬 홍보용 GIF 상세페이지 & 15초 CF 영상 미리보기\n• 상세페이지 (GIF 버전) : https://always-nam.github.io/lunacool-website/lunaon-detail-v9/\n• 홍보 영상 (15초 CF) : https://always-nam.github.io/lunacool-website/lunaon-cf-v8/\n\n이번 시즌 일정이 여의치 않으시다면 전혀 부담 갖지 마시고 편하게 말씀해 주셔도 괜찮습니다! 😊\n진행을 원하시거나 조율이 필요하신 부분이 있다면 본 메일로 가볍게 회신 부탁드립니다. 감사합니다!\n\n(주)테란 · 테란2(온누리유통) 루나온 공구제안팀 드림\n• 담당자 : 이화식 / 남대현 (010-2807-0174 / 010-4527-8781 / 070-8858-5230)\n• 회신 이메일 : akrrntn1@gmail.com`;
     }
 
     function fillThreeDayReminderTemplate(id, displayName, prefix = '') {
-      const el = document.getElementById(prefix + 'replyBody_' + id);
-      const subjEl = document.getElementById(prefix + 'replySubj_' + id);
-      if (!el) return;
-      el.value = getThreeDayReminderTemplate(displayName);
-      if (subjEl) {
-        subjEl.value = `Re: [루나온 그래핀 발열이불] ${displayName}님, 지난번 안내드린 공동구매 조건 관련 가볍게 안부 및 추가 안내드립니다 😊`;
-      }
-      el.focus();
-      showToast(`⏰ [${displayName}]님 3일 경과 안부·리마인드 메일 초안이 입력되었습니다!`);
+      runLiveGoniAnalyze(id, displayName, prefix, false, 'reminder');
     }
 
     function openThreeDayReminderBox(id, displayName) {
@@ -2375,15 +2368,15 @@
         alert('현재 3일 이상 경과한 미회신 리마인드 대상 셀러가 없습니다.');
         return;
       }
-      if (!confirm(`2차 답변 발송 후 3일 이상 추가 답장이 없는 셀러 총 ${targets.length}명에게\n정중한 [3일 경과 안부 & 리마인드 안내 메일]을 일괄 발송하시겠습니까?`)) return;
+      if (!confirm(`2차 답변 발송 후 3일 이상 추가 답장이 없는 셀러 총 ${targets.length}명에게\n고니(AI)가 각 셀러의 지난번 질문에 맞춰 작성한 [1:1 맞춤형 3일 경과 안부 & 리마인드 메일]을 일괄 발송하시겠습니까?`)) return;
 
-      showToast(`⏰ 총 ${targets.length}명에게 3일 경과 안부 리마인드 메일 발송 시작...`);
+      showToast(`⏰ 총 ${targets.length}명에게 고니 1:1 맞춤형 3일 경과 리마인드 메일 발송 시작...`);
       let sentCnt = 0;
       const nowStr = getKstNowStr();
       for (const s of targets) {
         const nm = (s.display_name || s.seller_id).split('(')[0].trim();
-        const subject = `Re: [루나온 그래핀 발열이불] ${nm}님, 지난번 안내드린 공동구매 조건 관련 가볍게 안부 및 추가 안내드립니다 😊`;
-        const body = getThreeDayReminderTemplate(nm);
+        const subject = s.goni_reminder_subject || `Re: [루나온 그래핀 발열이불] ${nm}님, 지난번 안내드린 공동구매 조건 관련 가볍게 안부 및 추가 안내드립니다 😊`;
+        const body = getThreeDayReminderTemplate(nm, s);
         try {
           const res = await smartApiFetch('/api/send_custom_reply', {
             method: 'POST',
@@ -2541,7 +2534,7 @@
       }
     }
 
-    async function runLiveGoniAnalyze(id, displayName, prefix = '', forceRefresh = false) {
+    async function runLiveGoniAnalyze(id, displayName, prefix = '', forceRefresh = false, mode = 'auto') {
       const el = document.getElementById(prefix + 'replyBody_' + id);
       const subjEl = document.getElementById(prefix + 'replySubj_' + id);
       const thoughtEl = document.getElementById(prefix + 'goniThoughtText_' + id);
@@ -2550,43 +2543,63 @@
 
       const s = allSellers.find(x => x.id === id) || {};
       const ctx = generateContextualGoniReplyJS(s, displayName);
+      const useReminder = (mode === 'reminder') || (mode === 'auto' && isSellerFollowup3D(s));
       if (thoughtBoxEl) thoughtBoxEl.style.display = 'block';
-      if (thoughtEl) thoughtEl.innerText = `⏳ 고니(AI)가 [${displayName}]님의 최신 답장 문장을 한 줄씩 실시간 정밀 독해 중입니다...`;
+      if (thoughtEl) {
+        thoughtEl.innerText = useReminder
+          ? `⏳ 고니(AI)가 [${displayName}]님의 3일 경과 미회신 원인과 지난번 질문을 대조하여 1:1 재점화 리마인드를 작성 중입니다...`
+          : `⏳ 고니(AI)가 [${displayName}]님의 최신 답장 문장을 한 줄씩 실시간 정밀 독해 중입니다...`;
+      }
 
       try {
         const res = await smartApiFetch('/api/goni_live_analyze', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id, force_refresh: Boolean(forceRefresh) })
+          body: JSON.stringify({ id, force_refresh: Boolean(forceRefresh), mode })
         });
         if (res && res.ok) {
           const data = await res.json();
           if (data && data.ok) {
-            s.goni_thought = data.thought;
-            s.goni_subject = data.subject;
-            s.goni_body = data.body;
+            if (data.reminder_thought) s.goni_reminder_thought = data.reminder_thought;
+            if (data.reminder_subject) s.goni_reminder_subject = data.reminder_subject;
+            if (data.reminder_body) s.goni_reminder_body = data.reminder_body;
+            if (!useReminder) {
+              s.goni_thought = data.thought;
+              s.goni_subject = data.subject;
+              s.goni_body = data.body;
+            }
             s.goni_analyzed_reply_at = data.analyzed_at || s.reply_at;
             el.value = data.body;
             if (subjEl) subjEl.value = data.subject;
             if (thoughtEl) thoughtEl.innerText = data.thought || ctx.thought;
             if (thoughtBoxEl) thoughtBoxEl.style.display = 'block';
             el.focus();
-            showToast(`🧠 [${displayName}]님 답장 실시간 AI 문장단위 정밀독해 완료! (${data.engine || '울트라 고니'})`);
+            showToast(useReminder
+              ? `🔔 [${displayName}]님 3일 경과 미회신 원인 분석 & 1:1 맞춤 리마인드 작성 완료!`
+              : `🧠 [${displayName}]님 답장 실시간 AI 문장단위 정밀독해 완료! (${data.engine || '울트라 고니'})`);
             return;
           }
         }
       } catch (e) {}
 
-      // 오프라인 폴백: 이미 DB에 저장된 울트라 고니 독해본 우선 사용
-      const finalBody = (s.goni_analyzed_reply_at && s.goni_analyzed_reply_at === s.reply_at && s.goni_body) ? s.goni_body : ctx.body;
-      const finalSubj = (s.goni_analyzed_reply_at && s.goni_analyzed_reply_at === s.reply_at && s.goni_subject) ? s.goni_subject : ctx.subj;
-      const finalThought = (s.goni_analyzed_reply_at && s.goni_analyzed_reply_at === s.reply_at && s.goni_thought) ? s.goni_thought : ctx.thought;
+      // 오프라인 폴백: 이미 DB에 저장된 울트라 고니 독해본(또는 리마인드 독해본) 우선 사용
+      const finalBody = useReminder
+        ? (s.goni_reminder_body || getThreeDayReminderTemplate(displayName, s))
+        : ((s.goni_analyzed_reply_at && s.goni_analyzed_reply_at === s.reply_at && s.goni_body) ? s.goni_body : ctx.body);
+      const finalSubj = useReminder
+        ? (s.goni_reminder_subject || `Re: [루나온 그래핀 발열이불] ${displayName}님, 지난번 문의주신 공동구매 조건 관련 부담 없는 0원 오픈 및 샘플 무상환급 추가 안내드립니다 😊`)
+        : ((s.goni_analyzed_reply_at && s.goni_analyzed_reply_at === s.reply_at && s.goni_subject) ? s.goni_subject : ctx.subj);
+      const finalThought = useReminder
+        ? (s.goni_reminder_thought || `📌 [고니(AI) 3일 경과 미회신 원인 & 재점화 분석] ${displayName}님이 지난번 조건 안내 수신 후 샘플 선결제 또는 일정 조율 단계에서 고민 중입니다.\n💡 [고니의 리마인드 전략] ① 실물 없이 본사 고화질 GIF·15초 홍보영상 소스로 초기 비용 0원 즉시 오픈 가능, ② 실물 샘플은 고객 실구매 4개만 달성해도 100% 무상 증정 + 개당 17,000원 정산 혜택을 제시해 답장을 이끌어냅니다.`)
+        : ((s.goni_analyzed_reply_at && s.goni_analyzed_reply_at === s.reply_at && s.goni_thought) ? s.goni_thought : ctx.thought);
       el.value = finalBody;
       if (subjEl) subjEl.value = finalSubj;
       if (thoughtEl && finalThought) thoughtEl.innerText = finalThought;
       if (thoughtBoxEl) thoughtBoxEl.style.display = 'block';
       el.focus();
-      showToast(`🧠 울트라 고니(AI)가 [${displayName}]님의 실제 답장 맥락을 읽고 설계한 1:1 답변을 입력했습니다!`);
+      showToast(useReminder
+        ? `🔔 울트라 고니(AI)가 [${displayName}]님의 지난번 질문에 맞춘 [고니 리마인드 생각 + 1:1 재점화 메일]을 입력했습니다!`
+        : `🧠 울트라 고니(AI)가 [${displayName}]님의 실제 답장 맥락을 읽고 설계한 1:1 답변을 입력했습니다!`);
     }
 
     function fillGoniThirdDraft(id, displayName, prefix = '') {

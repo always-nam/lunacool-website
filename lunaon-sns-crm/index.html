@@ -2060,7 +2060,10 @@
       if (email.includes('bkkime78') && latest.includes('쇼핑커넥트')) {
         return { tag: '⏹️ 원고료 조건불일치 (종료권장)', color: '#475569', bg: '#f1f5f9', summary: '[3차 추가회신 19:52] "쇼핑커넥트 1000개 넘게 중이며 쇼핑커넥트+원고료를 제안한 것" ➔ 정중한 마무리 인사 후 [⏹️ 상담종료] 이동 권장' };
       }
-      if (['tlswldp113', 'dory50', 'bkkime78', 'jootime'].some(k => email.includes(k)) || ['단순 협찬 진행도 가능할지', '원고료 지원 리뷰는 가능', '무료로 보내 주시면'].some(k => combined.includes(k))) {
+      if (email.includes('yumekanau10') || combined.includes('릴스 1건에 50만원') || combined.includes('유료 광고 진행 가능')) {
+        return { tag: '🤝 유료광고 전용 (종료권장)', color: '#b45309', bg: '#fef3c7', summary: '[23:23 도착] "릴스 1건 50만원 유료 광고만 가능하고 공구는 하지 않습니다" ➔ 본사는 개당 17,000원 공구 전용 운영 안내 및 추후 유료광고 시 연락 인사 ([⏹️ 상담종료] 권장)' };
+      }
+      if (['tlswldp113', 'dory50', 'bkkime78', 'jootime', 'yumekanau10'].some(k => email.includes(k)) || ['단순 협찬 진행도 가능할지', '원고료 지원 리뷰는 가능', '무료로 보내 주시면', '유료 광고'].some(k => combined.includes(k))) {
         return { tag: '🤝 협찬·원고료 역제안', color: '#b45309', bg: '#fef3c7', summary: '공구 대신 "단순 제품 협찬" 또는 "원고료 리뷰" 가능 여부 문의 ➔ 제작 콘텐츠에 전용 링크만 걸어도 개당 17,000원+5개 시 샘플 무상 역제안' };
       }
       if (['정중히 거절', '포기해야 할 것 같습니다', '저와는 많이 맞지 않네요', '죄송합니다', '어려울 것 같습니다', '정중히 사양', '함께 하기 어려워', '공구는 하지 않고', '공동구매는 진행하지 않', '공동구매는 조금 나중에', '실업급여'].some(k => combined.includes(k))) {
@@ -2226,8 +2229,8 @@
         };
       }
 
-      // [0-10] 단순 무상협찬 / 원고료 리뷰 역제안 셀러 (jeje.reviewer, zzini_bb, bkkime78, joonimism 지구별시골쥐)
-      if (email.includes('tlswldp113') || email.includes('dory50') || email.includes('bkkime78') || email.includes('jootime') || combined.includes('단순 협찬 진행도 가능할지') || combined.includes('원고료 지원 리뷰는 가능') || combined.includes('무료로 보내 주시면')) {
+      // [0-10] 단순 무상협찬 / 원고료 / 유료광고 리뷰 역제안 셀러 (jeje.reviewer, zzini_bb, bkkime78, joonimism 지구별시골쥐, 템사수 yumekanau10)
+      if (email.includes('tlswldp113') || email.includes('dory50') || email.includes('bkkime78') || email.includes('jootime') || email.includes('yumekanau10') || combined.includes('단순 협찬 진행도 가능할지') || combined.includes('원고료 지원 리뷰는 가능') || combined.includes('무료로 보내 주시면') || combined.includes('유료 광고 진행 가능') || combined.includes('릴스 1건에')) {
         return {
           thought: `📌 [셀러 의도 파악] ${name}님은 현재 공동구매 대신 '단순 제품 무상 협찬 리뷰' 또는 '원고료 지원 콘텐츠 제작' 형태로 진행이 가능한지 역제안하셨습니다.\n💡 [고니 AI 협상 전략] 현재 본사 캠페인은 단순 협찬이나 고정 원고료 광고가 아니라 '판매 1개당 17,000원 고수익 정산 공동구매'로만 진행됨을 정중히 설명하되, "정성껏 만드신 릴스/콘텐츠에 본사가 만들어 드리는 전용 구매 링크만 함께 걸어주시면 단 5개만 판매되어도 샘플 100% 무상 증정 + 85,000원 이상의 현금 정산금까지 가져가실 수 있다(또는 실물 없이 본사 GIF·영상 소스로 0원 무상 오픈 가능)"고 매력적으로 역제안하여 공구 전환을 유도합니다.`,
           subj: `Re: [루나온 그래핀 발열이불] ${name}님! 문의주신 콘텐츠 협찬 및 공동구매 수익 정산(개당 17,000원 + 5개 판매 시 샘플 무상) 안내드립니다 😊`,

@@ -755,10 +755,26 @@
   <div class="modal-backdrop" id="bankDepositModal">
     <div class="modal" style="max-width:860px;">
       <h3>💰 은행 입금자 자동 매칭 & 원클릭 [🎉 공구 확정 + 📅 달력 희망일 자동기입]</h3>
-      <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#14532d;line-height:1.55;">
-        <strong>💡 일일이 입금자 이름을 검색할 필요가 없습니다! (동명이인 자동 구분)</strong><br>
-        • 기업은행 통장 거래내역 표를 그대로 드래그해서 아래 칸에 붙여넣거나 <code>입금자명 금액</code>(예: <code>박은정 42,000</code> / <code>이연경 32,000</code>)을 입력하고 <strong>[🔍 입금자 자동 찾기]</strong>를 누르세요.<br>
-        • 셀러들이 메일로 보낸 신청서 안의 <strong>실명 · 휴대폰 뒷자리 · 신청 사이즈(32,000원=SS / 42,000원=Q) · 희망 오픈 날짜</strong>를 AI가 자동 대조하여 찾아주며, <strong>[🎉 입금확인 & 공구확정]</strong>을 누르면 <strong>달력에 희망 오픈 날짜까지 자동으로 기입</strong>됩니다!
+      <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px 14px;margin-bottom:10px;font-size:12px;color:#14532d;line-height:1.55;">
+        <strong>💡 이메일 발신자 실명(FROM 헤더) + 신청서 본문 자동 대조! (30분 주기 기업은행 API 연동 지원)</strong><br>
+        • 셀러가 메일 본문에 이름을 안 적었더라도 <strong>네이버/지메일 발신자 표시 이름(예: 남별이=친절한 텔라의 뉴투코, 최명기=온스파, 오은혜=140917.6 등)</strong>이 모든 셀러 DB에 자동 저장되어 100% 1:1 매칭됩니다!<br>
+        • 아래에 기업은행 API 키를 등록해 두시면 <strong>30분마다 자동으로 계좌 입금내역을 불러와 셀러 매칭 ➔ 공구 확정 ➔ 스마트스토어 전용 결제창 생성</strong>까지 무인으로 실행합니다.
+      </div>
+
+      <!-- 🏦 IBK 기업은행 API 30분 주기 자동 입금조회 설정 바 -->
+      <div style="background:#fffbeb;border:1.5px solid #f59e0b;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:6px;">
+          <strong style="color:#92400e;">🏦 IBK 기업은행(534-028152-01-023 · (주)테란) API 30분 자동 입금조회 연동 설정</strong>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-outline" style="padding:3px 9px;font-size:11px;background:#fff;color:#92400e;border-color:#f59e0b;font-weight:800;" onclick="syncIbkDepositsNow()">🔄 지금 기업은행 API 입금조회 실행</button>
+            <button class="btn" style="padding:3px 10px;font-size:11px;background:#d97706;color:#fff;font-weight:900;" onclick="saveIbkApiConfig()">💾 기업은행 API 키 저장 (30분 자동조회 켜기)</button>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:6px;">
+          <input type="text" id="inpIbkApiUrl" class="inline-input" style="padding:5px 8px;font-size:12px;background:#fff;" placeholder="API 엔드포인트 URL (선택/기본 IBK OpenAPI)" />
+          <input type="text" id="inpIbkClientId" class="inline-input" style="padding:5px 8px;font-size:12px;background:#fff;" placeholder="기업은행 Client ID (또는 기관코드)" />
+          <input type="text" id="inpIbkApiKey" class="inline-input" style="padding:5px 8px;font-size:12px;background:#fff;" placeholder="API Key / Access Token / Secret 입력" />
+        </div>
       </div>
 
       <div style="background:#eff6ff;border:1px solid #93c5fd;border-radius:8px;padding:10px 12px;margin-bottom:12px;">
@@ -1443,6 +1459,7 @@
                     <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
                       <span style="display:inline-block;background:${turnState === 'NEEDS_OUR_REPLY' ? '#dc2626' : (isFollowup3D ? '#ea580c' : '#0f172a')};color:#fff;font-size:12px;font-weight:900;padding:3px 9px;border-radius:99px;">#${orderIdx + 1}</span>
                       <span style="font-weight:900;font-size:16px;color:#0f172a;">${fullLabel}</span>
+                      ${(s.sender_real_name || s.depositor_name) ? `<span style="background:#d1fae5;color:#065f46;border:1px solid #34d399;font-size:12px;padding:2px 8px;border-radius:6px;font-weight:900;">👤 실명/입금자명: ${s.sender_real_name || s.depositor_name}</span>` : ''}
                       ${turnState === 'NEEDS_OUR_REPLY' ? `<span style="background:#dc2626;color:#fff;font-size:12px;padding:3px 9px;border-radius:6px;font-weight:900;">🚨 지금 회신 필요 (${roundLabel})</span>` : ''}
                       ${turnState === 'WAITING_SELLER' ? `<span style="background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd;font-size:12px;padding:3px 9px;border-radius:6px;font-weight:800;">⏳ 우리 답변완료 (${lastOurSentTime})</span>` : ''}
                       ${isFollowup3D ? `<span style="background:#fff7ed;color:#c2410c;border:2px solid #f97316;font-size:12px;padding:3px 9px;border-radius:6px;font-weight:900;">⏰ 답변 후 ${elapsedDays}일 경과 (안부메일 대상)</span>` : ''}
@@ -3353,9 +3370,67 @@
       reader.readAsText(file, 'UTF-8');
     }
 
-    function openBankDepositModal() {
+    async function openBankDepositModal() {
       document.getElementById('bankDepositModal').style.display = 'flex';
+      try {
+        const res = await smartApiFetch('/api/ibk_bank_status');
+        if (res && res.ok) {
+          const data = await res.json();
+          if (data && data.ok) {
+            const uEl = document.getElementById('inpIbkApiUrl');
+            const cEl = document.getElementById('inpIbkClientId');
+            if (uEl && data.api_url) uEl.value = data.api_url;
+            if (cEl && data.client_id) cEl.value = data.client_id;
+          }
+        }
+      } catch (e) {}
       parseAndMatchBankDeposits();
+    }
+
+    async function saveIbkApiConfig() {
+      const api_url = (document.getElementById('inpIbkApiUrl')?.value || '').trim();
+      const client_id = (document.getElementById('inpIbkClientId')?.value || '').trim();
+      const api_key = (document.getElementById('inpIbkApiKey')?.value || '').trim();
+      if (!client_id && !api_key && !api_url) {
+        alert('기업은행 API 키(또는 Client ID / 엔드포인트 URL)를 입력해주세요.');
+        return;
+      }
+      try {
+        const res = await smartApiFetch('/api/save_ibk_bank_api', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ api_url, client_id, api_key })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          alert('🏦 기업은행 API 연동 설정이 저장되었습니다! 이제 30분 스케줄러가 자동으로 입금내역을 조회하여 셀러와 1:1 매칭합니다.');
+          await loadData();
+        } else {
+          alert('설정 저장 오류: ' + (data.msg || ''));
+        }
+      } catch (e) {
+        alert('로컬 서버(8090) 연결을 확인해주세요: ' + e);
+      }
+    }
+
+    async function syncIbkDepositsNow() {
+      showToast('🏦 기업은행 API 실시간 입금내역 조회 및 셀러 1:1 매칭 중...');
+      try {
+        const res = await smartApiFetch('/api/sync_ibk_deposits', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        const data = await res.json();
+        if (data.ok) {
+          await loadData();
+          showToast(`✅ 기업은행 API 조회 완료! (신규 입금 ${data.fetched_count || 0}건 / 자동 공구확정 ${data.auto_confirmed_count || 0}명)`);
+        } else {
+          alert('기업은행 API 조회 안내: ' + (data.msg || data.api_error || 'API 키를 먼저 등록해주세요.'));
+        }
+      } catch (e) {
+        alert('로컬 서버(8090) 연결을 확인해주세요: ' + e);
+      }
     }
 
     function closeBankDepositModal() {
@@ -3579,10 +3654,12 @@
       });
 
       lastMatchedDeposits = parsedRows.map((row, idx) => {
-        // 셀러 DB에서 입금자명 매칭 (depositor_name, reply_body, memo, display_name, phone 등 전수 스캔)
+        // 셀러 DB에서 입금자명 매칭 (sender_real_name, depositor_name, reply_text, reply_2nd_text, latest_reply_text, memo, display_name 전수 스캔!)
         const candidates = allSellers.filter(s => {
-          if (!s.replied && !s.deposit_confirmed && s.stage === '1_1차발송완료') return false;
-          const hay = `${s.depositor_name || ''} ${s.display_name || ''} ${s.seller_id || ''} ${s.reply_body || ''} ${s.reply_history || ''} ${s.memo || ''}`;
+          if (s.stage === '0_발송대기' || s.stage === '1_1차제안메일') {
+            if (!s.reply_text && !s.deposit_confirmed) return false;
+          }
+          const hay = `${s.sender_real_name || ''} ${s.depositor_name || ''} ${s.deposit_name || ''} ${s.display_name || ''} ${s.seller_id || ''} ${s.reply_text || ''} ${s.reply_2nd_text || ''} ${s.latest_reply_text || ''} ${s.memo || ''}`;
           return hay.includes(row.depositor);
         });
         return {
@@ -3606,10 +3683,11 @@
         const alreadyConfirmed = matchedSeller && (matchedSeller.stage === '5_공구확정' || matchedSeller.is_confirmed);
 
         // 후보 선택 드롭다운 (동명이인이나 입금자명 미기재 셀러 대비 전체 회신 셀러 선택 가능)
-        const repliedPool = allSellers.filter(s => s.replied || s.is_confirmed || s.deposit_confirmed);
+        const repliedPool = allSellers.filter(s => s.stage !== '0_발송대기' && s.stage !== '1_1차제안메일');
         const optionsHtml = repliedPool.map(s => {
           const isCand = item.candidates.some(c => c.id === s.id);
-          const label = `${isCand ? '🎯 [자동매칭] ' : ''}${s.display_name || s.seller_id} (${s.email || ''}) ${s.schedule_start ? `[일정:${s.schedule_start}]` : ''}`;
+          const realNm = (s.sender_real_name || s.depositor_name) ? `[실명:${s.sender_real_name || s.depositor_name}] ` : '';
+          const label = `${isCand ? '🎯 [자동매칭] ' : ''}${realNm}${s.display_name || s.seller_id} (${s.email || ''}) ${s.schedule_start ? `[일정:${s.schedule_start}]` : ''}`;
           return `<option value="${s.id}" ${s.id === item.selectedSellerId ? 'selected' : ''}>${label}</option>`;
         }).join('');
 

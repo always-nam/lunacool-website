@@ -525,7 +525,7 @@
 
         <!-- 월간 달력 그리드 -->
         <div id="monthlyCalendarTitle" style="font-size:15px;font-weight:800;color:#0f172a;margin-bottom:8px;text-align:center;">2026년 11월 공동구매 오픈 스케줄 표</div>
-        <div style="display:grid;grid-template-columns:repeat(7, 1fr);gap:6px;text-align:center;font-size:12px;font-weight:800;color:#475569;margin-bottom:6px;">
+        <div style="display:grid;grid-template-columns:repeat(7, minmax(0, 1fr));gap:6px;text-align:center;font-size:12px;font-weight:800;color:#475569;margin-bottom:6px;">
           <div style="color:#dc2626;background:#fef2f2;padding:6px;border-radius:6px;">일 (SUN)</div>
           <div style="background:#f1f5f9;padding:6px;border-radius:6px;">월 (MON)</div>
           <div style="background:#f1f5f9;padding:6px;border-radius:6px;">화 (TUE)</div>
@@ -534,7 +534,7 @@
           <div style="background:#f1f5f9;padding:6px;border-radius:6px;">금 (FRI)</div>
           <div style="color:#2563eb;background:#eff6ff;padding:6px;border-radius:6px;">토 (SAT)</div>
         </div>
-        <div id="monthlyCalendarGrid" style="display:grid;grid-template-columns:repeat(7, 1fr);gap:6px;"></div>
+        <div id="monthlyCalendarGrid" style="display:grid;grid-template-columns:repeat(7, minmax(0, 1fr));gap:6px;width:100%;"></div>
       </div>
 
       <!-- ⏰ 3일 경과 미회신자 일괄 안부·리마인드 메일 발송 안내 배너 -->
@@ -2846,23 +2846,25 @@
           } else if (s.stage === '4_직원오픈채팅이관') {
             bg = '#f3e8ff'; fg = '#5b21b6'; bdr = '#c084fc'; icon = '🔥';
           }
-          const subTag = isStart ? `[오픈시작] ${nm}` : `${nm} (진행중)`;
-          const sampleBadge = (isStart && s.sample_size) ? ` · ${s.sample_size}` : '';
+          const subTag = isStart ? `[오픈] ${nm}` : `${nm} (진행중)`;
+          let shortSample = (s.sample_size || '').split('(')[0].trim();
+          if (shortSample.length > 8) shortSample = shortSample.slice(0, 8);
+          const sampleBadge = (isStart && shortSample) ? ` · ${shortSample}` : '';
           return `
-            <div onclick="event.stopPropagation(); openScheduleModal('${s.id}')" title="${nm} (${s.schedule_start}~${s.schedule_end || s.schedule_start}) ${s.schedule_note || ''}" style="background:${bg};color:${fg};border:1px solid ${bdr};border-radius:5px;padding:3px 5px;font-size:11px;font-weight:800;margin-top:3px;cursor:pointer;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+            <div onclick="event.stopPropagation(); openScheduleModal('${s.id}')" title="${nm} (${s.schedule_start}~${s.schedule_end || s.schedule_start}) ${s.sample_size || ''} ${s.schedule_note || ''}" style="background:${bg};color:${fg};border:1px solid ${bdr};border-radius:5px;padding:3px 5px;font-size:11px;font-weight:800;margin-top:3px;cursor:pointer;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">
               ${icon} ${subTag}${sampleBadge}
             </div>
           `;
         }).join('');
 
         html += `
-          <div onclick="openScheduleModal('', '${dateStr}')" style="min-height:96px;background:${isToday ? '#eff6ff' : '#ffffff'};border:${isToday ? '2px solid #2563eb' : '1px solid #cbd5e1'};border-radius:8px;padding:6px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;transition:0.12s;" onmouseover="this.style.borderColor='#7c3aed'" onmouseout="this.style.borderColor='${isToday ? '#2563eb' : '#cbd5e1'}'">
-            <div>
+          <div onclick="openScheduleModal('', '${dateStr}')" style="min-height:96px;min-width:0;overflow:hidden;background:${isToday ? '#eff6ff' : '#ffffff'};border:${isToday ? '2px solid #2563eb' : '1px solid #cbd5e1'};border-radius:8px;padding:6px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;transition:0.12s;" onmouseover="this.style.borderColor='#7c3aed'" onmouseout="this.style.borderColor='${isToday ? '#2563eb' : '#cbd5e1'}'">
+            <div style="min-width:0;width:100%;">
               <div style="display:flex;justify-content:space-between;align-items:center;">
                 <span style="font-size:12px;font-weight:800;color:${dayColor};">${d}일 ${isToday ? '<span style="font-size:10px;background:#2563eb;color:#fff;padding:1px 4px;border-radius:4px;">오늘</span>' : ''}</span>
                 <span style="font-size:10px;color:#64748b;font-weight:700;">+기입</span>
               </div>
-              <div style="margin-top:2px;">${evHtml}</div>
+              <div style="margin-top:2px;min-width:0;width:100%;">${evHtml}</div>
             </div>
           </div>
         `;

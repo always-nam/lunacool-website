@@ -992,8 +992,6 @@
           start = `${y}-${String(mmNum).padStart(2, '0')}-${String(mSlash[2]).padStart(2, '0')}`;
         } else if (searchTarget.includes('빠른시일') || searchTarget.includes('최대한빨리') || searchTarget.includes('바로')) {
           start = getKstNowStr().slice(0, 10);
-        } else if (comb.includes('12월 초') || comb.includes('12월초')) {
-          start = '2026-12-02';
         }
       }
       if (start && !end) {

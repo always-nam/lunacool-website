@@ -1589,7 +1589,7 @@
                       </button>
                     `)}
                     <button class="btn btn-outline" style="padding:7px 12px;font-size:12px;font-weight:800;color:#1e3a8a;border-color:#93c5fd;background:#eff6ff;" onclick="toggleFullHistory('${s.id}')">
-                      📜 주고받은 메일 내역 (${alreadyReplied2nd ? (alreadyReplied3rd ? '3차완료' : '2차완료') : '1차만'})
+                      📜 주고받은 메일 내역 (${Array.isArray(s.full_thread) && s.full_thread.length > 0 ? `전체 ${s.full_thread.length}통` : (alreadyReplied2nd ? (alreadyReplied3rd ? '3차완료' : '2차완료') : '1차만')})
                     </button>
                     <button class="btn btn-outline" style="padding:7px 12px;font-size:12px;font-weight:700;color:#475569;background:#f8fafc;" onclick="toggleExtraTools('${s.id}')">
                       ⚙️ 일정·송장·연락처·메모 열기
@@ -1604,6 +1604,40 @@
                     </div>
                     <div style="display:flex;flex-direction:column;gap:8px;">
                       ${(() => {
+                        // 1순위: Gmail 수신함(INBOX) + 보낸편지함(Sent Mail)에서 100% 원문 추출된 full_thread 배열이 있으면 단 1통의 누락도 없이 시간순 전체 출력!
+                        if (Array.isArray(s.full_thread) && s.full_thread.length > 0) {
+                          let inCnt = 0;
+                          let outCnt = 0;
+                          return s.full_thread.map((m, idx) => {
+                            const isOut = (m.dir === 'OUT');
+                            if (isOut) outCnt += 1; else inCnt += 1;
+                            if (isOut && outCnt === 1) {
+                              return `<div style="background:#eff6ff;border-left:4px solid #3b82f6;padding:7px 10px;border-radius:6px;">
+                                <strong>${idx + 1}. [본사 ➔ 셀러] 1차 제안 메일 발송 (${m.at || ''})</strong>: ${m.subject || ''}
+                              </div>`;
+                            }
+                            if (isOut) {
+                              const bgOut = outCnt === 2 ? '#dcfce7' : '#f3e8ff';
+                              const bdrOut = outCnt === 2 ? '#16a34a' : '#7c3aed';
+                              const fgOut = outCnt === 2 ? '#166534' : '#6d28d9';
+                              return `<div style="background:${bgOut};border:1px solid ${bdrOut};border-left:4px solid ${bdrOut};padding:7px 10px;border-radius:6px;">
+                                <strong>${idx + 1}. [본사 ➔ 셀러] ${outCnt}차 본사 답변 발송완료 (${m.at || ''})</strong>
+                                <div style="font-weight:700;color:${fgOut};margin-top:2px;">제목: ${m.subject || ''}</div>
+                                <pre style="white-space:pre-wrap;font-family:inherit;max-height:150px;overflow-y:auto;background:#fff;padding:7px;border-radius:4px;margin-top:4px;">${(m.body || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+                              </div>`;
+                            } else {
+                              const isFirstIn = (inCnt === 1);
+                              return isFirstIn
+                                ? `<div style="background:#ffffff;border:1px solid #cbd5e1;border-left:4px solid #0f172a;padding:7px 10px;border-radius:6px;white-space:pre-line;">
+                                    <strong>${idx + 1}. [셀러 ➔ 본사] 1차 답장 도착 (${m.at || ''})</strong>:\n${(m.body || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}
+                                  </div>`
+                                : `<div style="background:#fef2f2;border:1px solid #fca5a5;border-left:4px solid #dc2626;padding:7px 10px;border-radius:6px;white-space:pre-line;">
+                                    <strong style="color:#dc2626;">${idx + 1}. 🔥 [셀러 ➔ 본사] ${inCnt}차 답장 도착 (${m.at || ''})</strong>:\n${(m.body || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}
+                                  </div>`;
+                            }
+                          }).join('');
+                        }
+
                         const events = [];
                         // 1. 본사 1차 제안 메일
                         events.push({
